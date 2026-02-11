@@ -1,0 +1,108 @@
+import { db } from '@/db';
+import { user } from '@/db/schema';
+import { UserJSON, WebhookEvent } from '@clerk/nextjs/server';
+import { eq } from 'drizzle-orm';
+import { headers } from 'next/headers';
+import { NextResponse } from 'next/server';
+import { Webhook } from 'svix';
+
+const SIGNING_SECRET = process.env.CLERK_WEBHOOK_SECRET;
+
+export async function POST(req: Request) {
+	try {
+		if (!SIGNING_SECRET) {
+			throw new Error('Error: Clerk webhook secret not found');
+		}
+
+		const wh = new Webhook(SIGNING_SECRET);
+		const headerPayload = await headers();
+		const svix_id = headerPayload.get('svix-id');
+		const svix_timestamp = headerPayload.get('svix-timestamp');
+		const svix_signature = headerPayload.get('svix-signature');
+
+		if (!svix_id || !svix_timestamp || !svix_signature) {
+			return new Response('Error: Missing Svix headers', {
+				status: 400,
+			});
+		}
+
+		const payload = await req.json();
+		const body = JSON.stringify(payload);
+
+		let evt: WebhookEvent;
+
+		try {
+			evt = wh.verify(body, {
+				'svix-id': svix_id,
+				'svix-timestamp': svix_timestamp,
+				'svix-signature': svix_signature,
+			}) as WebhookEvent;
+		} catch (err) {
+			console.error('Error: Could not verify webhook:', err);
+			return new Response('Error: Verification error', {
+				status: 400,
+			});
+		}
+
+		const { id: clerkUserId } = evt.data;
+
+		if (!clerkUserId)
+			return NextResponse.json(
+				{ error: 'No user ID provided' },
+				{ status: 400 },
+			);
+
+		let userResponse = null;
+
+		const eventType = evt.type;
+		const data = evt.data as UserJSON;
+
+		const email =
+			data.email_addresses.find(
+				(addr) => addr.id === data.primary_email_address_id,
+			)?.email_address ?? data.email_addresses[0]?.email_address;
+
+		const role =
+			(data.public_metadata.role as 'admin' | 'veterinarian' | 'client') ??
+			'client';
+
+		switch (eventType) {
+			case 'user.created': {
+				userResponse = await db.insert(user).values({
+					name: `${data.first_name} ${data.last_name}`.trim(),
+					email: email,
+					image: data.image_url,
+					clerkUserId: data.id,
+					role: role,
+				});
+				break;
+			}
+
+			case 'user.updated': {
+				userResponse = await db
+					.update(user)
+					.set({
+						name: `${data.first_name} ${data.last_name}`.trim(),
+						email: email,
+						image: data.image_url,
+						role,
+						updatedAt: new Date(),
+					})
+					.where(eq(user.clerkUserId, data.id));
+				break;
+			}
+
+			case 'user.deleted': {
+				const { id } = evt.data;
+				if (id) {
+					await db.delete(user).where(eq(user.clerkUserId, id));
+				}
+				break;
+			}
+		}
+
+		return NextResponse.json({ user: userResponse });
+	} catch (error) {
+		return NextResponse.json({ error }, { status: 500 });
+	}
+}
