@@ -1,8 +1,11 @@
 'use client';
 
-import { createCustomer } from '@/api/actions/customers.actions';
+import { onboardingCustomer } from '@/api/actions/customers.actions';
 import { searchAddressByPostalCode } from '@/api/config/consts';
-import { createCustomerSchema } from '@/api/schema/customers.schema';
+import {
+	OnboardingCustomerSchema,
+	onboardingCustomerSchema,
+} from '@/api/schema/customers.schema';
 import InputForm from '@/components/form/input-form';
 import InputFormMask from '@/components/form/input-form-mask';
 import { Button } from '@/components/ui/button';
@@ -19,7 +22,6 @@ import { useMutation } from '@tanstack/react-query';
 import { SaveIcon } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
-import z from 'zod';
 
 const OnboardingCustomerFormDialog = ({ isOpen }: { isOpen: boolean }) => {
 	const {
@@ -27,8 +29,8 @@ const OnboardingCustomerFormDialog = ({ isOpen }: { isOpen: boolean }) => {
 		handleSubmit,
 		setValue,
 		formState: { errors },
-	} = useForm<z.infer<typeof createCustomerSchema>>({
-		resolver: zodResolver(createCustomerSchema),
+	} = useForm<OnboardingCustomerSchema>({
+		resolver: zodResolver(onboardingCustomerSchema),
 		defaultValues: {
 			phone: '',
 			cpf: '',
@@ -61,7 +63,7 @@ const OnboardingCustomerFormDialog = ({ isOpen }: { isOpen: boolean }) => {
 	};
 
 	const { mutate: handleCreateCustomer, isPending } = useMutation({
-		mutationFn: createCustomer,
+		mutationFn: onboardingCustomer,
 		onSuccess: () => {
 			toast.success('Dados atualizados com sucesso!');
 			resetForm();
@@ -74,8 +76,7 @@ const OnboardingCustomerFormDialog = ({ isOpen }: { isOpen: boolean }) => {
 		},
 	});
 
-	const submitForm = (data: z.infer<typeof createCustomerSchema>) => {
-		console.log('teste');
+	const submitForm = (data: OnboardingCustomerSchema) => {
 		handleCreateCustomer(data);
 	};
 

@@ -8,6 +8,7 @@ import {
 	PageHeaderContent,
 	PageTitle,
 } from '@/components/shared/page-container';
+import CustomersListClient from './_component/customers-list';
 
 interface CustomersPageProps {
 	searchParams: Promise<{ page?: string; filter?: string; keyword?: string }>;
@@ -16,7 +17,7 @@ interface CustomersPageProps {
 const CustomersPage = async ({ searchParams }: CustomersPageProps) => {
 	const params = await searchParams;
 	const page = Number(params.page) || 1;
-	const filter = params.filter || 'all';
+	const filter = params.filter || '';
 
 	const dataPromise = getCustomersPaginated(page, MAX_PAGE_SIZE, filter);
 
@@ -32,8 +33,7 @@ const CustomersPage = async ({ searchParams }: CustomersPageProps) => {
 			</PageHeader>
 
 			<PageContent>
-				<></>
-				{/* <CustomerListClient customers={dataPromise} /> */}
+				<CustomersListClient customers={dataPromise} />
 			</PageContent>
 		</PageContainer>
 	);

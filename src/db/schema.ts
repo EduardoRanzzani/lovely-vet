@@ -24,7 +24,7 @@ export const appointmentStatusEnum = pgEnum('appointment_status', [
 export const userRoleEnum = pgEnum('user_role', [
 	'admin',
 	'veterinarian',
-	'client',
+	'customer',
 ]);
 
 // System tables to manage all the clinic data
@@ -34,8 +34,8 @@ export const usersTable = pgTable('users', {
 	name: text('name').notNull(),
 	email: text('email').notNull().unique(),
 	image: text('image'),
-	clerkUserId: text('clerk_user_id').notNull(),
-	role: userRoleEnum('role').default('client').notNull(),
+	clerkUserId: text('clerk_user_id').notNull().unique(),
+	role: userRoleEnum('role').default('customer').notNull(),
 	createdAt: timestamp('created_at').defaultNow().notNull(),
 	updatedAt: timestamp('updated_at')
 		.defaultNow()

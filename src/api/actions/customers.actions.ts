@@ -2,21 +2,21 @@
 
 import { db } from '@/db';
 import { customersTable, usersTable } from '@/db/schema';
-import { ViaCepResponse } from '@/types/viacep';
 import { currentUser } from '@clerk/nextjs/server';
 import { count, desc, eq, ilike, or, sql } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
-import z from 'zod';
 import { PaginatedData } from '../config/consts';
-import { createCustomerSchema } from '../schema/customers.schema';
+import {
+	CreateCustomerWithUserSchema,
+	OnboardingCustomerSchema,
+} from '../schema/customers.schema';
+import { createNewClerkUser } from './clerk.actions';
 
 export type CustomerWithUser = typeof customersTable.$inferSelect & {
 	user: typeof usersTable.$inferSelect;
 };
 
-export const createCustomer = async (
-	data: z.infer<typeof createCustomerSchema>,
-) => {
+export const onboardingCustomer = async (data: OnboardingCustomerSchema) => {
 	const clerkUser = await currentUser();
 	if (!clerkUser) throw new Error('Usuário não autenticado');
 
@@ -40,8 +40,6 @@ export const createCustomer = async (
 
 	revalidatePath('/dashboard');
 };
-
-
 
 export const getCustomersPaginated = async (
 	page: number = 1,
@@ -107,5 +105,59 @@ export const getCustomersPaginated = async (
 			currentPage: page,
 			limit,
 		},
+	};
+};
+
+export const upsertCustomer = async (data: CreateCustomerWithUserSchema) => {
+	const clerkUser = await currentUser();
+	if (!clerkUser) throw new Error('Usuário não autenticado');
+
+	if (data.id) {
+		console.log('update');
+	} else {
+		return createCustomer(data);
+	}
+};
+
+const createCustomer = async (data: CreateCustomerWithUserSchema) => {
+	const clerkUser = await createNewClerkUser(data);
+
+	const [newUser] = await db
+		.insert(usersTable)
+		.values({
+			name: data.name,
+			email: data.email,
+			image: data.image,
+			clerkUserId: clerkUser.id,
+			role: 'customer',
+		})
+		.onConflictDoUpdate({
+			target: usersTable.clerkUserId,
+			set: { updatedAt: new Date() },
+		})
+		.returning();
+
+	if (!newUser) throw new Error('Falha ao criar usuário base no sistema');
+
+	const [newCustomer] = await db
+		.insert(customersTable)
+		.values({
+			userId: newUser.id,
+			phone: data.phone,
+			cpf: data.cpf,
+			email: data.email,
+			postalCode: data.postalCode,
+			address: data.address,
+			addressNumber: data.addressNumber || 'S/N',
+			neighborhood: data.neighborhood,
+			city: data.city,
+			state: data.state,
+		})
+		.returning();
+
+	revalidatePath('/customers');
+	return {
+		newUser,
+		newCustomer,
 	};
 };
