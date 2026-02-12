@@ -1,5 +1,5 @@
 import { db } from '@/db';
-import { user } from '@/db/schema';
+import { usersTable } from '@/db/schema';
 import { UserJSON, WebhookEvent } from '@clerk/nextjs/server';
 import { eq } from 'drizzle-orm';
 import { headers } from 'next/headers';
@@ -55,20 +55,22 @@ export async function POST(req: Request) {
 		let userResponse = null;
 
 		const eventType = evt.type;
-		const data = evt.data as UserJSON;
 
-		const email =
-			data.email_addresses.find(
-				(addr) => addr.id === data.primary_email_address_id,
-			)?.email_address ?? data.email_addresses[0]?.email_address;
-
-		const role =
-			(data.public_metadata.role as 'admin' | 'veterinarian' | 'client') ??
-			'client';
+		console.log(eventType);
 
 		switch (eventType) {
 			case 'user.created': {
-				userResponse = await db.insert(user).values({
+				const data = evt.data as UserJSON;
+				const email =
+					data.email_addresses.find(
+						(addr) => addr.id === data.primary_email_address_id,
+					)?.email_address ?? data.email_addresses[0]?.email_address;
+
+				const role =
+					(data.public_metadata.role as 'admin' | 'veterinarian' | 'client') ??
+					'client';
+
+				userResponse = await db.insert(usersTable).values({
 					name: `${data.first_name} ${data.last_name}`.trim(),
 					email: email,
 					image: data.image_url,
@@ -79,8 +81,18 @@ export async function POST(req: Request) {
 			}
 
 			case 'user.updated': {
+				const data = evt.data as UserJSON;
+				const email =
+					data.email_addresses.find(
+						(addr) => addr.id === data.primary_email_address_id,
+					)?.email_address ?? data.email_addresses[0]?.email_address;
+
+				const role =
+					(data.public_metadata.role as 'admin' | 'veterinarian' | 'client') ??
+					'client';
+
 				userResponse = await db
-					.update(user)
+					.update(usersTable)
 					.set({
 						name: `${data.first_name} ${data.last_name}`.trim(),
 						email: email,
@@ -88,15 +100,42 @@ export async function POST(req: Request) {
 						role,
 						updatedAt: new Date(),
 					})
-					.where(eq(user.clerkUserId, data.id));
+					.where(eq(usersTable.clerkUserId, data.id));
 				break;
 			}
 
 			case 'user.deleted': {
-				const { id } = evt.data;
-				if (id) {
-					await db.delete(user).where(eq(user.clerkUserId, id));
+				const { id: clerkUserId } = evt.data;
+
+				if (!clerkUserId) {
+					return NextResponse.json(
+						{ error: 'No user ID provided' },
+						{ status: 400 },
+					);
 				}
+
+				// 1. Verifica se o usuário existe no SEU banco
+				const existingUser = await db.query.user.findFirst({
+					where: eq(usersTable.clerkUserId, clerkUserId),
+				});
+
+				if (!existingUser) {
+					console.log(
+						`Usuário ${clerkUserId} não encontrado no banco local. Pulando deleção.`,
+					);
+					return NextResponse.json({
+						message: 'User not found localy, nothing to delete',
+					});
+				}
+
+				// 2. Se existe, deleta (o cascade cuidará de client/veterinarian/etc)
+				await db
+					.delete(usersTable)
+					.where(eq(usersTable.clerkUserId, clerkUserId));
+
+				console.log(
+					`Usuário ${clerkUserId} e seus dados vinculados foram removidos.`,
+				);
 				break;
 			}
 		}

@@ -4,6 +4,7 @@ import { ClerkProvider } from '@clerk/nextjs';
 import type { Metadata } from 'next';
 import { Poppins } from 'next/font/google';
 import './globals.css';
+import { ClientProviders } from '@/components/shared/client-providers';
 
 const poppins = Poppins({
 	variable: '--font-poppins',
@@ -25,13 +26,7 @@ export default function RootLayout({
 		<ClerkProvider localization={ptBR}>
 			<html lang='pt-BR' suppressHydrationWarning>
 				<body className={`${poppins.className} antialiased light`}>
-					<Toaster
-						closeButton={false}
-						position='bottom-center'
-						richColors
-						theme='light'
-					/>
-					{children}
+					<ClientProviders>{children}</ClientProviders>
 				</body>
 			</html>
 		</ClerkProvider>

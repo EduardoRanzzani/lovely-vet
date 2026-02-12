@@ -1,9 +1,10 @@
-import { UserButton } from '@clerk/nextjs';
+'use client';
+import { useAuth } from '@clerk/nextjs';
+import { redirect } from 'next/navigation';
 
 export default function Home() {
-	return (
-		<div className='flex flex-col items-center justify-center min-h-screen py-2'>
-			<UserButton />
-		</div>
-	);
+	const { isSignedIn } = useAuth();
+	if (isSignedIn) redirect('/dashboard');
+
+	return <p className='animate-pulse'>Carregando...</p>;
 }
