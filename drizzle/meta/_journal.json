@@ -8,6 +8,27 @@
       "when": 1770840018161,
       "tag": "0000_premium_sister_grimm",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1770903255450,
+      "tag": "0001_furry_miek",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1770913096290,
+      "tag": "0002_groovy_emma_frost",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1770913551643,
+      "tag": "0003_gifted_darkstar",
+      "breakpoints": true
     }
   ]
 }

@@ -3,18 +3,15 @@
 import { db } from '@/db';
 import { customersTable, usersTable } from '@/db/schema';
 import { currentUser } from '@clerk/nextjs/server';
-import { count, desc, eq, ilike, or, sql } from 'drizzle-orm';
+import { asc, count, eq, ilike, or, sql } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 import { PaginatedData } from '../config/consts';
 import {
 	CreateCustomerWithUserSchema,
+	CustomerWithUser,
 	OnboardingCustomerSchema,
 } from '../schema/customers.schema';
 import { createNewClerkUser } from './clerk.actions';
-
-export type CustomerWithUser = typeof customersTable.$inferSelect & {
-	user: typeof usersTable.$inferSelect;
-};
 
 export const onboardingCustomer = async (data: OnboardingCustomerSchema) => {
 	const clerkUser = await currentUser();
@@ -29,6 +26,7 @@ export const onboardingCustomer = async (data: OnboardingCustomerSchema) => {
 		userId: databaseUser.id,
 		phone: data.phone,
 		cpf: data.cpf,
+		sex: data.sex,
 		email: databaseUser.email,
 		postalCode: data.postalCode,
 		address: data.address,
@@ -74,7 +72,7 @@ export const getCustomersPaginated = async (
 		.where(filterCondition)
 		.limit(limit)
 		.offset(offset)
-		.orderBy(desc(usersTable.name));
+		.orderBy(asc(usersTable.name));
 
 	// 3. Contagem Total (precisa do join para o filtro de nome funcionar)
 	const totalCountPromise = db
@@ -112,15 +110,7 @@ export const upsertCustomer = async (data: CreateCustomerWithUserSchema) => {
 	const clerkUser = await currentUser();
 	if (!clerkUser) throw new Error('Usuário não autenticado');
 
-	if (data.id) {
-		console.log('update');
-	} else {
-		return createCustomer(data);
-	}
-};
-
-const createCustomer = async (data: CreateCustomerWithUserSchema) => {
-	const clerkUser = await createNewClerkUser(data);
+	const newClerkUser = await createNewClerkUser(data);
 
 	const [newUser] = await db
 		.insert(usersTable)
@@ -128,7 +118,7 @@ const createCustomer = async (data: CreateCustomerWithUserSchema) => {
 			name: data.name,
 			email: data.email,
 			image: data.image,
-			clerkUserId: clerkUser.id,
+			clerkUserId: newClerkUser.id,
 			role: 'customer',
 		})
 		.onConflictDoUpdate({
@@ -145,6 +135,7 @@ const createCustomer = async (data: CreateCustomerWithUserSchema) => {
 			userId: newUser.id,
 			phone: data.phone,
 			cpf: data.cpf,
+			sex: data.sex,
 			email: data.email,
 			postalCode: data.postalCode,
 			address: data.address,
@@ -153,6 +144,23 @@ const createCustomer = async (data: CreateCustomerWithUserSchema) => {
 			city: data.city,
 			state: data.state,
 		})
+		.onConflictDoUpdate({
+			target: customersTable.cpf,
+			set: {
+				userId: newUser.id,
+				phone: data.phone,
+				cpf: data.cpf,
+				sex: data.sex,
+				email: data.email,
+				postalCode: data.postalCode,
+				address: data.address,
+				addressNumber: data.addressNumber || 'S/N',
+				neighborhood: data.neighborhood,
+				city: data.city,
+				state: data.state,
+				updatedAt: new Date(),
+			},
+		})
 		.returning();
 
 	revalidatePath('/customers');
@@ -160,4 +168,21 @@ const createCustomer = async (data: CreateCustomerWithUserSchema) => {
 		newUser,
 		newCustomer,
 	};
+};
+
+export const getCustomers = async (): Promise<CustomerWithUser[]> => {
+	const clerkUser = await currentUser();
+	if (!clerkUser) throw new Error('Usuário não autenticado');
+
+	// Usando select tradicional para permitir o join e a ordenação por outra tabela
+	const customers = await db
+		.select()
+		.from(customersTable)
+		.leftJoin(usersTable, eq(customersTable.userId, usersTable.id))
+		.orderBy(asc(usersTable.name));
+
+	return customers.map((row) => ({
+		...row.customers,
+		user: row.users,
+	})) as CustomerWithUser[];
 };

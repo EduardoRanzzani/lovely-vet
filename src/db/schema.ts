@@ -1,6 +1,7 @@
 import { relations } from 'drizzle-orm';
 import {
 	boolean,
+	date,
 	integer,
 	pgEnum,
 	pgTable,
@@ -23,9 +24,13 @@ export const appointmentStatusEnum = pgEnum('appointment_status', [
 
 export const userRoleEnum = pgEnum('user_role', [
 	'admin',
-	'veterinarian',
+	'doctor',
 	'customer',
 ]);
+
+export const sexEnum = pgEnum('sex', ['male', 'female']);
+
+export const petStatusEnum = pgEnum('pet_status', ['alive', 'dead']);
 
 // System tables to manage all the clinic data
 
@@ -50,6 +55,7 @@ export const doctorsTable = pgTable('doctors', {
 		.references(() => usersTable.id, { onDelete: 'cascade' }),
 	phone: text('phone').notNull(),
 	cpf: text('cpf').notNull().unique(),
+	sex: sexEnum('sex').notNull().default('female'),
 	licenseNumber: text('licence_number').notNull(),
 	licenseState: text('license_state').notNull(),
 	specialty: text('specialty'),
@@ -68,6 +74,7 @@ export const customersTable = pgTable('customers', {
 	phone: text('phone').notNull(),
 	cpf: text('cpf').notNull().unique(),
 	email: text('email').notNull(),
+	sex: sexEnum('sex').notNull().default('male'),
 	postalCode: text('postal_code').notNull(),
 	address: text('address').notNull(),
 	addressNumber: text('address_number').notNull().default('S/N'),
@@ -97,16 +104,19 @@ export const breedsTable = pgTable('breeds', {
 export const petsTable = pgTable('pets', {
 	id: uuid('id').primaryKey().defaultRandom().notNull(),
 	name: text('name').notNull(),
-	birthDate: timestamp('birth_date'),
+	birthDate: date('birth_date').notNull(),
+	specieId: uuid('specie_id')
+		.notNull()
+		.references(() => speciesTable.id),
 	breedId: uuid('breed_id')
 		.notNull()
 		.references(() => breedsTable.id),
 	sterile: boolean('sterile').default(false).notNull(),
 	photo: text('photo'),
 	color: text('color'),
-	gender: text('gender'),
+	gender: sexEnum('gender').notNull().default('male'),
 	weight: text('weight'),
-	status: text('status'),
+	status: petStatusEnum('status').default('alive').notNull(),
 	observations: text('observations'),
 });
 
@@ -151,18 +161,18 @@ export const appointmentsTable = pgTable('appointments', {
 // Relations
 
 export const usersRelations = relations(usersTable, ({ one }) => ({
-	doctorsProfile: one(doctorsTable, {
+	doctor: one(doctorsTable, {
 		fields: [usersTable.id],
 		references: [doctorsTable.userId],
 	}),
-	customersProfile: one(customersTable, {
+	customer: one(customersTable, {
 		fields: [usersTable.id],
 		references: [customersTable.userId],
 	}),
 }));
 
 export const doctorsRelations = relations(doctorsTable, ({ one }) => ({
-	users: one(usersTable, {
+	user: one(usersTable, {
 		fields: [doctorsTable.userId],
 		references: [usersTable.id],
 	}),
@@ -171,7 +181,7 @@ export const doctorsRelations = relations(doctorsTable, ({ one }) => ({
 export const customersRelations = relations(
 	customersTable,
 	({ one, many }) => ({
-		users: one(usersTable, {
+		user: one(usersTable, {
 			fields: [customersTable.userId],
 			references: [usersTable.id],
 		}),
@@ -180,7 +190,11 @@ export const customersRelations = relations(
 );
 
 export const petsRelations = relations(petsTable, ({ one, many }) => ({
-	breeds: one(breedsTable, {
+	specie: one(speciesTable, {
+		fields: [petsTable.specieId],
+		references: [speciesTable.id],
+	}),
+	breed: one(breedsTable, {
 		fields: [petsTable.breedId],
 		references: [breedsTable.id],
 	}),
@@ -191,11 +205,11 @@ export const petsRelations = relations(petsTable, ({ one, many }) => ({
 export const ownersToPetsRelations = relations(
 	ownersToPetsTable,
 	({ one }) => ({
-		customers: one(customersTable, {
+		owner: one(customersTable, {
 			fields: [ownersToPetsTable.clientId],
 			references: [customersTable.id],
 		}),
-		pets: one(petsTable, {
+		pet: one(petsTable, {
 			fields: [ownersToPetsTable.petId],
 			references: [petsTable.id],
 		}),
@@ -203,7 +217,7 @@ export const ownersToPetsRelations = relations(
 );
 
 export const breedsRelations = relations(breedsTable, ({ one, many }) => ({
-	species: one(speciesTable, {
+	specie: one(speciesTable, {
 		fields: [breedsTable.speciesId],
 		references: [speciesTable.id],
 	}),
@@ -221,15 +235,15 @@ export const servicesRelations = relations(servicesTable, ({ many }) => ({
 export const appointmentsRelations = relations(
 	appointmentsTable,
 	({ one }) => ({
-		pets: one(petsTable, {
+		pet: one(petsTable, {
 			fields: [appointmentsTable.petId],
 			references: [petsTable.id],
 		}),
-		services: one(servicesTable, {
+		service: one(servicesTable, {
 			fields: [appointmentsTable.serviceId],
 			references: [servicesTable.id],
 		}),
-		doctors: one(doctorsTable, {
+		doctor: one(doctorsTable, {
 			fields: [appointmentsTable.veterinarianId],
 			references: [doctorsTable.id],
 		}),

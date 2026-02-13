@@ -1,16 +1,15 @@
 'use client';
 
-import {
-	CustomerWithUser,
-	upsertCustomer,
-} from '@/api/actions/customers.actions';
+import { upsertCustomer } from '@/api/actions/customers.actions';
 import { searchAddressByPostalCode } from '@/api/config/consts';
 import {
 	createCustomerWithUserSchema,
 	CreateCustomerWithUserSchema,
+	CustomerWithUser,
 } from '@/api/schema/customers.schema';
 import InputForm from '@/components/form/input-form';
 import InputFormMask from '@/components/form/input-form-mask';
+import SelectForm from '@/components/form/select-form';
 import { Button } from '@/components/ui/button';
 import {
 	DialogClose,
@@ -38,6 +37,7 @@ const CustomerFormClient = ({
 	const {
 		register,
 		handleSubmit,
+		control,
 		setValue,
 		reset,
 		formState: { errors },
@@ -49,6 +49,7 @@ const CustomerFormClient = ({
 			email: customer?.user?.email || '',
 			phone: customer?.phone || '',
 			cpf: customer?.cpf || '',
+			sex: customer?.sex || 'male',
 			postalCode: customer?.postalCode || '',
 			address: customer?.address || '',
 			addressNumber: customer?.addressNumber || '',
@@ -83,7 +84,7 @@ const CustomerFormClient = ({
 		},
 	});
 
-	const submitForm = (data: CreateCustomerWithUserSchema) => {
+	const formSubmit = (data: CreateCustomerWithUserSchema) => {
 		handleUpsertCustomer(data);
 	};
 
@@ -108,7 +109,7 @@ const CustomerFormClient = ({
 
 			<form
 				id='registerForm'
-				onSubmit={handleSubmit(submitForm)}
+				onSubmit={handleSubmit(formSubmit)}
 				className='flex flex-col gap-2'
 			>
 				<InputForm
@@ -133,6 +134,7 @@ const CustomerFormClient = ({
 						format='(##) #####-####'
 						mask='x'
 						name='phone'
+						className='w-[33%]'
 					/>
 
 					<InputFormMask
@@ -142,6 +144,27 @@ const CustomerFormClient = ({
 						format='###.###.###-##'
 						mask='x'
 						name='cpf'
+						className='w-[33%]'
+					/>
+
+					<SelectForm
+						label='Sexo:'
+						control={control}
+						error={errors.sex?.message}
+						name='sex'
+						options={[
+							{
+								value: 'male',
+								label: 'Masculino',
+								key: 'male',
+							},
+							{
+								value: 'female',
+								label: 'Feminino',
+								key: 'female',
+							},
+						]}
+						className='w-[33%]'
 					/>
 				</div>
 

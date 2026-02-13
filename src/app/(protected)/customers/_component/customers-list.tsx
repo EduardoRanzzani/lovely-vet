@@ -1,13 +1,14 @@
 'use client';
 
-import { CustomerWithUser } from '@/api/actions/customers.actions';
 import { MAX_PAGE_SIZE, PaginatedData } from '@/api/config/consts';
+import { CustomerWithUser } from '@/api/schema/customers.schema';
 import SearchInput from '@/components/list/search-input';
 import TableComponent from '@/components/list/table-component';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { startTransition, use } from 'react';
-import { columns, renderMobile, renderRow } from './customers-table-props';
+import { handleNavigation } from '@/lib/utils';
+import { useSearchParams } from 'next/navigation';
+import { use } from 'react';
 import AddCustomerButton from './add-customer-button';
+import { columns, renderMobile, renderRow } from './customers-table-props';
 
 interface CustomersListClientProps {
 	customers: Promise<PaginatedData<CustomerWithUser>>;
@@ -15,14 +16,7 @@ interface CustomersListClientProps {
 
 const CustomersListClient = ({ customers }: CustomersListClientProps) => {
 	const customersResolved = use(customers);
-	const router = useRouter();
 	const searchParams = useSearchParams();
-
-	const handleNavigation = (params: URLSearchParams) => {
-		startTransition(() => {
-			router.push(`?${params.toString()}`);
-		});
-	};
 
 	const handlePageChange = (page: number) => {
 		const params = new URLSearchParams(searchParams.toString());

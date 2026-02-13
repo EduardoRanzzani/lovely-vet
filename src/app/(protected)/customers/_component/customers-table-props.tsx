@@ -1,4 +1,5 @@
-import { CustomerWithUser } from '@/api/actions/customers.actions';
+import { CustomerWithUser } from '@/api/schema/customers.schema';
+import { getInitials } from '@/api/util';
 import { GoogleMapsIcon } from '@/components/icons/icon-googlemaps';
 import { WhatsappIcon } from '@/components/icons/icon-whatsapp';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -7,15 +8,19 @@ import { Separator } from '@/components/ui/separator';
 import { TableCell, TableRow } from '@/components/ui/table';
 import { IdCardIcon, MapPinIcon, PhoneIcon } from 'lucide-react';
 import Link from 'next/link';
+import EditCustomerButton from './edit-customer-button';
 
 export const columns = [
 	{ header: 'Nome', accessorKey: 'name' },
 	{ header: 'CPF', accessorKey: 'cpf' },
 	{ header: 'Telefone', accessorKey: 'phone' },
 	{ header: 'Endereço', accessorKey: 'address' },
+	{ header: 'Ações', accessorKey: 'actions' },
 ];
 
 export const renderRow = (customer: CustomerWithUser) => {
+	const fullAddress = `${customer.address}, ${customer.addressNumber} - ${customer.neighborhood}. ${customer.city}/${customer.state}`;
+
 	return (
 		<TableRow key={customer.id}>
 			<TableCell className='flex gap-4 items-center'>
@@ -23,7 +28,9 @@ export const renderRow = (customer: CustomerWithUser) => {
 					{customer.user.image ? (
 						<AvatarImage src={customer.user.image} alt={customer.user.name} />
 					) : (
-						<AvatarFallback className='rounded-full'>LV</AvatarFallback>
+						<AvatarFallback className='rounded-full'>
+							{getInitials(customer.user.name)}
+						</AvatarFallback>
 					)}
 				</Avatar>
 				<span className='flex flex-col'>
@@ -33,14 +40,18 @@ export const renderRow = (customer: CustomerWithUser) => {
 			</TableCell>
 			<TableCell>{customer.cpf}</TableCell>
 			<TableCell>{customer.phone}</TableCell>
-			<TableCell>{customer.address}</TableCell>
+			<TableCell>{fullAddress}</TableCell>
+			<TableCell>
+				<EditCustomerButton customer={customer} />
+			</TableCell>
 		</TableRow>
 	);
 };
 
 export const renderMobile = (customer: CustomerWithUser) => {
+	const fullAddress = `${customer.address}, ${customer.addressNumber} - ${customer.neighborhood}. ${customer.city}/${customer.state}`;
 	const whatsappUrl = `https://wa.me/55${customer.phone.replace(/\D/g, '')}/?text=Ol%C3%A1,%20gostaria%20de%20falar%20com%20${customer.user.name}`;
-	const googleMapsUrl = `https://www.google.com/maps/place/${customer.address}`;
+	const googleMapsUrl = `https://www.google.com/maps/place/${fullAddress}`;
 
 	return (
 		<div key={customer.id} className='flex flex-col gap-4'>
@@ -87,9 +98,7 @@ export const renderMobile = (customer: CustomerWithUser) => {
 					<span className='text-sm font-semibold'>
 						<MapPinIcon className='w-4 h-4' />
 					</span>
-					<span className='text-sm flex gap-2 items-center'>
-						{customer.address}
-					</span>
+					<span className='text-sm flex gap-2 items-center'>{fullAddress}</span>
 				</p>
 
 				<Button asChild variant={'outline'}>
