@@ -2,39 +2,27 @@ import { Field } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
-import { InputHTMLAttributes } from 'react';
-import {
-	FieldValues,
-	Path,
-	RegisterOptions,
-	UseFormRegister,
-} from 'react-hook-form';
-import { PatternFormat } from 'react-number-format';
+import { ComponentProps } from 'react';
+import { Control, Controller, FieldValues, Path } from 'react-hook-form';
+import { PatternFormat, NumberFormatValues } from 'react-number-format';
 
-// 1. Omitimos o 'type' original que é muito amplo
-type OmittedInputProps =
-	| 'name'
-	| 'defaultValue'
-	| 'value'
-	| 'onChange'
-	| 'onBlur'
-	| 'format'
-	| 'type';
+// 1. Pegamos exatamente o que o seu componente Input aceita
+type ShadcnInputProps = ComponentProps<typeof Input>;
 
+// 2. Criamos nossa interface omitindo os campos problemáticos
 interface InputFormMaskProps<T extends FieldValues> extends Omit<
-	InputHTMLAttributes<HTMLInputElement>,
-	OmittedInputProps
+	ShadcnInputProps,
+	'name' | 'type' | 'value' | 'defaultValue' | 'onChange' | 'onBlur'
 > {
 	label: string;
 	format: string;
 	mask?: string;
 	error?: string;
 	name: Path<T>;
-	register: UseFormRegister<T>;
-	registerOptions?: RegisterOptions<T, Path<T>>;
-	onBlur?: (e: React.FocusEvent<HTMLInputElement>) => void;
-	// 2. Definimos apenas os tipos que o PatternFormat suporta
+	control: Control<T>;
+	// Restringimos o type para o que o PatternFormat aceita (evita erro do "number")
 	type?: 'text' | 'tel' | 'password';
+	onBlur?: (e: React.FocusEvent<HTMLInputElement>) => void;
 }
 
 const InputFormMask = <T extends FieldValues>({
@@ -42,48 +30,58 @@ const InputFormMask = <T extends FieldValues>({
 	format,
 	mask,
 	error,
-	register,
-	registerOptions,
+	control,
 	name,
-	type = 'text', // Default para text
+	type = 'text',
+	className,
+	onBlur: externalOnBlur,
 	...props
 }: InputFormMaskProps<T>) => {
 	const inputId = props.id || name;
 
-	const {
-		ref,
-		onBlur,
-		name: registerName,
-		onChange,
-		...registerProps
-	} = register(name, registerOptions);
-
 	return (
-		<Field className={cn('flex flex-col -gap-1', props.className)}>
+		<Field className={cn('flex flex-col gap-1', className)}>
 			<Label htmlFor={inputId} className='text-xs font-medium'>
 				{label} {props.required && <span className='text-destructive'>*</span>}
 			</Label>
 
-			<PatternFormat
-				// Props de controle do RHF
-				name={registerName}
-				getInputRef={ref}
-				onBlur={onBlur}
-				onChange={onChange}
-				{...registerProps}
-				// Configuração da Máscara
-				format={format}
-				mask={mask}
-				type={type}
-				// Customização
-				id={inputId}
-				customInput={Input}
-				// Demais props HTML
-				{...props}
-				className={cn('read-only:cursor-not-allowed read-only:bg-zinc-200')}
+			<Controller
+				name={name}
+				control={control}
+				render={({ field: { onChange, onBlur: rhfOnBlur, value, ref } }) => {
+					// SOLUÇÃO PARA O ERRO DE TIPO (readonly string[]):
+					// Forçamos o valor a ser string ou number, que é o que o PatternFormat exige.
+					const val =
+						typeof value === 'string' || typeof value === 'number' ? value : '';
+
+					return (
+						<PatternFormat
+							{...props} // Espalhamos as props do Shadcn aqui
+							id={inputId}
+							format={format}
+							mask={mask}
+							type={type} // "type" restrito no topo evita o erro do HTMLInputTypeAttribute
+							customInput={Input}
+							getInputRef={ref}
+							value={val}
+							onValueChange={(values: NumberFormatValues) => {
+								// Envia o valor formatado para o React Hook Form
+								onChange(values.formattedValue);
+							}}
+							onBlur={(e: React.FocusEvent<HTMLInputElement>) => {
+								rhfOnBlur();
+								externalOnBlur?.(e);
+							}}
+							className={cn(
+								'read-only:cursor-not-allowed read-only:bg-zinc-200',
+								error && 'border-destructive',
+							)}
+						/>
+					);
+				}}
 			/>
 
-			{error && <p className='text-xs text-destructive'>{error}</p>}
+			{error && <p className='text-xs text-destructive mt-1'>{error}</p>}
 		</Field>
 	);
 };

@@ -20,10 +20,12 @@ const EditCustomerButton = ({ customer }: EditCustomerButtonProps) => {
 				</Button>
 			</DialogTrigger>
 
-			<CustomerFormClient
-				customer={customer}
-				onSuccess={() => setIsOpen(false)}
-			/>
+			{isOpen && (
+				<CustomerFormClient
+					customer={customer}
+					onSuccess={() => setIsOpen(false)}
+				/>
+			)}
 		</Dialog>
 	);
 };

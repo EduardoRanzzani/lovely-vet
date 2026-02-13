@@ -16,6 +16,7 @@ import {
 	ChevronRightIcon,
 	CogIcon,
 	LayoutDashboardIcon,
+	LucideIcon,
 	PawPrintIcon,
 	StethoscopeIcon,
 	UsersRoundIcon,
@@ -24,6 +25,13 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { NavUser, NavUserType } from './nav-user';
 
+interface sidebarItems {
+	title: string;
+	url: string;
+	icon: LucideIcon;
+	roles: string[];
+}
+
 const AppSidebar = () => {
 	const { user } = useUser();
 	const navUser: NavUserType = {
@@ -31,19 +39,44 @@ const AppSidebar = () => {
 		name: user?.fullName as string,
 		email: user?.primaryEmailAddress?.emailAddress as string,
 	};
-	const userRole = user?.publicMetadata?.role;
 
+	const userRole = (user?.publicMetadata?.role as string) || 'customer';
 	const pathname = usePathname();
 
-	const items = [
-		{ title: 'Dashboard', url: '/dashboard', icon: LayoutDashboardIcon },
-		{ title: 'Veterinários', url: '/doctors', icon: StethoscopeIcon },
-		{ title: 'Pets', url: '/pets', icon: PawPrintIcon },
-		{ title: 'Clientes', url: '/customers', icon: UsersRoundIcon },
+	const items: sidebarItems[] = [
+		{
+			title: 'Dashboard',
+			url: '/dashboard',
+			icon: LayoutDashboardIcon,
+			roles: ['admin', 'customer', 'doctor'],
+		},
+		{
+			title: 'Veterinários',
+			url: '/doctors',
+			icon: StethoscopeIcon,
+			roles: ['admin'],
+		},
+		{
+			title: 'Pets',
+			url: '/pets',
+			icon: PawPrintIcon,
+			roles: ['admin', 'doctor', 'customer'],
+		},
+		{
+			title: 'Clientes',
+			url: '/customers',
+			icon: UsersRoundIcon,
+			roles: ['admin', 'doctor'],
+		},
 	];
 
-	const settings = [
-		{ title: 'Cadastro de Raças', url: '/breeds', icon: CogIcon },
+	const settings: sidebarItems[] = [
+		{
+			title: 'Cadastro de Raças',
+			url: '/breeds',
+			icon: CogIcon,
+			roles: ['admin', 'doctor'],
+		},
 	];
 
 	return (
@@ -67,26 +100,28 @@ const AppSidebar = () => {
 				<SidebarGroup>
 					<SidebarGroupLabel>Menu Principal</SidebarGroupLabel>
 					<SidebarMenu>
-						{items.map((item) => (
-							<SidebarMenuItem key={item.title}>
-								<SidebarMenuButton asChild isActive={pathname === item.url}>
-									<Link href={item.url} className='flex justify-between'>
-										<span className='flex items-center gap-2'>
-											<item.icon className='h-5 w-5' />
-											<p
-												className={`${pathname === item.url && 'font-semibold'}`}
-											>
-												{item.title}
-											</p>
-										</span>
-										{pathname === item.url && <ChevronRightIcon />}
-									</Link>
-								</SidebarMenuButton>
-							</SidebarMenuItem>
-						))}
+						{items
+							.filter((item) => item.roles.includes(userRole))
+							.map((item) => (
+								<SidebarMenuItem key={item.title}>
+									<SidebarMenuButton asChild isActive={pathname === item.url}>
+										<Link href={item.url} className='flex justify-between'>
+											<span className='flex items-center gap-2'>
+												<item.icon className='h-5 w-5' />
+												<p
+													className={`${pathname === item.url && 'font-semibold'}`}
+												>
+													{item.title}
+												</p>
+											</span>
+											{pathname === item.url && <ChevronRightIcon />}
+										</Link>
+									</SidebarMenuButton>
+								</SidebarMenuItem>
+							))}
 					</SidebarMenu>
 				</SidebarGroup>
-				{userRole === 'admin' && (
+				{['admin', 'doctor'].includes(userRole) && (
 					<SidebarGroup>
 						<SidebarGroupLabel>Configurações</SidebarGroupLabel>
 						<SidebarMenu>

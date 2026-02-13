@@ -107,10 +107,19 @@ export const getCustomersPaginated = async (
 };
 
 export const upsertCustomer = async (data: CreateCustomerWithUserSchema) => {
-	const clerkUser = await currentUser();
-	if (!clerkUser) throw new Error('Usuário não autenticado');
+	const authenticatedUser = await currentUser();
+	if (!authenticatedUser) throw new Error('Usuário não autenticado');
 
-	const newClerkUser = await createNewClerkUser(data);
+	let clerkUserId;
+
+	console.log('update? ', !!data.clerkUserId);
+
+	if (data.clerkUserId) {
+		clerkUserId = data.clerkUserId;
+	} else {
+		const newClerkUser = await createNewClerkUser(data);
+		clerkUserId = newClerkUser.id;
+	}
 
 	const [newUser] = await db
 		.insert(usersTable)
@@ -118,18 +127,23 @@ export const upsertCustomer = async (data: CreateCustomerWithUserSchema) => {
 			name: data.name,
 			email: data.email,
 			image: data.image,
-			clerkUserId: newClerkUser.id,
+			clerkUserId: clerkUserId,
 			role: 'customer',
 		})
 		.onConflictDoUpdate({
 			target: usersTable.clerkUserId,
-			set: { updatedAt: new Date() },
+			set: {
+				name: data.name,
+				email: data.email,
+				image: data.image,
+				updatedAt: new Date(),
+			},
 		})
 		.returning();
 
 	if (!newUser) throw new Error('Falha ao criar usuário base no sistema');
 
-	const [newCustomer] = await db
+	await db
 		.insert(customersTable)
 		.values({
 			userId: newUser.id,
@@ -164,10 +178,6 @@ export const upsertCustomer = async (data: CreateCustomerWithUserSchema) => {
 		.returning();
 
 	revalidatePath('/customers');
-	return {
-		newUser,
-		newCustomer,
-	};
 };
 
 export const getCustomers = async (): Promise<CustomerWithUser[]> => {

@@ -45,6 +45,7 @@ const CustomerFormClient = ({
 		resolver: zodResolver(createCustomerWithUserSchema),
 		shouldUnregister: true,
 		defaultValues: {
+			clerkUserId: customer?.user?.clerkUserId || '',
 			name: customer?.user?.name || '',
 			email: customer?.user?.email || '',
 			phone: customer?.phone || '',
@@ -85,7 +86,11 @@ const CustomerFormClient = ({
 	});
 
 	const formSubmit = (data: CreateCustomerWithUserSchema) => {
-		handleUpsertCustomer(data);
+		handleUpsertCustomer({
+			...data,
+			id: customer?.id,
+			clerkUserId: customer?.user.clerkUserId || '',
+		});
 	};
 
 	return (
@@ -112,6 +117,8 @@ const CustomerFormClient = ({
 				onSubmit={handleSubmit(formSubmit)}
 				className='flex flex-col gap-2'
 			>
+				<input type='text' {...register('clerkUserId')} className='hidden' />
+
 				<InputForm
 					label='Nome:'
 					register={register}
@@ -129,7 +136,7 @@ const CustomerFormClient = ({
 				<div className='flex flex-col lg:flex-row gap-2'>
 					<InputFormMask
 						label='Telefone:'
-						register={register}
+						control={control}
 						error={errors.phone?.message}
 						format='(##) #####-####'
 						mask='x'
@@ -139,7 +146,7 @@ const CustomerFormClient = ({
 
 					<InputFormMask
 						label='CPF:'
-						register={register}
+						control={control}
 						error={errors.cpf?.message}
 						format='###.###.###-##'
 						mask='x'
@@ -171,7 +178,7 @@ const CustomerFormClient = ({
 				<div className='flex flex-col lg:flex-row gap-2'>
 					<InputFormMask
 						label='CEP:'
-						register={register}
+						control={control}
 						error={errors.postalCode?.message}
 						format='#####-###'
 						mask='x'
