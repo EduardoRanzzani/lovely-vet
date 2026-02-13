@@ -141,7 +141,7 @@ const CustomerFormClient = ({
 						format='(##) #####-####'
 						mask='x'
 						name='phone'
-						className='w-[33%]'
+						className='w-full lg:w-[33%]'
 					/>
 
 					<InputFormMask
@@ -151,7 +151,7 @@ const CustomerFormClient = ({
 						format='###.###.###-##'
 						mask='x'
 						name='cpf'
-						className='w-[33%]'
+						className='w-full lg:w-[33%]'
 					/>
 
 					<SelectForm
@@ -171,7 +171,7 @@ const CustomerFormClient = ({
 								key: 'female',
 							},
 						]}
-						className='w-[33%]'
+						className='w-full lg:w-[33%]'
 					/>
 				</div>
 

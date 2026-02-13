@@ -95,7 +95,7 @@ const OnboardingCustomerFormDialog = ({ isOpen }: { isOpen: boolean }) => {
 					onSubmit={handleSubmit(submitForm)}
 					className='flex flex-col gap-2'
 				>
-					<span className='flex gap-4'>
+					<span className='flex flex-col lg:flex-row gap-4'>
 						<InputFormMask
 							label='Telefone:'
 							control={control}
@@ -103,7 +103,7 @@ const OnboardingCustomerFormDialog = ({ isOpen }: { isOpen: boolean }) => {
 							format='(##) #####-####'
 							mask='x'
 							name='phone'
-							className='w-[33%]'
+							className='w-full lg:w-[33%]'
 						/>
 
 						<InputFormMask
@@ -113,7 +113,7 @@ const OnboardingCustomerFormDialog = ({ isOpen }: { isOpen: boolean }) => {
 							format='###.###.###-##'
 							mask='x'
 							name='cpf'
-							className='w-[33%]'
+							className='w-full lg:w-[33%]'
 						/>
 
 						<SelectForm
@@ -133,7 +133,7 @@ const OnboardingCustomerFormDialog = ({ isOpen }: { isOpen: boolean }) => {
 									key: 'female',
 								},
 							]}
-							className='w-[33%]'
+							className='w-full lg:w-[33%]'
 						/>
 					</span>
 

@@ -55,20 +55,26 @@ export const renderMobile = (customer: CustomerWithUser) => {
 
 	return (
 		<div key={customer.id} className='flex flex-col gap-4'>
-			<div className='flex gap-4'>
-				<Avatar className='h-9 w-9 rounded-full' draggable={false}>
-					{customer.user.image ? (
-						<AvatarImage src={customer.user.image} alt={customer.user.name} />
-					) : (
-						<AvatarFallback className='rounded-full'>LV</AvatarFallback>
-					)}
-				</Avatar>
+			<span className='flex justify-between'>
+				<div className='flex gap-4'>
+					<Avatar className='h-9 w-9 rounded-full' draggable={false}>
+						{customer.user.image ? (
+							<AvatarImage src={customer.user.image} alt={customer.user.name} />
+						) : (
+							<AvatarFallback className='rounded-full'>LV</AvatarFallback>
+						)}
+					</Avatar>
 
-				<span className='flex flex-col'>
-					<h3>{customer.user.name}</h3>
-					<p className='text-xs text-muted-foreground'>{customer.user.email}</p>
-				</span>
-			</div>
+					<span className='flex flex-col'>
+						<h3>{customer.user.name}</h3>
+						<p className='text-xs text-muted-foreground'>
+							{customer.user.email}
+						</p>
+					</span>
+				</div>
+
+				<EditCustomerButton customer={customer} />
+			</span>
 
 			<Separator />
 
