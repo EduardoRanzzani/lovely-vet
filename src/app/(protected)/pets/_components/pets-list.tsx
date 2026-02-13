@@ -4,28 +4,17 @@ import { PetsWithTutorAndBreed } from '@/api/schema/pets.schema';
 import SearchInput from '@/components/list/search-input';
 import TableComponent from '@/components/list/table-component';
 import { handleNavigation } from '@/lib/utils';
+import { useUser } from '@clerk/nextjs';
 import { useSearchParams } from 'next/navigation';
 import { use } from 'react';
-import { columns, renderMobile, renderRow } from './pets-table-props';
 import AddPetButton from './add-pet-button';
-import { BreedsWithSpecies } from '@/api/schema/breeds.schema';
-import { Species } from '@/api/schema/species.schema';
-import { CustomerWithUser } from '@/api/schema/customers.schema';
-import { useUser } from '@clerk/nextjs';
+import { columns, renderMobile, renderRow } from './pets-table-props';
 
 interface PetsListClientProps {
 	pets: Promise<PaginatedData<PetsWithTutorAndBreed>>;
-	species: Species[];
-	breeds: BreedsWithSpecies[];
-	customers: CustomerWithUser[];
 }
 
-const PetsListClient = ({
-	pets,
-	species,
-	breeds,
-	customers,
-}: PetsListClientProps) => {
+const PetsListClient = ({ pets }: PetsListClientProps) => {
 	const { user } = useUser();
 	const role = user?.publicMetadata?.role as string;
 
@@ -43,13 +32,7 @@ const PetsListClient = ({
 			<div className='flex flex-col lg:flex-row items-center justify-between gap-4'>
 				<SearchInput />
 
-				{['admin', 'doctor'].includes(role) && (
-					<AddPetButton
-						species={species}
-						breeds={breeds}
-						customers={customers}
-					/>
-				)}
+				{['admin', 'doctor'].includes(role) && <AddPetButton />}
 			</div>
 
 			<TableComponent

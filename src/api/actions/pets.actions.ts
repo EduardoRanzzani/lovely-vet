@@ -4,7 +4,6 @@ import { db } from '@/db';
 import {
 	breedsTable,
 	customersTable,
-	ownersToPetsTable,
 	petsTable,
 	speciesTable,
 	usersTable,
@@ -28,15 +27,17 @@ export const getPetsPaginated = async (
 
 	const databaseUser = await db.query.usersTable.findFirst({
 		where: eq(usersTable.clerkUserId, clerkUser.id),
+		with: { customer: true },
 	});
+
 	if (!databaseUser) throw new Error('Usuário não encontrado');
 
 	const offset = (page - 1) * limit;
-
 	const conditions = [];
 
-	if (databaseUser.role === 'customer') {
-		conditions.push(eq(usersTable.id, databaseUser.id));
+	// LÓGICA DE SEGURANÇA: Se for customer, filtra pelo ID de cliente dele
+	if (databaseUser.role === 'customer' && databaseUser.customer) {
+		conditions.push(eq(petsTable.customerId, databaseUser.customer.id));
 	}
 
 	if (search) {
@@ -46,7 +47,6 @@ export const getPetsPaginated = async (
 				ilike(breedsTable.name, `%${search}%`),
 				ilike(speciesTable.name, `%${search}%`),
 				ilike(usersTable.name, `%${search}%`),
-				ilike(petsTable.status, `%${search}%`),
 				ilike(petsTable.color, `%${search}%`),
 			),
 		);
@@ -59,17 +59,16 @@ export const getPetsPaginated = async (
 		.select({
 			pet: petsTable,
 			breed: breedsTable,
-			species: speciesTable, // Selecionamos a tabela de espécies explicitamente
-			tutors: sql<string>`string_agg(${usersTable.name}, ', ')`.as('tutors'),
+			specie: speciesTable,
+			tutor: customersTable,
+			user: usersTable,
 		})
 		.from(petsTable)
-		.leftJoin(breedsTable, eq(petsTable.breedId, breedsTable.id))
-		.leftJoin(speciesTable, eq(breedsTable.speciesId, speciesTable.id))
-		.leftJoin(ownersToPetsTable, eq(petsTable.id, ownersToPetsTable.petId))
-		.leftJoin(customersTable, eq(ownersToPetsTable.clientId, customersTable.id))
-		.leftJoin(usersTable, eq(customersTable.userId, usersTable.id))
+		.innerJoin(breedsTable, eq(petsTable.breedId, breedsTable.id))
+		.innerJoin(speciesTable, eq(petsTable.specieId, speciesTable.id))
+		.innerJoin(customersTable, eq(petsTable.customerId, customersTable.id))
+		.innerJoin(usersTable, eq(customersTable.userId, usersTable.id))
 		.where(filterCondition)
-		.groupBy(petsTable.id, breedsTable.id, speciesTable.id)
 		.limit(limit)
 		.offset(offset)
 		.orderBy(asc(petsTable.name));
@@ -77,11 +76,8 @@ export const getPetsPaginated = async (
 	const totalCountResult = await db
 		.select({ value: countDistinct(petsTable.id) })
 		.from(petsTable)
-		.leftJoin(breedsTable, eq(petsTable.breedId, breedsTable.id))
-		.leftJoin(speciesTable, eq(breedsTable.speciesId, speciesTable.id))
-		.leftJoin(ownersToPetsTable, eq(petsTable.id, ownersToPetsTable.petId))
-		.leftJoin(customersTable, eq(ownersToPetsTable.clientId, customersTable.id))
-		.leftJoin(usersTable, eq(customersTable.userId, usersTable.id))
+		.innerJoin(customersTable, eq(petsTable.customerId, customersTable.id))
+		.innerJoin(usersTable, eq(customersTable.userId, usersTable.id))
 		.where(filterCondition);
 
 	const totalCount = Number(totalCountResult[0]?.value ?? 0);
@@ -89,21 +85,19 @@ export const getPetsPaginated = async (
 
 	const formattedData: PetsWithTutorAndBreed[] = data.map((row) => ({
 		...row.pet,
-		tutors: row.tutors,
 		breed: {
-			...row.breed!,
-			species: row.species!, // Aqui fazemos o aninhamento
+			...row.breed,
+			specie: row.specie,
+		},
+		tutor: {
+			...row.tutor,
+			user: row.user,
 		},
 	}));
 
 	return {
 		data: formattedData,
-		metadata: {
-			totalCount: totalCount, // totalCount calculado na sua query de contagem
-			pageCount,
-			currentPage: page,
-			limit,
-		},
+		metadata: { totalCount, pageCount, currentPage: page, limit },
 	};
 };
 
@@ -128,10 +122,11 @@ export const createPet = async (data: CreatePetWithTutorAndBreedSchema) => {
 			birthDate: data.birthDate,
 			specieId: data.speciesId,
 			breedId: data.breedId,
-			sterile: data.sterile == 'true' ? true : false,
+			customerId: data.tutorId, // Agora o tutor é salvo diretamente aqui
+			sterile: data.sterile === 'true',
 			photo: data.photo,
 			color: data.color,
-			gender: data.gender as 'male' | 'female',
+			gender: data.gender,
 			weight: data.weight,
 			observations: data.observations,
 		})

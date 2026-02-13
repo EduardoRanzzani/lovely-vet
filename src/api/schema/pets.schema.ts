@@ -1,11 +1,19 @@
-import { breedsTable, petsTable, speciesTable } from '@/db/schema';
+import {
+	breedsTable,
+	customersTable,
+	petsTable,
+	speciesTable,
+	usersTable,
+} from '@/db/schema';
 import z from 'zod';
 
 export type PetsWithTutorAndBreed = typeof petsTable.$inferSelect & {
 	breed: typeof breedsTable.$inferSelect & {
-		species: typeof speciesTable.$inferSelect;
+		specie: typeof speciesTable.$inferSelect;
 	};
-	tutors: string | null;
+	tutor: typeof customersTable.$inferSelect & {
+		user: typeof usersTable.$inferSelect;
+	};
 };
 
 export const createPetWithTutorAndBreedSchema = z.object({

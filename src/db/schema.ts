@@ -111,6 +111,9 @@ export const petsTable = pgTable('pets', {
 	breedId: uuid('breed_id')
 		.notNull()
 		.references(() => breedsTable.id),
+	customerId: uuid('customer_id')
+		.notNull()
+		.references(() => customersTable.id, { onDelete: 'cascade' }),
 	sterile: boolean('sterile').default(false).notNull(),
 	photo: text('photo'),
 	color: text('color'),
@@ -119,19 +122,6 @@ export const petsTable = pgTable('pets', {
 	status: petStatusEnum('status').default('alive').notNull(),
 	observations: text('observations'),
 });
-
-export const ownersToPetsTable = pgTable(
-	'owners_to_pets',
-	{
-		clientId: uuid('client_id')
-			.notNull()
-			.references(() => customersTable.id, { onDelete: 'cascade' }),
-		petId: uuid('pet_id')
-			.notNull()
-			.references(() => petsTable.id, { onDelete: 'cascade' }),
-	},
-	(t) => [primaryKey({ columns: [t.clientId, t.petId] })],
-);
 
 export const servicesTable = pgTable('services', {
 	id: uuid('id').primaryKey().defaultRandom().notNull(),
@@ -185,7 +175,7 @@ export const customersRelations = relations(
 			fields: [customersTable.userId],
 			references: [usersTable.id],
 		}),
-		ownersToPets: many(ownersToPetsTable),
+		pets: many(petsTable), // Um cliente tem muitos pets
 	}),
 );
 
@@ -198,23 +188,12 @@ export const petsRelations = relations(petsTable, ({ one, many }) => ({
 		fields: [petsTable.breedId],
 		references: [breedsTable.id],
 	}),
-	ownersToPets: many(ownersToPetsTable),
+	customer: one(customersTable, {
+		fields: [petsTable.customerId],
+		references: [customersTable.id],
+	}),
 	appointments: many(appointmentsTable),
 }));
-
-export const ownersToPetsRelations = relations(
-	ownersToPetsTable,
-	({ one }) => ({
-		owner: one(customersTable, {
-			fields: [ownersToPetsTable.clientId],
-			references: [customersTable.id],
-		}),
-		pet: one(petsTable, {
-			fields: [ownersToPetsTable.petId],
-			references: [petsTable.id],
-		}),
-	}),
-);
 
 export const breedsRelations = relations(breedsTable, ({ one, many }) => ({
 	specie: one(speciesTable, {

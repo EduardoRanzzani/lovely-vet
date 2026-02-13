@@ -1,5 +1,8 @@
 'use client';
+import { getBreeds } from '@/api/actions/breeds.actions';
+import { getCustomers } from '@/api/actions/customers.actions';
 import { upsertPet } from '@/api/actions/pets.actions';
+import { getSpecies } from '@/api/actions/species.actions';
 import { BreedsWithSpecies } from '@/api/schema/breeds.schema';
 import { CustomerWithUser } from '@/api/schema/customers.schema';
 import {
@@ -29,19 +32,13 @@ import { toast } from 'sonner';
 interface PetFormClientProps {
 	pet?: PetsWithTutorAndBreed;
 	onSuccess?: () => void;
-	species: Species[];
-	breeds: BreedsWithSpecies[];
-	customers: CustomerWithUser[];
 }
 
-const PetFormClient = ({
-	pet,
-	onSuccess,
-	species,
-	breeds,
-	customers,
-}: PetFormClientProps) => {
+const PetFormClient = ({ pet, onSuccess }: PetFormClientProps) => {
 	const [filteredBreeds, setFilteredBreeds] = useState<BreedsWithSpecies[]>([]);
+	const [breeds, setBreeds] = useState<BreedsWithSpecies[]>([]);
+	const [species, setSpecies] = useState<Species[]>([]);
+	const [customers, setCustomers] = useState<CustomerWithUser[]>([]);
 
 	const {
 		register,
@@ -64,6 +61,55 @@ const PetFormClient = ({
 			observations: pet?.observations || '',
 		},
 	});
+
+	// Dentro do PetFormClient
+	useEffect(() => {
+		const fetchData = async () => {
+			// Busca todos em paralelo para ganhar performance
+			const [speciesData, breedsData, customersData] = await Promise.all([
+				getSpecies(),
+				getBreeds(),
+				getCustomers(),
+			]);
+
+			setSpecies(speciesData);
+			setBreeds(breedsData);
+			setCustomers(customersData);
+
+			// Se estiver editando um pet, agora que as listas existem,
+			// garantimos que o formulário tenha os valores e os filtros corretos.
+			if (pet) {
+				// Filtra as raças para que o Select de Raça mostre as opções certas
+				setFilteredBreeds(
+					breedsData.filter((b) => b.speciesId === pet.breed.speciesId),
+				);
+
+				// Força o reset do formulário com os dados do pet
+				if (pet) {
+					setFilteredBreeds(
+						breedsData.filter((b) => b.speciesId === pet.breed.speciesId),
+					);
+
+					reset({
+						id: pet.id,
+						name: pet.name,
+						birthDate: pet.birthDate,
+						tutorId: pet.customerId, // Mapeando customerId do banco para tutorId do form
+						speciesId: pet.breed.speciesId,
+						breedId: pet.breed.id,
+						gender: pet.gender as 'male' | 'female',
+						sterile: pet.sterile ? 'true' : 'false',
+						color: pet.color ?? '', // Se for null no banco, vira string vazia
+						weight: pet.weight ?? '', // Se for null no banco, vira string vazia
+						photo: pet.photo ?? undefined, // Converte null para undefined
+						observations: pet.observations ?? '',
+					});
+				}
+			}
+		};
+
+		fetchData();
+	}, [pet, reset]); // Removi o setValue individual para usar o reset completo
 
 	const { mutate: handleUpsertCustomer, isPending } = useMutation({
 		mutationFn: upsertPet,

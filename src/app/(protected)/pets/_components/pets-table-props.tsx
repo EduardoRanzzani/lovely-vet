@@ -2,6 +2,7 @@ import { PetsWithTutorAndBreed } from '@/api/schema/pets.schema';
 import { calculateAge, getInitials } from '@/api/util';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { TableCell, TableRow } from '@/components/ui/table';
+import EditPetButton from './edit-pet-button';
 
 export const columns = [
 	{ header: 'Nome', accessorKey: 'name' },
@@ -9,6 +10,7 @@ export const columns = [
 	{ header: 'Pelagem', accessorKey: 'color' },
 	{ header: 'Sexo', accessorKey: 'gender' },
 	{ header: 'Castrado?', accessorKey: 'sterile' },
+	{ header: 'Tutor', accessorKey: 'tutor' },
 	{ header: 'Ações', accessorKey: 'actions' },
 ];
 
@@ -28,7 +30,7 @@ export const renderRow = (pet: PetsWithTutorAndBreed) => {
 				<span className='flex flex-col'>
 					<h3>{pet.name}</h3>
 					<p className='text-xs text-muted-foreground'>
-						{pet.breed.species.name} - {pet.breed.name}
+						{pet.breed.specie.name} - {pet.breed.name}
 					</p>
 				</span>
 			</TableCell>
@@ -36,7 +38,10 @@ export const renderRow = (pet: PetsWithTutorAndBreed) => {
 			<TableCell>{pet.color}</TableCell>
 			<TableCell>{pet.gender === 'male' ? 'Macho' : 'Fêmea'}</TableCell>
 			<TableCell>{pet.sterile ? 'Sim' : 'Não'}</TableCell>
-			<TableCell></TableCell>
+			<TableCell>{pet.tutor.user.name}</TableCell>
+			<TableCell>
+				<EditPetButton pet={pet} />
+			</TableCell>
 		</TableRow>
 	);
 };
