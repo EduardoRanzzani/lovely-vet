@@ -11,6 +11,7 @@ import AddPetButton from './add-pet-button';
 import { BreedsWithSpecies } from '@/api/schema/breeds.schema';
 import { Species } from '@/api/schema/species.schema';
 import { CustomerWithUser } from '@/api/schema/customers.schema';
+import { useUser } from '@clerk/nextjs';
 
 interface PetsListClientProps {
 	pets: Promise<PaginatedData<PetsWithTutorAndBreed>>;
@@ -25,6 +26,9 @@ const PetsListClient = ({
 	breeds,
 	customers,
 }: PetsListClientProps) => {
+	const { user } = useUser();
+	const role = user?.publicMetadata?.role as string;
+
 	const petsResolved = use(pets);
 	const searchParams = useSearchParams();
 
@@ -39,7 +43,13 @@ const PetsListClient = ({
 			<div className='flex flex-col lg:flex-row items-center justify-between gap-4'>
 				<SearchInput />
 
-				<AddPetButton species={species} breeds={breeds} customers={customers} />
+				{['admin', 'doctor'].includes(role) && (
+					<AddPetButton
+						species={species}
+						breeds={breeds}
+						customers={customers}
+					/>
+				)}
 			</div>
 
 			<TableComponent

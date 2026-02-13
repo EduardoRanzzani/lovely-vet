@@ -10,7 +10,7 @@ import {
 	usersTable,
 } from '@/db/schema';
 import { currentUser } from '@clerk/nextjs/server';
-import { asc, countDistinct, eq, ilike, or, sql } from 'drizzle-orm';
+import { and, asc, countDistinct, eq, ilike, or, sql } from 'drizzle-orm';
 import { PaginatedData } from '../config/consts';
 import {
 	CreatePetWithTutorAndBreedSchema,
@@ -26,18 +26,34 @@ export const getPetsPaginated = async (
 	const clerkUser = await currentUser();
 	if (!clerkUser) throw new Error('Usuário não autenticado');
 
+	const databaseUser = await db.query.usersTable.findFirst({
+		where: eq(usersTable.clerkUserId, clerkUser.id),
+	});
+	if (!databaseUser) throw new Error('Usuário não encontrado');
+
 	const offset = (page - 1) * limit;
 
-	const filterCondition = search
-		? or(
+	const conditions = [];
+
+	if (databaseUser.role === 'customer') {
+		conditions.push(eq(usersTable.id, databaseUser.id));
+	}
+
+	if (search) {
+		conditions.push(
+			or(
 				ilike(petsTable.name, `%${search}%`),
 				ilike(breedsTable.name, `%${search}%`),
 				ilike(speciesTable.name, `%${search}%`),
 				ilike(usersTable.name, `%${search}%`),
 				ilike(petsTable.status, `%${search}%`),
 				ilike(petsTable.color, `%${search}%`),
-			)
-		: undefined;
+			),
+		);
+	}
+
+	const filterCondition =
+		conditions.length > 0 ? and(...conditions) : undefined;
 
 	const data = await db
 		.select({
@@ -53,7 +69,7 @@ export const getPetsPaginated = async (
 		.leftJoin(customersTable, eq(ownersToPetsTable.clientId, customersTable.id))
 		.leftJoin(usersTable, eq(customersTable.userId, usersTable.id))
 		.where(filterCondition)
-		.groupBy(petsTable.id, breedsTable.id, speciesTable.id) // Incluído speciesTable no group by
+		.groupBy(petsTable.id, breedsTable.id, speciesTable.id)
 		.limit(limit)
 		.offset(offset)
 		.orderBy(asc(petsTable.name));

@@ -67,10 +67,8 @@ export async function POST(req: Request) {
 					)?.email_address ?? data.email_addresses[0]?.email_address;
 
 				const role =
-					(data.public_metadata.role as
-						| 'admin'
-						| 'veterinarian'
-						| 'customer') ?? 'customer';
+					(data.public_metadata.role as 'admin' | 'doctor' | 'customer') ??
+					'customer';
 
 				userResponse = await db.insert(usersTable).values({
 					name: `${data.first_name} ${data.last_name}`.trim(),
@@ -90,10 +88,8 @@ export async function POST(req: Request) {
 					)?.email_address ?? data.email_addresses[0]?.email_address;
 
 				const role =
-					(data.public_metadata.role as
-						| 'admin'
-						| 'veterinarian'
-						| 'customer') ?? 'customer';
+					(data.public_metadata.role as 'admin' | 'doctor' | 'customer') ??
+					'customer';
 
 				userResponse = await db
 					.update(usersTable)

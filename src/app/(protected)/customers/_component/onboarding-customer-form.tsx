@@ -8,6 +8,7 @@ import {
 } from '@/api/schema/customers.schema';
 import InputForm from '@/components/form/input-form';
 import InputFormMask from '@/components/form/input-form-mask';
+import SelectForm from '@/components/form/select-form';
 import { Button } from '@/components/ui/button';
 import {
 	Dialog,
@@ -25,22 +26,13 @@ import { toast } from 'sonner';
 
 const OnboardingCustomerFormDialog = ({ isOpen }: { isOpen: boolean }) => {
 	const {
+		control,
 		register,
 		handleSubmit,
 		setValue,
 		formState: { errors },
 	} = useForm<OnboardingCustomerSchema>({
 		resolver: zodResolver(onboardingCustomerSchema),
-		defaultValues: {
-			phone: '',
-			cpf: '',
-			postalCode: '',
-			addressNumber: '',
-			address: '',
-			neighborhood: '',
-			city: '',
-			state: '',
-		},
 	});
 
 	const handlePostalCodeChange = async (postalCode: string) => {
@@ -54,6 +46,7 @@ const OnboardingCustomerFormDialog = ({ isOpen }: { isOpen: boolean }) => {
 	const resetForm = () => {
 		setValue('phone', '');
 		setValue('cpf', '');
+		setValue('sex', 'male');
 		setValue('postalCode', '');
 		setValue('address', '');
 		setValue('addressNumber', '');
@@ -80,6 +73,8 @@ const OnboardingCustomerFormDialog = ({ isOpen }: { isOpen: boolean }) => {
 		handleCreateCustomer(data);
 	};
 
+	console.log({ errors });
+
 	return (
 		<Dialog open={isOpen}>
 			<DialogContent
@@ -103,27 +98,49 @@ const OnboardingCustomerFormDialog = ({ isOpen }: { isOpen: boolean }) => {
 					<span className='flex gap-4'>
 						<InputFormMask
 							label='Telefone:'
-							register={register}
+							control={control}
 							error={errors.phone?.message}
 							format='(##) #####-####'
 							mask='x'
 							name='phone'
+							className='w-[33%]'
 						/>
 
 						<InputFormMask
 							label='CPF:'
-							register={register}
+							control={control}
 							error={errors.cpf?.message}
 							format='###.###.###-##'
 							mask='x'
 							name='cpf'
+							className='w-[33%]'
+						/>
+
+						<SelectForm
+							label='Sexo:'
+							control={control}
+							error={errors.sex?.message}
+							name='sex'
+							options={[
+								{
+									value: 'male',
+									label: 'Masculino',
+									key: 'male',
+								},
+								{
+									value: 'female',
+									label: 'Feminino',
+									key: 'female',
+								},
+							]}
+							className='w-[33%]'
 						/>
 					</span>
 
 					<span className='flex gap-4'>
 						<InputFormMask
 							label='CEP:'
-							register={register}
+							control={control}
 							error={errors.postalCode?.message}
 							format='#####-###'
 							mask='x'

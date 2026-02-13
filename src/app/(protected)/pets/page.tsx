@@ -1,4 +1,7 @@
+import { getBreeds } from '@/api/actions/breeds.actions';
+import { getCustomers } from '@/api/actions/customers.actions';
 import { getPetsPaginated } from '@/api/actions/pets.actions';
+import { getSpecies } from '@/api/actions/species.actions';
 import { MAX_PAGE_SIZE } from '@/api/config/consts';
 import {
 	PageContainer,
@@ -9,9 +12,6 @@ import {
 	PageTitle,
 } from '@/components/shared/page-container';
 import PetsListClient from './_components/pets-list';
-import { getBreeds } from '@/api/actions/breeds.actions';
-import { getSpecies } from '@/api/actions/species.actions';
-import { getCustomers } from '@/api/actions/customers.actions';
 
 interface PetsPageProps {
 	searchParams: Promise<{ page?: string; filter?: string; keyword?: string }>;
