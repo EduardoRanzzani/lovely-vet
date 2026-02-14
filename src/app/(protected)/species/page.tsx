@@ -1,3 +1,5 @@
+import { getSpeciesPaginated } from '@/api/actions/species.actions';
+import { MAX_PAGE_SIZE } from '@/api/config/consts';
 import {
 	PageContainer,
 	PageContent,
@@ -6,6 +8,7 @@ import {
 	PageHeaderContent,
 	PageTitle,
 } from '@/components/shared/page-container';
+import SpeciesListClient from './_components/species-list';
 
 interface SpeciesPageProps {
 	searchParams: Promise<{ page?: string; filter?: string; keyword?: string }>;
@@ -16,7 +19,7 @@ const SpeciesPage = async ({ searchParams }: SpeciesPageProps) => {
 	const page = Number(params.page) || 1;
 	const filter = params.filter || '';
 
-	console.log(page, filter);
+	const dataPromise = getSpeciesPaginated(page, MAX_PAGE_SIZE, filter);
 
 	return (
 		<PageContainer>
@@ -30,7 +33,7 @@ const SpeciesPage = async ({ searchParams }: SpeciesPageProps) => {
 			</PageHeader>
 
 			<PageContent>
-				<h1>Hello World!</h1>
+				<SpeciesListClient species={dataPromise} />
 			</PageContent>
 		</PageContainer>
 	);

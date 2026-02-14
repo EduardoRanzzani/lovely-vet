@@ -22,11 +22,11 @@ export const getPetsPaginated = async (
 	limit: number,
 	search?: string,
 ): Promise<PaginatedData<PetsWithTutorAndBreed>> => {
-	const clerkUser = await currentUser();
-	if (!clerkUser) throw new Error('Usuário não autenticado');
+	const authenticatedUser = await currentUser();
+	if (!authenticatedUser) throw new Error('Usuário não autenticado');
 
 	const databaseUser = await db.query.usersTable.findFirst({
-		where: eq(usersTable.clerkUserId, clerkUser.id),
+		where: eq(usersTable.clerkUserId, authenticatedUser.id),
 		with: { customer: true },
 	});
 
@@ -102,8 +102,8 @@ export const getPetsPaginated = async (
 };
 
 export const upsertPet = async (data: CreatePetWithTutorAndBreedSchema) => {
-	const clerkUser = await currentUser();
-	if (!clerkUser) throw new Error('Usuário não autenticado');
+	const authenticatedUser = await currentUser();
+	if (!authenticatedUser) throw new Error('Usuário não autenticado');
 
 	if (data.id) {
 		console.log('update');

@@ -14,11 +14,11 @@ import {
 import { createNewClerkUser } from './clerk.actions';
 
 export const onboardingCustomer = async (data: OnboardingCustomerSchema) => {
-	const clerkUser = await currentUser();
-	if (!clerkUser) throw new Error('Usuário não autenticado');
+	const authenticatedUser = await currentUser();
+	if (!authenticatedUser) throw new Error('Usuário não autenticado');
 
 	const databaseUser = await db.query.usersTable.findFirst({
-		where: eq(usersTable.clerkUserId, clerkUser.id),
+		where: eq(usersTable.clerkUserId, authenticatedUser.id),
 	});
 	if (!databaseUser) throw new Error('Usuário não cadastrado no sistema');
 
@@ -42,22 +42,22 @@ export const onboardingCustomer = async (data: OnboardingCustomerSchema) => {
 export const getCustomersPaginated = async (
 	page: number = 1,
 	limit: number = 20,
-	filter?: string,
+	search?: string,
 ): Promise<PaginatedData<CustomerWithUser>> => {
-	const clerkUser = await currentUser();
-	if (!clerkUser) throw new Error('Usuário não autenticado');
+	const authenticatedUser = await currentUser();
+	if (!authenticatedUser) throw new Error('Usuário não autenticado');
 
 	const offset = (page - 1) * limit;
 
 	// 1. Construir a condição de filtro
 	// Buscamos no nome do usuário (tabela user) ou no CPF do cliente
-	const filterCondition = filter
+	const filterCondition = search
 		? or(
-				ilike(usersTable.name, `%${filter}%`),
-				ilike(customersTable.email, `%${filter}%`),
-				ilike(customersTable.cpf, `%${filter}%`),
-				ilike(customersTable.phone, `%${filter}%`),
-				ilike(customersTable.address, `%${filter}%`),
+				ilike(usersTable.name, `%${search}%`),
+				ilike(customersTable.email, `%${search}%`),
+				ilike(customersTable.cpf, `%${search}%`),
+				ilike(customersTable.phone, `%${search}%`),
+				ilike(customersTable.address, `%${search}%`),
 			)
 		: undefined;
 
@@ -181,8 +181,8 @@ export const upsertCustomer = async (data: CreateCustomerWithUserSchema) => {
 };
 
 export const getCustomers = async (): Promise<CustomerWithUser[]> => {
-	const clerkUser = await currentUser();
-	if (!clerkUser) throw new Error('Usuário não autenticado');
+	const authenticatedUser = await currentUser();
+	if (!authenticatedUser) throw new Error('Usuário não autenticado');
 
 	// Usando select tradicional para permitir o join e a ordenação por outra tabela
 	const customers = await db

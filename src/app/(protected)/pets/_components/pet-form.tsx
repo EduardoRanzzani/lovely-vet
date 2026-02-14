@@ -10,7 +10,7 @@ import {
 	CreatePetWithTutorAndBreedSchema,
 	PetsWithTutorAndBreed,
 } from '@/api/schema/pets.schema';
-import { Species } from '@/api/schema/species.schema';
+import { Specie } from '@/api/schema/species.schema';
 import InputForm from '@/components/form/input-form';
 import SelectForm from '@/components/form/select-form';
 import { Button } from '@/components/ui/button';
@@ -37,7 +37,7 @@ interface PetFormClientProps {
 const PetFormClient = ({ pet, onSuccess }: PetFormClientProps) => {
 	const [filteredBreeds, setFilteredBreeds] = useState<BreedsWithSpecies[]>([]);
 	const [breeds, setBreeds] = useState<BreedsWithSpecies[]>([]);
-	const [species, setSpecies] = useState<Species[]>([]);
+	const [species, setSpecies] = useState<Specie[]>([]);
 	const [customers, setCustomers] = useState<CustomerWithUser[]>([]);
 
 	const {
