@@ -7,8 +7,15 @@ const isWebhookRoute = createRouteMatcher(['/api/webhooks/clerk']);
 
 // 2. Mapeamento de permissões baseado no seu Sidebar
 const rolePermissions = {
-	admin: ['/dashboard', '/doctors', '/pets', '/customers', '/breeds'],
-	doctor: ['/dashboard', '/pets', '/customers', '/breeds'],
+	admin: [
+		'/dashboard',
+		'/doctors',
+		'/pets',
+		'/customers',
+		'/breeds',
+		'/species',
+	],
+	doctor: ['/dashboard', '/pets', '/customers', '/breeds', '/species'],
 	customer: ['/dashboard', '/pets'],
 };
 

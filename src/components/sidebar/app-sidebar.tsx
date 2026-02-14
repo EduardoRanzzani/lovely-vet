@@ -72,6 +72,12 @@ const AppSidebar = () => {
 
 	const settings: sidebarItems[] = [
 		{
+			title: 'Cadastro de Espécies',
+			url: '/species',
+			icon: CogIcon,
+			roles: ['admin', 'doctor'],
+		},
+		{
 			title: 'Cadastro de Raças',
 			url: '/breeds',
 			icon: CogIcon,
