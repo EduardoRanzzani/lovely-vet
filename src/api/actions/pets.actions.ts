@@ -9,13 +9,13 @@ import {
 	usersTable,
 } from '@/db/schema';
 import { currentUser } from '@clerk/nextjs/server';
-import { and, asc, countDistinct, eq, ilike, or, sql } from 'drizzle-orm';
+import { and, asc, countDistinct, eq, ilike, or } from 'drizzle-orm';
+import { revalidatePath } from 'next/cache';
 import { PaginatedData } from '../config/consts';
 import {
 	CreatePetWithTutorAndBreedSchema,
 	PetsWithTutorAndBreed,
 } from '../schema/pets.schema';
-import { revalidatePath } from 'next/cache';
 
 export const getPetsPaginated = async (
 	page: number,
@@ -120,7 +120,7 @@ export const createPet = async (data: CreatePetWithTutorAndBreedSchema) => {
 		.values({
 			name: data.name,
 			birthDate: data.birthDate,
-			specieId: data.speciesId,
+			specieId: data.specieId,
 			breedId: data.breedId,
 			customerId: data.tutorId, // Agora o tutor é salvo diretamente aqui
 			sterile: data.sterile === 'true',

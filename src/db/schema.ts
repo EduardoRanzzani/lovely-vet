@@ -90,14 +90,24 @@ export const customersTable = pgTable('customers', {
 export const speciesTable = pgTable('species', {
 	id: uuid('id').primaryKey().defaultRandom().notNull(),
 	name: text('name').notNull().unique(), // e.g., "Canine", "Feline"
+	createdAt: timestamp('created_at').defaultNow().notNull(),
+	updatedAt: timestamp('updated_at')
+		.defaultNow()
+		.$onUpdate(() => new Date())
+		.notNull(),
 });
 
 export const breedsTable = pgTable('breeds', {
 	id: uuid('id').primaryKey().defaultRandom().notNull(),
 	name: text('name').notNull(),
-	speciesId: uuid('species_id')
+	specieId: uuid('specie_id')
 		.notNull()
 		.references(() => speciesTable.id, { onDelete: 'cascade' }),
+	createdAt: timestamp('created_at').defaultNow().notNull(),
+	updatedAt: timestamp('updated_at')
+		.defaultNow()
+		.$onUpdate(() => new Date())
+		.notNull(),
 });
 
 export const petsTable = pgTable('pets', {
@@ -120,6 +130,11 @@ export const petsTable = pgTable('pets', {
 	weight: text('weight'),
 	status: petStatusEnum('status').default('alive').notNull(),
 	observations: text('observations'),
+	createdAt: timestamp('created_at').defaultNow().notNull(),
+	updatedAt: timestamp('updated_at')
+		.defaultNow()
+		.$onUpdate(() => new Date())
+		.notNull(),
 });
 
 export const servicesTable = pgTable('services', {
@@ -127,6 +142,11 @@ export const servicesTable = pgTable('services', {
 	name: text('name').notNull(),
 	priceInCents: integer('price_in_cents').notNull(),
 	description: text('description'),
+	createdAt: timestamp('created_at').defaultNow().notNull(),
+	updatedAt: timestamp('updated_at')
+		.defaultNow()
+		.$onUpdate(() => new Date())
+		.notNull(),
 });
 
 export const appointmentsTable = pgTable('appointments', {
@@ -145,6 +165,10 @@ export const appointmentsTable = pgTable('appointments', {
 	totalPriceInCents: integer('total_price_in_cents').notNull(), // Preço fixado no momento do agendamento
 	notes: text('notes'),
 	createdAt: timestamp('created_at').defaultNow().notNull(),
+	updatedAt: timestamp('updated_at')
+		.defaultNow()
+		.$onUpdate(() => new Date())
+		.notNull(),
 });
 
 // Relations
@@ -196,7 +220,7 @@ export const petsRelations = relations(petsTable, ({ one, many }) => ({
 
 export const breedsRelations = relations(breedsTable, ({ one, many }) => ({
 	specie: one(speciesTable, {
-		fields: [breedsTable.speciesId],
+		fields: [breedsTable.specieId],
 		references: [speciesTable.id],
 	}),
 	pets: many(petsTable),

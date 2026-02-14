@@ -39,7 +39,7 @@ export const renderRow = (pet: PetsWithTutorAndBreed) => {
 			<TableCell>{pet.gender === 'male' ? 'Macho' : 'Fêmea'}</TableCell>
 			<TableCell>{pet.sterile ? 'Sim' : 'Não'}</TableCell>
 			<TableCell>{pet.tutor.user.name}</TableCell>
-			<TableCell>
+			<TableCell className='w-20'>
 				<EditPetButton pet={pet} />
 			</TableCell>
 		</TableRow>
@@ -49,19 +49,23 @@ export const renderRow = (pet: PetsWithTutorAndBreed) => {
 export const renderMobile = (pet: PetsWithTutorAndBreed) => {
 	return (
 		<div key={pet.id} className='flex flex-col gap-4'>
-			<div className='flex gap-4'>
-				<Avatar className='h-9 w-9 rounded-full' draggable={false}>
-					{pet.photo ? (
-						<AvatarImage src={pet.photo} alt={pet.name} />
-					) : (
-						<AvatarFallback className='rounded-full'>LV</AvatarFallback>
-					)}
-				</Avatar>
+			<div className='flex gap-4 items-center justify-between'>
+				<span className='flex gap-4'>
+					<Avatar className='h-9 w-9 rounded-full' draggable={false}>
+						{pet.photo ? (
+							<AvatarImage src={pet.photo} alt={pet.name} />
+						) : (
+							<AvatarFallback className='rounded-full'>LV</AvatarFallback>
+						)}
+					</Avatar>
 
-				<span className='flex flex-col'>
-					<h3>{pet.name}</h3>
-					<p className='text-xs text-muted-foreground'>{pet.breed.name}</p>
+					<span className='flex flex-col'>
+						<h3>{pet.name}</h3>
+						<p className='text-xs text-muted-foreground'>{pet.breed.name}</p>
+					</span>
 				</span>
+
+				<EditPetButton pet={pet} />
 			</div>
 		</div>
 	);

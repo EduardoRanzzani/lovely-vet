@@ -1,6 +1,7 @@
 import { Specie } from '@/api/schema/species.schema';
 import { TableCell, TableRow } from '@/components/ui/table';
 import EditSpecieButton from './edit-specie-button';
+import { Edit } from 'lucide-react';
 
 export const columns = [
 	{ header: 'Descrição', accessorKey: 'name' },
@@ -20,8 +21,9 @@ export const renderRow = (specie: Specie) => {
 
 export const renderMobile = (specie: Specie) => {
 	return (
-		<div key={specie.id}>
+		<div key={specie.id} className='flex items-center justify-between'>
 			<h3>{specie.name}</h3>
+			<EditSpecieButton specie={specie} />
 		</div>
 	);
 };

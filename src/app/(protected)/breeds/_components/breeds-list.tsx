@@ -1,21 +1,21 @@
 'use client';
 
 import { MAX_PAGE_SIZE, PaginatedData } from '@/api/config/consts';
-import { Specie } from '@/api/schema/species.schema';
+import { BreedsWithSpecies } from '@/api/schema/breeds.schema';
 import SearchInput from '@/components/list/search-input';
 import TableComponent from '@/components/list/table-component';
 import { handleNavigation } from '@/lib/utils';
 import { useSearchParams } from 'next/navigation';
 import { use } from 'react';
-import AddSpecieButton from './add-specie-button';
-import { columns, renderMobile, renderRow } from './species-table-props';
+import AddBreedButton from './add-breed-button';
+import { columns, renderMobile, renderRow } from './breeds-table-props';
 
-interface SpeciesListClientProps {
-	species: Promise<PaginatedData<Specie>>;
+interface BreedsListClientProps {
+	breeds: Promise<PaginatedData<BreedsWithSpecies>>;
 }
 
-const SpeciesListClient = ({ species }: SpeciesListClientProps) => {
-	const speciesResolved = use(species);
+const BreedsListClient = ({ breeds }: BreedsListClientProps) => {
+	const breedsResolved = use(breeds);
 	const searchParams = useSearchParams();
 
 	const handlePageChange = (page: number) => {
@@ -29,7 +29,7 @@ const SpeciesListClient = ({ species }: SpeciesListClientProps) => {
 			<div className='flex flex-col lg:flex-row items-center justify-between gap-4'>
 				<SearchInput />
 
-				<AddSpecieButton />
+				<AddBreedButton />
 			</div>
 
 			<TableComponent
@@ -37,14 +37,15 @@ const SpeciesListClient = ({ species }: SpeciesListClientProps) => {
 				columns={columns}
 				renderRow={renderRow}
 				renderMobile={renderMobile}
-				data={speciesResolved?.data}
-				currentPage={speciesResolved?.metadata.currentPage}
-				totalPages={speciesResolved?.metadata.pageCount}
-				totalElements={speciesResolved?.metadata.totalCount}
+				data={breedsResolved?.data}
+				currentPage={breedsResolved?.metadata.currentPage}
+				totalPages={breedsResolved?.metadata.pageCount}
+				totalElements={breedsResolved?.metadata.totalCount}
 				pageSize={MAX_PAGE_SIZE}
 				onPageChange={handlePageChange}
 			/>
 		</div>
 	);
 };
-export default SpeciesListClient;
+
+export default BreedsListClient;

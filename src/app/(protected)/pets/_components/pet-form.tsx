@@ -52,7 +52,7 @@ const PetFormClient = ({ pet, onSuccess }: PetFormClientProps) => {
 		defaultValues: {
 			name: pet?.name || '',
 			birthDate: pet?.birthDate || new Date().toISOString().split('T')[0],
-			speciesId: pet?.breed?.speciesId || '',
+			specieId: pet?.breed?.specieId || '',
 			breedId: pet?.breed?.id || '',
 			gender: pet?.gender || 'male',
 			sterile: pet?.sterile ? 'true' : 'false',
@@ -81,13 +81,13 @@ const PetFormClient = ({ pet, onSuccess }: PetFormClientProps) => {
 			if (pet) {
 				// Filtra as raças para que o Select de Raça mostre as opções certas
 				setFilteredBreeds(
-					breedsData.filter((b) => b.speciesId === pet.breed.speciesId),
+					breedsData.filter((b) => b.specieId === pet.breed.specieId),
 				);
 
 				// Força o reset do formulário com os dados do pet
 				if (pet) {
 					setFilteredBreeds(
-						breedsData.filter((b) => b.speciesId === pet.breed.speciesId),
+						breedsData.filter((b) => b.specieId === pet.breed.specieId),
 					);
 
 					reset({
@@ -95,7 +95,7 @@ const PetFormClient = ({ pet, onSuccess }: PetFormClientProps) => {
 						name: pet.name,
 						birthDate: pet.birthDate,
 						tutorId: pet.customerId, // Mapeando customerId do banco para tutorId do form
-						speciesId: pet.breed.speciesId,
+						specieId: pet.breed.specieId,
 						breedId: pet.breed.id,
 						gender: pet.gender as 'male' | 'female',
 						sterile: pet.sterile ? 'true' : 'false',
@@ -127,8 +127,8 @@ const PetFormClient = ({ pet, onSuccess }: PetFormClientProps) => {
 	});
 
 	useEffect(() => {
-		if (pet?.breed?.speciesId) {
-			handleSpeciesChange(pet.breed.speciesId);
+		if (pet?.breed?.specieId) {
+			handleSpeciesChange(pet.breed.specieId);
 		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [pet]);
@@ -136,7 +136,7 @@ const PetFormClient = ({ pet, onSuccess }: PetFormClientProps) => {
 	const handleSpeciesChange = (
 		specieId: string | number | (string | number)[],
 	) => {
-		setFilteredBreeds(breeds.filter((breed) => breed.speciesId === specieId));
+		setFilteredBreeds(breeds.filter((breed) => breed.specieId === specieId));
 	};
 
 	const formSubmit = (data: CreatePetWithTutorAndBreedSchema) => {
@@ -177,7 +177,7 @@ const PetFormClient = ({ pet, onSuccess }: PetFormClientProps) => {
 						register={register}
 						name='birthDate'
 						error={errors.birthDate?.message}
-						className='w-1/3'
+						className='w-full lg:w-1/3'
 					/>
 
 					<SelectForm
@@ -197,7 +197,7 @@ const PetFormClient = ({ pet, onSuccess }: PetFormClientProps) => {
 								key: 'female',
 							},
 						]}
-						className='w-1/3'
+						className='w-full lg:w-1/3'
 					/>
 
 					<SelectForm
@@ -217,23 +217,23 @@ const PetFormClient = ({ pet, onSuccess }: PetFormClientProps) => {
 								key: 'false',
 							},
 						]}
-						className='w-1/3'
+						className='w-full lg:w-1/3'
 					/>
 				</div>
 
 				<div className='flex flex-col lg:flex-row items-center gap-2 w-full'>
 					<SelectForm
 						label='Espécie:'
-						name='speciesId'
+						name='specieId'
 						control={control}
-						error={errors.speciesId?.message}
+						error={errors.specieId?.message}
 						onSelect={(selectedId) => handleSpeciesChange(selectedId)}
 						options={species.map((specie) => ({
 							value: specie.id,
 							label: specie.name,
 							key: specie.id,
 						}))}
-						className='w-1/4'
+						className='w-full lg:w-1/4'
 					/>
 
 					<SelectForm
@@ -246,7 +246,7 @@ const PetFormClient = ({ pet, onSuccess }: PetFormClientProps) => {
 							label: breed.name,
 							key: breed.id,
 						}))}
-						className='w-2/4'
+						className='w-full lg:w-2/4'
 					/>
 
 					<InputForm
@@ -254,7 +254,7 @@ const PetFormClient = ({ pet, onSuccess }: PetFormClientProps) => {
 						register={register}
 						name='weight'
 						error={errors.weight?.message}
-						className='w-1/4'
+						className='w-full lg:w-1/4'
 					/>
 				</div>
 
@@ -264,7 +264,7 @@ const PetFormClient = ({ pet, onSuccess }: PetFormClientProps) => {
 						register={register}
 						name='color'
 						error={errors.color?.message}
-						className='w-1/3'
+						className='w-full lg:w-1/3'
 					/>
 
 					<SelectForm
@@ -277,7 +277,7 @@ const PetFormClient = ({ pet, onSuccess }: PetFormClientProps) => {
 							label: customer.user.name,
 							key: customer.id,
 						}))}
-						className='w-2/3'
+						className='w-full lg:w-2/3'
 					/>
 				</div>
 

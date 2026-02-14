@@ -1,3 +1,5 @@
+import { getBreedsPaginated } from '@/api/actions/breeds.actions';
+import { MAX_PAGE_SIZE } from '@/api/config/consts';
 import {
 	PageContainer,
 	PageContent,
@@ -6,6 +8,7 @@ import {
 	PageHeaderContent,
 	PageTitle,
 } from '@/components/shared/page-container';
+import BreedsListClient from './_components/breeds-list';
 
 interface BreedsPageProps {
 	searchParams: Promise<{ page?: string; filter?: string; keyword?: string }>;
@@ -16,7 +19,7 @@ const BreedsPage = async ({ searchParams }: BreedsPageProps) => {
 	const page = Number(params.page) || 1;
 	const filter = params.filter || '';
 
-	console.log(page, filter);
+	const dataPromise = getBreedsPaginated(page, MAX_PAGE_SIZE, filter);
 
 	return (
 		<PageContainer>
@@ -30,7 +33,7 @@ const BreedsPage = async ({ searchParams }: BreedsPageProps) => {
 			</PageHeader>
 
 			<PageContent>
-				<h1>Hello World!</h1>
+				<BreedsListClient breeds={dataPromise} />
 			</PageContent>
 		</PageContainer>
 	);

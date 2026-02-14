@@ -41,7 +41,7 @@ export const renderRow = (customer: CustomerWithUser) => {
 			<TableCell>{customer.cpf}</TableCell>
 			<TableCell>{customer.phone}</TableCell>
 			<TableCell>{fullAddress}</TableCell>
-			<TableCell>
+			<TableCell className='w-20'>
 				<EditCustomerButton customer={customer} />
 			</TableCell>
 		</TableRow>

@@ -25,7 +25,7 @@ export const createPetWithTutorAndBreedSchema = z.object({
 	tutorId: z.uuid({ message: 'Tutor é obrigatório' }).nonempty({
 		message: 'Tutor é obrigatório',
 	}),
-	speciesId: z
+	specieId: z
 		.uuid({ message: 'Espécie é obrigatório' })
 		.nonempty({ message: 'Espécie é obrigatório' }),
 	breedId: z
