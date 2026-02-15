@@ -8,7 +8,7 @@ import {
 	CustomerWithUser,
 } from '@/api/schema/customers.schema';
 import InputForm from '@/components/form/input-form';
-import InputFormMask from '@/components/form/input-form-mask';
+import InputFormMask from '@/components/form/input-mask-form';
 import SelectForm from '@/components/form/select-form';
 import { Button } from '@/components/ui/button';
 import {

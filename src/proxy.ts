@@ -14,8 +14,16 @@ const rolePermissions = {
 		'/customers',
 		'/breeds',
 		'/species',
+		'/services',
 	],
-	doctor: ['/dashboard', '/pets', '/customers', '/breeds', '/species'],
+	doctor: [
+		'/dashboard',
+		'/pets',
+		'/customers',
+		'/breeds',
+		'/species',
+		'/services',
+	],
 	customer: ['/dashboard', '/pets'],
 };
 

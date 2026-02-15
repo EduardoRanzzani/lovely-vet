@@ -83,6 +83,12 @@ const AppSidebar = () => {
 			icon: CogIcon,
 			roles: ['admin', 'doctor'],
 		},
+		{
+			title: 'Cadastro de Serviços',
+			url: '/services',
+			icon: CogIcon,
+			roles: ['admin', 'doctor'],
+		},
 	];
 
 	return (
