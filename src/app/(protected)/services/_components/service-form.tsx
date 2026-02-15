@@ -39,7 +39,7 @@ const ServiceFormClient = ({ service, onSuccess }: ServiceFormClientProps) => {
 		defaultValues: {
 			name: service?.name || '',
 			description: service?.description || '',
-			priceInCents: service?.priceInCents || 0,
+			price: service?.priceInCents ? service.priceInCents / 100 : 0,
 		},
 	});
 
@@ -61,7 +61,7 @@ const ServiceFormClient = ({ service, onSuccess }: ServiceFormClientProps) => {
 	});
 
 	const formSubmit = (data: CreateServiceSchema) => {
-		handleUpsertService(data);
+		handleUpsertService({ ...data, price: data.price * 100 });
 	};
 
 	return (
@@ -96,8 +96,8 @@ const ServiceFormClient = ({ service, onSuccess }: ServiceFormClientProps) => {
 				<MoneyInputForm
 					label='Valor:'
 					control={control}
-					name='priceInCents'
-					error={errors.priceInCents?.message}
+					name='price'
+					error={errors.price?.message}
 				/>
 
 				<InputForm

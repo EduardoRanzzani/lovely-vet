@@ -4,9 +4,9 @@ import { db } from '@/db';
 import { servicesTable } from '@/db/schema';
 import { currentUser } from '@clerk/nextjs/server';
 import { count, ilike, or } from 'drizzle-orm';
+import { revalidatePath } from 'next/cache';
 import { PaginatedData } from '../config/consts';
 import { CreateServiceSchema, Services } from '../schema/services.schema';
-import { revalidatePath } from 'next/cache';
 
 export const getServicesPaginated = async (
 	page: number,
@@ -22,7 +22,6 @@ export const getServicesPaginated = async (
 		? or(
 				ilike(servicesTable.name, `%${search}%`),
 				ilike(servicesTable.description, `%${search}%`),
-				ilike(servicesTable.priceInCents, `%${search}%`),
 			)
 		: undefined;
 
@@ -74,14 +73,14 @@ export const upsertService = async (data: CreateServiceSchema) => {
 			id: data.id,
 			name: data.name,
 			description: data.description,
-			priceInCents: data.priceInCents,
+			priceInCents: data.price,
 		})
 		.onConflictDoUpdate({
 			target: servicesTable.id,
 			set: {
 				name: data.name,
 				description: data.description,
-				priceInCents: data.priceInCents,
+				priceInCents: data.price,
 			},
 		})
 		.returning();
