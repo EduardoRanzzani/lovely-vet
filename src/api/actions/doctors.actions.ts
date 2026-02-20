@@ -124,8 +124,8 @@ export const upsertDoctor = async (data: CreateDoctorWithUserSchema) => {
 			specialty: data.specialty,
 			availableFromWeekDay: Number(data.availableFromWeekDay),
 			availableToWeekDay: Number(data.availableToWeekDay),
-			availableFromTime: Number(data.availableFromTime.replace(':', '')), // Ex: "08:00" -> 800
-			availableToTime: Number(data.availableToTime.replace(':', '')),
+			availableFromTime: data.availableFromTime,
+			availableToTime: data.availableToTime,
 		})
 		.onConflictDoUpdate({
 			target: doctorsTable.cpf,
@@ -137,8 +137,8 @@ export const upsertDoctor = async (data: CreateDoctorWithUserSchema) => {
 				specialty: data.specialty,
 				availableFromWeekDay: Number(data.availableFromWeekDay),
 				availableToWeekDay: Number(data.availableToWeekDay),
-				availableFromTime: Number(data.availableFromTime.replace(':', '')),
-				availableToTime: Number(data.availableToTime.replace(':', '')),
+				availableFromTime: data.availableFromTime,
+				availableToTime: data.availableToTime,
 				updatedAt: new Date(),
 			},
 		});

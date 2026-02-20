@@ -65,55 +65,6 @@ const PetFormClient = ({
 		},
 	});
 
-	// Dentro do PetFormClient
-	// useEffect(() => {
-	// 	const fetchData = async () => {
-	// 		// Busca todos em paralelo para ganhar performance
-	// 		const [speciesData, breedsData, customersData] = await Promise.all([
-	// 			getSpecies(),
-	// 			getBreeds(),
-	// 			getCustomers(),
-	// 		]);
-
-	// 		setSpecies(speciesData);
-	// 		setBreeds(breedsData);
-	// 		setCustomers(customersData);
-
-	// 		// Se estiver editando um pet, agora que as listas existem,
-	// 		// garantimos que o formulário tenha os valores e os filtros corretos.
-	// 		if (pet) {
-	// 			// Filtra as raças para que o Select de Raça mostre as opções certas
-	// 			setFilteredBreeds(
-	// 				breedsData.filter((b) => b.specieId === pet.breed.specieId),
-	// 			);
-
-	// 			// Força o reset do formulário com os dados do pet
-	// 			if (pet) {
-	// 				setFilteredBreeds(
-	// 					breedsData.filter((b) => b.specieId === pet.breed.specieId),
-	// 				);
-
-	// 				reset({
-	// 					id: pet.id,
-	// 					name: pet.name,
-	// 					birthDate: pet.birthDate,
-	// 					tutorId: pet.customerId, // Mapeando customerId do banco para tutorId do form
-	// 					specieId: pet.breed.specieId,
-	// 					breedId: pet.breed.id,
-	// 					gender: pet.gender as 'male' | 'female',
-	// 					sterile: pet.sterile ? 'true' : 'false',
-	// 					color: pet.color ?? '', // Se for null no banco, vira string vazia
-	// 					weight: pet.weight ?? '', // Se for null no banco, vira string vazia
-	// 					photo: pet.photo ?? undefined, // Converte null para undefined
-	// 					observations: pet.observations ?? '',
-	// 				});
-	// 			}
-	// 		}
-	// 	};
-
-	// 	fetchData();
-	// }, [pet, reset]); // Removi o setValue individual para usar o reset completo
-
 	const { mutate: handleUpsertCustomer, isPending } = useMutation({
 		mutationFn: upsertPet,
 		onSuccess: () => {
