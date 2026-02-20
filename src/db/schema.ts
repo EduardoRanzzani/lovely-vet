@@ -2,6 +2,7 @@ import { relations } from 'drizzle-orm';
 import {
 	boolean,
 	date,
+	index,
 	integer,
 	pgEnum,
 	pgTable,
@@ -10,7 +11,6 @@ import {
 	time,
 	timestamp,
 	uuid,
-	index,
 } from 'drizzle-orm/pg-core';
 
 // --- ENUMS ---
@@ -79,6 +79,7 @@ export const customersTable = pgTable('customers', {
 		.references(() => usersTable.id, { onDelete: 'cascade' }),
 	phone: text('phone').notNull(),
 	cpf: text('cpf').notNull().unique(),
+	gender: sexEnum('gender').notNull(),
 	postalCode: text('postal_code').notNull(),
 	address: text('address').notNull(),
 	addressNumber: text('address_number').notNull().default('S/N'),
