@@ -1,4 +1,5 @@
 'use client';
+
 import { MAX_PAGE_SIZE, PaginatedData } from '@/api/config/consts';
 import { BreedsWithSpecies } from '@/api/schema/breeds.schema';
 import { CustomerWithUser } from '@/api/schema/customers.schema';
@@ -8,6 +9,7 @@ import { calculateAge, getInitials } from '@/api/util';
 import SearchInput from '@/components/list/search-input';
 import TableComponent from '@/components/list/table-component';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge'; // Opcional: para status ou gênero
 import { TableCell, TableRow } from '@/components/ui/table';
 import { handleNavigation } from '@/lib/utils';
 import { useSearchParams } from 'next/navigation';
@@ -37,10 +39,16 @@ const PetsListClient = ({
 		handleNavigation(params);
 	};
 
+	// Formata gramas para Kg com uma casa decimal
+	const formatWeight = (grams: number | null) => {
+		if (!grams) return '-';
+		return `${(grams / 1000).toFixed(1)} kg`;
+	};
+
 	const columns = [
 		{ header: 'Nome', accessorKey: 'name' },
 		{ header: 'Idade', accessorKey: 'age' },
-		{ header: 'Pelagem', accessorKey: 'color' },
+		{ header: 'Peso', accessorKey: 'weight' },
 		{ header: 'Sexo', accessorKey: 'gender' },
 		{ header: 'Castrado?', accessorKey: 'sterile' },
 		{ header: 'Tutor', accessorKey: 'tutor' },
@@ -49,29 +57,51 @@ const PetsListClient = ({
 
 	const renderRow = (pet: PetsWithTutorAndBreed) => {
 		return (
-			<TableRow key={pet.id}>
+			<TableRow key={pet.id} className='group'>
 				<TableCell className='flex gap-4 items-center'>
-					<Avatar className='h-10 w-10 rounded-full'>
+					<Avatar className='h-10 w-10 border'>
 						{pet.photo ? (
 							<AvatarImage src={pet.photo} alt={pet.name} />
 						) : (
-							<AvatarFallback className='rounded-full'>
+							<AvatarFallback className='bg-primary/10 text-primary'>
 								{getInitials(pet.name)}
 							</AvatarFallback>
 						)}
 					</Avatar>
 					<span className='flex flex-col'>
-						<h3>{pet.name}</h3>
+						<span className='font-medium'>{pet.name}</span>
 						<p className='text-xs text-muted-foreground'>
-							{pet.breed.specie.name} - {pet.breed.name}
+							{pet.breed.specie.name} • {pet.breed.name}
 						</p>
 					</span>
 				</TableCell>
+
+				{/* birthDate é string "YYYY-MM-DD", calculateAge precisa lidar com isso */}
 				<TableCell>{calculateAge(new Date(pet.birthDate))}</TableCell>
-				<TableCell>{pet.color}</TableCell>
-				<TableCell>{pet.gender === 'male' ? 'Macho' : 'Fêmea'}</TableCell>
-				<TableCell>{pet.sterile ? 'Sim' : 'Não'}</TableCell>
-				<TableCell>{pet.tutor.user.name}</TableCell>
+
+				<TableCell>{formatWeight(pet.weightInGrams)}</TableCell>
+
+				<TableCell>
+					<span className='text-sm'>
+						{pet.gender === 'male' ? 'Macho' : 'Fêmea'}
+					</span>
+				</TableCell>
+
+				<TableCell>
+					<Badge variant={pet.sterile ? 'default' : 'outline'}>
+						{pet.sterile ? 'Sim' : 'Não'}
+					</Badge>
+				</TableCell>
+
+				<TableCell>
+					<div className='flex flex-col'>
+						<span className='text-sm font-medium'>{pet.tutor.user.name}</span>
+						<span className='text-[10px] text-muted-foreground uppercase'>
+							{pet.tutor.city} - {pet.tutor.state}
+						</span>
+					</div>
+				</TableCell>
+
 				<TableCell className='w-20'>
 					<EditPetButton
 						pet={pet}
@@ -86,24 +116,37 @@ const PetsListClient = ({
 
 	const renderMobile = (pet: PetsWithTutorAndBreed) => {
 		return (
-			<div key={pet.id} className='flex flex-col gap-4'>
+			<div
+				key={pet.id}
+				className='p-4 border rounded-lg bg-card text-card-foreground shadow-sm'
+			>
 				<div className='flex gap-4 items-center justify-between'>
-					<span className='flex gap-4'>
-						<Avatar className='h-9 w-9 rounded-full' draggable={false}>
+					<div className='flex gap-3'>
+						<Avatar className='h-12 w-12 border'>
 							{pet.photo ? (
 								<AvatarImage src={pet.photo} alt={pet.name} />
 							) : (
-								<AvatarFallback className='rounded-full'>LV</AvatarFallback>
+								<AvatarFallback>{getInitials(pet.name)}</AvatarFallback>
 							)}
 						</Avatar>
 
-						<span className='flex flex-col'>
-							<h3>{pet.name}</h3>
-							<p className='text-xs text-muted-foreground'>{pet.breed.name}</p>
-						</span>
-					</span>
+						<div className='flex flex-col'>
+							<h3 className='font-bold'>{pet.name}</h3>
+							<p className='text-xs text-muted-foreground'>
+								{pet.breed.name} ({pet.gender === 'male' ? 'M' : 'F'})
+							</p>
+							<p className='text-xs font-medium mt-1'>
+								Tutor: {pet.tutor.user.name}
+							</p>
+						</div>
+					</div>
 
-					{/* <EditPetButton pet={pet} /> */}
+					<EditPetButton
+						pet={pet}
+						species={species}
+						breeds={breeds}
+						customers={customers}
+					/>
 				</div>
 			</div>
 		);
@@ -113,7 +156,6 @@ const PetsListClient = ({
 		<div className='flex flex-col w-full gap-4'>
 			<div className='flex flex-col lg:flex-row items-center justify-between gap-4'>
 				<SearchInput />
-
 				<AddPetButton species={species} breeds={breeds} customers={customers} />
 			</div>
 

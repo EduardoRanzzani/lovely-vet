@@ -15,6 +15,7 @@ const rolePermissions = {
 		'/breeds',
 		'/species',
 		'/services',
+		'/appointments',
 	],
 	doctor: [
 		'/dashboard',
@@ -23,8 +24,9 @@ const rolePermissions = {
 		'/breeds',
 		'/species',
 		'/services',
+		'/appointments',
 	],
-	customer: ['/dashboard', '/pets'],
+	customer: ['/dashboard', '/pets', '/appointments'],
 };
 
 export default clerkMiddleware(async (auth, req) => {

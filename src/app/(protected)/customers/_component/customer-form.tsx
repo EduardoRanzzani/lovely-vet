@@ -19,9 +19,10 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from '@/components/ui/dialog';
+import { Form } from '@/components/ui/form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useMutation } from '@tanstack/react-query';
 import { BanIcon, Loader2Icon, SaveIcon } from 'lucide-react';
+import { useAction } from 'next-safe-action/hooks';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 
@@ -34,14 +35,7 @@ const CustomerFormClient = ({
 	customer,
 	onSuccess,
 }: CustomerFormClientProps) => {
-	const {
-		register,
-		handleSubmit,
-		control,
-		setValue,
-		reset,
-		formState: { errors },
-	} = useForm<CreateCustomerWithUserSchema>({
+	const form = useForm<CreateCustomerWithUserSchema>({
 		resolver: zodResolver(createCustomerWithUserSchema),
 		shouldUnregister: true,
 		defaultValues: {
@@ -62,35 +56,31 @@ const CustomerFormClient = ({
 
 	const handlePostalCodeChange = async (postalCode: string) => {
 		const fullAddress = await searchAddressByPostalCode(postalCode);
-		setValue('address', fullAddress.logradouro);
-		setValue('neighborhood', fullAddress.bairro);
-		setValue('city', fullAddress.localidade);
-		setValue('state', fullAddress.uf);
+		form.setValue('address', fullAddress.logradouro);
+		form.setValue('neighborhood', fullAddress.bairro);
+		form.setValue('city', fullAddress.localidade);
+		form.setValue('state', fullAddress.uf);
 	};
-
-	const { mutate: handleUpsertCustomer, isPending } = useMutation({
-		mutationFn: upsertCustomer,
-		onSuccess: () => {
-			toast.success(
-				customer
-					? 'Cliente atualizado com sucesso!'
-					: 'Cliente cadastrado com sucesso!',
-			);
-			reset();
-			onSuccess?.();
-		},
-		onError: (error) => {
-			toast.error('Erro ao salvar o cliente: ' + error.message);
-		},
-	});
 
 	const formSubmit = (data: CreateCustomerWithUserSchema) => {
-		handleUpsertCustomer({
+		upsertCustomerAction.execute({
 			...data,
 			id: customer?.id,
-			userId: customer?.user.clerkUserId || '',
+			userId: customer?.user?.clerkUserId || '',
 		});
 	};
+
+	const upsertCustomerAction = useAction(upsertCustomer, {
+		onSuccess: () => {
+			onSuccess?.();
+			toast.success('Cliente salvo com sucesso!');
+			form.reset();
+		},
+		onError: (err) => {
+			console.error({ err });
+			toast.error('Ocorreu um erro ao salvar o cliente!');
+		},
+	});
 
 	return (
 		<DialogContent
@@ -100,168 +90,169 @@ const CustomerFormClient = ({
 			showCloseButton={false}
 			className='max-w-lg'
 		>
-			<DialogHeader>
-				<DialogTitle>
-					{customer ? 'Atualizar Cliente' : 'Cadastrar Cliente'}
-				</DialogTitle>
-				<DialogDescription>
-					{customer
-						? 'Atualize as informações do cliente selecionado'
-						: 'Adicione um novo cliente ao sistema'}
-				</DialogDescription>
-			</DialogHeader>
+			<Form {...form}>
+				<form
+					id='registerForm'
+					onSubmit={form.handleSubmit(formSubmit)}
+					className='flex flex-col gap-2'
+				>
+					<DialogHeader>
+						<DialogTitle>
+							{customer ? 'Atualizar Cliente' : 'Cadastrar Cliente'}
+						</DialogTitle>
+						<DialogDescription>
+							{customer
+								? 'Atualize as informações do cliente selecionado'
+								: 'Adicione um novo cliente ao sistema'}
+						</DialogDescription>
+					</DialogHeader>
 
-			<form
-				id='registerForm'
-				onSubmit={handleSubmit(formSubmit)}
-				className='flex flex-col gap-2'
-			>
-				<input type='text' {...register('userId')} className='hidden' />
+					<input type='text' {...form.register('userId')} className='hidden' />
 
-				<InputForm
-					label='Nome:'
-					register={register}
-					name='name'
-					error={errors.name?.message}
-				/>
-
-				<InputForm
-					label='Email:'
-					register={register}
-					name='email'
-					error={errors.email?.message}
-				/>
-
-				<div className='flex flex-col lg:flex-row gap-2'>
-					<InputFormMask
-						label='Telefone:'
-						control={control}
-						error={errors.phone?.message}
-						format='(##) #####-####'
-						mask='x'
-						name='phone'
-						className='w-full lg:w-[33%]'
-					/>
-
-					<InputFormMask
-						label='CPF:'
-						control={control}
-						error={errors.cpf?.message}
-						format='###.###.###-##'
-						mask='x'
-						name='cpf'
-						className='w-full lg:w-[33%]'
-					/>
-
-					<SelectForm
-						label='Sexo:'
-						control={control}
-						error={errors.sex?.message}
-						name='sex'
-						options={[
-							{
-								value: 'male',
-								label: 'Masculino',
-								key: 'male',
-							},
-							{
-								value: 'female',
-								label: 'Feminino',
-								key: 'female',
-							},
-						]}
-						className='w-full lg:w-[33%]'
-					/>
-				</div>
-
-				<div className='flex flex-col lg:flex-row gap-2'>
-					<InputFormMask
-						label='CEP:'
-						control={control}
-						error={errors.postalCode?.message}
-						format='#####-###'
-						mask='x'
-						name='postalCode'
-						onBlur={(event) => handlePostalCodeChange(event.target.value)}
+					<InputForm
+						label='Nome:'
+						register={form.register}
+						name='name'
+						error={form.formState.errors.name?.message}
 					/>
 
 					<InputForm
-						label='Número:'
-						register={register}
-						error={errors.addressNumber?.message}
-						name='addressNumber'
-						type='number'
+						label='Email:'
+						register={form.register}
+						name='email'
+						error={form.formState.errors.email?.message}
 					/>
-				</div>
 
-				<InputForm
-					label='Endereço:'
-					register={register}
-					name='address'
-					error={errors.address?.message}
-					disabled
-				/>
+					<div className='flex flex-col lg:flex-row gap-2'>
+						<InputFormMask
+							label='Telefone:'
+							control={form.control}
+							error={form.formState.errors.phone?.message}
+							format='(##) #####-####'
+							mask='x'
+							name='phone'
+							className='w-full lg:w-[33%]'
+						/>
 
-				<InputForm
-					label='Bairro:'
-					register={register}
-					name='neighborhood'
-					error={errors.neighborhood?.message}
-					disabled
-				/>
+						<InputFormMask
+							label='CPF:'
+							control={form.control}
+							error={form.formState.errors.cpf?.message}
+							format='###.###.###-##'
+							mask='x'
+							name='cpf'
+							className='w-full lg:w-[33%]'
+						/>
 
-				<div className='flex flex-col lg:flex-row gap-2'>
+						<SelectForm
+							label='Sexo:'
+							control={form.control}
+							error={form.formState.errors.sex?.message}
+							name='sex'
+							options={[
+								{
+									value: 'male',
+									label: 'Masculino',
+									key: 'male',
+								},
+								{
+									value: 'female',
+									label: 'Feminino',
+									key: 'female',
+								},
+							]}
+							className='w-full lg:w-[33%]'
+						/>
+					</div>
+
+					<div className='flex flex-col lg:flex-row gap-2'>
+						<InputFormMask
+							label='CEP:'
+							control={form.control}
+							error={form.formState.errors.postalCode?.message}
+							format='#####-###'
+							mask='x'
+							name='postalCode'
+							onBlur={(event) => handlePostalCodeChange(event.target.value)}
+						/>
+
+						<InputForm
+							label='Número:'
+							register={form.register}
+							error={form.formState.errors.addressNumber?.message}
+							name='addressNumber'
+							type='number'
+						/>
+					</div>
+
 					<InputForm
-						label='Cidade:'
-						register={register}
-						name='city'
-						error={errors.city?.message}
+						label='Endereço:'
+						register={form.register}
+						name='address'
+						error={form.formState.errors.address?.message}
 						disabled
 					/>
 
 					<InputForm
-						label='Estado:'
-						register={register}
-						name='state'
-						error={errors.state?.message}
+						label='Bairro:'
+						register={form.register}
+						name='neighborhood'
+						error={form.formState.errors.neighborhood?.message}
 						disabled
 					/>
-				</div>
-			</form>
 
-			<DialogFooter>
-				<div className='flex flex-col lg:flex-row gap-4 w-full'>
-					<DialogClose asChild>
-						<Button
-							type='button'
-							variant={'destructive'}
-							onClick={() => {
-								if (!isPending) reset();
-							}}
-							className='flex-1'
-						>
-							<BanIcon />
-							Cancelar
-						</Button>
-					</DialogClose>
+					<div className='flex flex-col lg:flex-row gap-2'>
+						<InputForm
+							label='Cidade:'
+							register={form.register}
+							name='city'
+							error={form.formState.errors.city?.message}
+							disabled
+						/>
 
-					<Button
-						type='submit'
-						disabled={isPending}
-						form='registerForm'
-						className='flex-1'
-					>
-						{isPending ? (
-							<Loader2Icon className='h-5 w-5 animate-spin' />
-						) : (
-							<>
-								<SaveIcon className='mr-2 h-4 w-4' />
-								Salvar
-							</>
-						)}
-					</Button>
-				</div>
-			</DialogFooter>
+						<InputForm
+							label='Estado:'
+							register={form.register}
+							name='state'
+							error={form.formState.errors.state?.message}
+							disabled
+						/>
+					</div>
+
+					<DialogFooter>
+						<div className='flex flex-col lg:flex-row gap-4 w-full'>
+							<DialogClose asChild>
+								<Button
+									type='button'
+									variant={'destructive'}
+									onClick={() => {
+										if (!upsertCustomerAction.isPending) form.reset();
+									}}
+									className='flex-1'
+								>
+									<BanIcon />
+									Cancelar
+								</Button>
+							</DialogClose>
+
+							<Button
+								type='submit'
+								disabled={upsertCustomerAction.isPending}
+								className='flex-1'
+							>
+								{upsertCustomerAction.isPending ? (
+									<Loader2Icon className='h-5 w-5 animate-spin' />
+								) : (
+									<>
+										<SaveIcon className='mr-2 h-4 w-4' />
+										Salvar
+									</>
+								)}
+							</Button>
+						</div>
+					</DialogFooter>
+				</form>
+			</Form>
 		</DialogContent>
 	);
 };

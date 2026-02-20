@@ -8,6 +8,13 @@ import { revalidatePath } from 'next/cache';
 import { PaginatedData } from '../config/consts';
 import { CreateServiceSchema, Services } from '../schema/services.schema';
 
+export const getServices = async (): Promise<Services[]> => {
+	const authenticatedUser = await currentUser();
+	if (!authenticatedUser) throw new Error('Usuário não autenticado');
+
+	return await db.query.servicesTable.findMany();
+};
+
 export const getServicesPaginated = async (
 	page: number,
 	limit: number,

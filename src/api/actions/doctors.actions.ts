@@ -12,6 +12,27 @@ import {
 } from '../schema/doctors.schema';
 import { createNewClerkUser } from './clerk.actions';
 
+export const getDoctors = async (): Promise<DoctorsWithUser[]> => {
+	const authenticatedUser = await currentUser();
+	if (!authenticatedUser) throw new Error('Usuário não autenticado');
+
+	const data = await db
+		.select({
+			doctors: doctorsTable,
+			users: usersTable,
+		})
+		.from(doctorsTable)
+		.innerJoin(usersTable, sql`${doctorsTable.userId} = ${usersTable.id}`)
+		.orderBy(asc(usersTable.name));
+
+	const formattedData: DoctorsWithUser[] = data.map((row) => ({
+		...row.doctors,
+		user: row.users,
+	}));
+
+	return formattedData;
+};
+
 export const getDoctorsPaginated = async (
 	page: number = 1,
 	limit: number = MAX_PAGE_SIZE,

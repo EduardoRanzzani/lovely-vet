@@ -1,3 +1,5 @@
+'use server';
+
 import { db } from '@/db';
 import {
 	appointmentsTable,
@@ -9,7 +11,10 @@ import {
 import { currentUser } from '@clerk/nextjs/server';
 import { and, countDistinct, eq, ilike, or } from 'drizzle-orm';
 import { PaginatedData } from '../config/consts';
-import { AppointmentsWithPetAndServiceAndDoctor } from '../schema/appointments.schema';
+import {
+	AppointmentsWithPetAndServiceAndDoctor,
+	CreateAppointmentSchema,
+} from '../schema/appointments.schema';
 
 export const getAppointmentsPaginated = async (
 	page: number,
@@ -92,4 +97,8 @@ export const getAppointmentsPaginated = async (
 			limit,
 		},
 	};
+};
+
+export const upsertAppointment = async (data: CreateAppointmentSchema) => {
+	console.log('Data received in upsertAppointment:', data);
 };

@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/sidebar';
 import { useUser } from '@clerk/nextjs';
 import {
+	CalendarIcon,
 	ChevronRightIcon,
 	CogIcon,
 	LayoutDashboardIcon,
@@ -67,6 +68,12 @@ const AppSidebar = () => {
 			url: '/customers',
 			icon: UsersRoundIcon,
 			roles: ['admin', 'doctor'],
+		},
+		{
+			title: 'Agendamentos',
+			url: '/appointments',
+			icon: CalendarIcon,
+			roles: ['admin', 'doctor', 'customer'],
 		},
 	];
 

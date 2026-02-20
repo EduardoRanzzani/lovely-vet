@@ -7,6 +7,7 @@ import {
 } from '@/db/schema';
 import z from 'zod';
 
+// Tipo para leitura (Select)
 export type PetsWithTutorAndBreed = typeof petsTable.$inferSelect & {
 	breed: typeof breedsTable.$inferSelect & {
 		specie: typeof speciesTable.$inferSelect;
@@ -16,31 +17,35 @@ export type PetsWithTutorAndBreed = typeof petsTable.$inferSelect & {
 	};
 };
 
+// Schema mestre com transformação
 export const createPetWithTutorAndBreedSchema = z.object({
 	id: z.uuid().optional(),
-	name: z.string().nonempty({ message: 'Nome é obrigatório' }),
-	birthDate: z
+	name: z.string().min(1, 'Nome é obrigatório'),
+	birthDate: z.string().min(1, 'Data de nascimento é obrigatória'),
+	tutorId: z.string().uuid('Tutor inválido'),
+	specieId: z.string().uuid('Espécie inválida'),
+	breedId: z.string().uuid('Raça inválida'),
+	sterile: z.string().min(1, 'Informe se o pet é castrado'),
+	photo: z.string().optional().nullable(),
+	color: z.string().min(1, 'Pelagem é obrigatória'),
+	gender: z.enum(['male', 'female']).default('female'),
+	// O formulário lida com STRING, o banco recebe NUMBER (gramas)
+	weight: z
 		.string()
-		.nonempty({ message: 'Data de nascimento é obrigatória' }),
-	tutorId: z.uuid({ message: 'Tutor é obrigatório' }).nonempty({
-		message: 'Tutor é obrigatório',
-	}),
-	specieId: z
-		.uuid({ message: 'Espécie é obrigatório' })
-		.nonempty({ message: 'Espécie é obrigatório' }),
-	breedId: z
-		.uuid({ message: 'Raça é obrigatório' })
-		.nonempty({ message: 'Raça é obrigatório' }),
-	sterile: z.string().nonempty({ message: 'Informe se o pet é cadastrado' }),
-	photo: z.string().optional(),
-	color: z.string().nonempty({ message: 'Pelagem é obrigatória' }),
-	gender: z
-		.enum(['male', 'female'])
-		.nonoptional({ message: 'Gênero é obrigatório' }),
-	weight: z.string().nonempty({ message: 'Peso é obrigatório' }),
-	observations: z.string().optional(),
+		.min(1, 'Peso é obrigatório')
+		.transform((val) => {
+			const parsed = parseFloat(val.replace(',', '.'));
+			return isNaN(parsed) ? 0 : Math.round(parsed * 1000);
+		}),
+	observations: z.string().optional().nullable(),
 });
 
-export type CreatePetWithTutorAndBreedSchema = z.infer<
+// Tipo do dado de SAÍDA (o que vai para o Server Action)
+export type CreatePetWithTutorAndBreedSchema = z.output<
+	typeof createPetWithTutorAndBreedSchema
+>;
+
+// Tipo do dado de ENTRADA (o que o React Hook Form usa internamente)
+export type CreatePetWithTutorAndBreedInput = z.input<
 	typeof createPetWithTutorAndBreedSchema
 >;

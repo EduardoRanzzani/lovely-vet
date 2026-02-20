@@ -55,7 +55,7 @@ const InputForm = <T extends FieldValues>({
 				)}
 			/>
 
-			{error && <p className='text-xs text-destructive mt-1'>{error}</p>}
+			{error && <p className='text-xs text-destructive -mt-1'>{error}</p>}
 		</Field>
 	);
 };
