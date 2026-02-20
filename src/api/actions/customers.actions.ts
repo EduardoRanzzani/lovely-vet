@@ -112,10 +112,10 @@ export const upsertCustomer = async (data: CreateCustomerWithUserSchema) => {
 
 	let clerkUserId;
 
-	console.log('update? ', !!data.clerkUserId);
+	console.log('update? ', !!data.userId);
 
-	if (data.clerkUserId) {
-		clerkUserId = data.clerkUserId;
+	if (data.userId) {
+		clerkUserId = data.userId;
 	} else {
 		const newClerkUser = await createNewClerkUser(data);
 		clerkUserId = newClerkUser.id;

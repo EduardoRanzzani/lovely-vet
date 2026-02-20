@@ -4,6 +4,7 @@ import { createClerkClient } from '@clerk/nextjs/server';
 import { CLERK_ERROR_MESSAGES } from '../config/consts';
 import { CreateCustomerWithUserSchema } from '../schema/customers.schema';
 import { generateUsername } from '../util';
+import { CreateDoctorWithUserSchema } from '../schema/doctors.schema';
 
 const clerkClient = createClerkClient({
 	secretKey: process.env.CLERK_SECRET_KEY,
@@ -30,7 +31,7 @@ const isClerkAPIError = (error: unknown): error is ClerkResponseError => {
 };
 
 export const createNewClerkUser = async (
-	data: CreateCustomerWithUserSchema,
+	data: CreateCustomerWithUserSchema | CreateDoctorWithUserSchema,
 ) => {
 	try {
 		const firstName = data.name.substring(0, data.name.indexOf(' '));

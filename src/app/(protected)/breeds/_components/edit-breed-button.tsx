@@ -4,12 +4,14 @@ import { Dialog, DialogTrigger } from '@/components/ui/dialog';
 import { PencilIcon } from 'lucide-react';
 import { useState } from 'react';
 import BreedFormClient from './breed-form';
+import { Specie } from '@/api/schema/species.schema';
 
 interface EditBreedButtonProps {
 	breed: BreedsWithSpecies;
+	species: Specie[];
 }
 
-const EditBreedButton = ({ breed }: EditBreedButtonProps) => {
+const EditBreedButton = ({ breed, species }: EditBreedButtonProps) => {
 	const [isOpen, setIsOpen] = useState<boolean>(false);
 
 	return (
@@ -21,7 +23,11 @@ const EditBreedButton = ({ breed }: EditBreedButtonProps) => {
 			</DialogTrigger>
 
 			{isOpen && (
-				<BreedFormClient breed={breed} onSuccess={() => setIsOpen(false)} />
+				<BreedFormClient
+					breed={breed}
+					onSuccess={() => setIsOpen(false)}
+					species={species}
+				/>
 			)}
 		</Dialog>
 	);

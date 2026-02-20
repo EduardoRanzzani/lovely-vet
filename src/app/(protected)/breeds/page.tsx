@@ -9,6 +9,7 @@ import {
 	PageTitle,
 } from '@/components/shared/page-container';
 import BreedsListClient from './_components/breeds-list';
+import { getSpecies } from '@/api/actions/species.actions';
 
 interface BreedsPageProps {
 	searchParams: Promise<{ page?: string; filter?: string; keyword?: string }>;
@@ -20,6 +21,8 @@ const BreedsPage = async ({ searchParams }: BreedsPageProps) => {
 	const filter = params.filter || '';
 
 	const dataPromise = getBreedsPaginated(page, MAX_PAGE_SIZE, filter);
+
+	const species = await getSpecies();
 
 	return (
 		<PageContainer>
@@ -33,7 +36,7 @@ const BreedsPage = async ({ searchParams }: BreedsPageProps) => {
 			</PageHeader>
 
 			<PageContent>
-				<BreedsListClient breeds={dataPromise} />
+				<BreedsListClient breeds={dataPromise} species={species} />
 			</PageContent>
 		</PageContainer>
 	);

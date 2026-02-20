@@ -1,10 +1,9 @@
-import { Toaster } from '@/components/ui/sonner';
+import { ClientProviders } from '@/components/shared/client-providers';
 import { ptBR } from '@clerk/localizations';
 import { ClerkProvider } from '@clerk/nextjs';
 import type { Metadata } from 'next';
 import { Poppins } from 'next/font/google';
 import './globals.css';
-import { ClientProviders } from '@/components/shared/client-providers';
 
 const poppins = Poppins({
 	variable: '--font-poppins',
@@ -23,7 +22,7 @@ export default function RootLayout({
 	children: React.ReactNode;
 }>) {
 	return (
-		<ClerkProvider localization={ptBR}>
+		<ClerkProvider localization={ptBR} dynamic>
 			<html lang='pt-BR' suppressHydrationWarning>
 				<body className={`${poppins.className} antialiased`}>
 					<ClientProviders>{children}</ClientProviders>

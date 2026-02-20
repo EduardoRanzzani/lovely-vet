@@ -45,7 +45,7 @@ const CustomerFormClient = ({
 		resolver: zodResolver(createCustomerWithUserSchema),
 		shouldUnregister: true,
 		defaultValues: {
-			clerkUserId: customer?.user?.clerkUserId || '',
+			userId: customer?.user?.clerkUserId || '',
 			name: customer?.user?.name || '',
 			email: customer?.user?.email || '',
 			phone: customer?.phone || '',
@@ -89,7 +89,7 @@ const CustomerFormClient = ({
 		handleUpsertCustomer({
 			...data,
 			id: customer?.id,
-			clerkUserId: customer?.user.clerkUserId || '',
+			userId: customer?.user.clerkUserId || '',
 		});
 	};
 
@@ -117,7 +117,7 @@ const CustomerFormClient = ({
 				onSubmit={handleSubmit(formSubmit)}
 				className='flex flex-col gap-2'
 			>
-				<input type='text' {...register('clerkUserId')} className='hidden' />
+				<input type='text' {...register('userId')} className='hidden' />
 
 				<InputForm
 					label='Nome:'

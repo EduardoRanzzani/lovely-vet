@@ -58,6 +58,10 @@ export const doctorsTable = pgTable('doctors', {
 	licenseNumber: text('licence_number').notNull(),
 	licenseState: text('license_state').notNull(),
 	specialty: text('specialty'),
+	availableFromWeekDay: integer('available_from_week_day').notNull(),
+	availableToWeekDay: integer('available_to_week_day').notNull(),
+	availableFromTime: text('available_from_time').notNull(),
+	availableToTime: text('available_to_time').notNull(),
 	createdAt: timestamp('created_at').defaultNow().notNull(),
 	updatedAt: timestamp('updated_at')
 		.defaultNow()
@@ -157,7 +161,7 @@ export const appointmentsTable = pgTable('appointments', {
 	serviceId: uuid('service_id')
 		.notNull()
 		.references(() => servicesTable.id),
-	veterinarianId: uuid('veterinarian_id')
+	doctorId: uuid('doctor_id')
 		.notNull()
 		.references(() => doctorsTable.id),
 	scheduledAt: timestamp('scheduled_at').notNull(),
@@ -246,7 +250,7 @@ export const appointmentsRelations = relations(
 			references: [servicesTable.id],
 		}),
 		doctor: one(doctorsTable, {
-			fields: [appointmentsTable.veterinarianId],
+			fields: [appointmentsTable.doctorId],
 			references: [doctorsTable.id],
 		}),
 	}),

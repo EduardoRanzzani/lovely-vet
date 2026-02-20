@@ -1,11 +1,20 @@
 'use client';
+import { BreedsWithSpecies } from '@/api/schema/breeds.schema';
+import { CustomerWithUser } from '@/api/schema/customers.schema';
+import { Specie } from '@/api/schema/species.schema';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogTrigger } from '@/components/ui/dialog';
 import { PlusIcon } from 'lucide-react';
 import { useState } from 'react';
 import PetFormClient from './pet-form';
 
-const AddPetButton = () => {
+interface AddPetButtonProps {
+	species: Specie[];
+	breeds: BreedsWithSpecies[];
+	customers: CustomerWithUser[];
+}
+
+const AddPetButton = ({ species, breeds, customers }: AddPetButtonProps) => {
 	const [isOpen, setIsOpen] = useState<boolean>(false);
 
 	return (
@@ -17,7 +26,12 @@ const AddPetButton = () => {
 				</Button>
 			</DialogTrigger>
 
-			<PetFormClient onSuccess={() => setIsOpen(false)} />
+			<PetFormClient
+				species={species}
+				breeds={breeds}
+				customers={customers}
+				onSuccess={() => setIsOpen(false)}
+			/>
 		</Dialog>
 	);
 };

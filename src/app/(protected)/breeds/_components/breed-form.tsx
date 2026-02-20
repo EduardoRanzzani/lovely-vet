@@ -1,5 +1,4 @@
 import { upsertBreed } from '@/api/actions/breeds.actions';
-import { getSpecies } from '@/api/actions/species.actions';
 import {
 	BreedsWithSpecies,
 	createBreedSchema,
@@ -20,18 +19,20 @@ import {
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
 import { BanIcon, Loader2Icon, SaveIcon } from 'lucide-react';
-import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 
 interface BreedFormClientProps {
 	breed?: BreedsWithSpecies;
+	species: Specie[];
 	onSuccess?: () => void;
 }
 
-const BreedFormClient = ({ breed, onSuccess }: BreedFormClientProps) => {
-	const [species, setSpecies] = useState<Specie[]>([]);
-
+const BreedFormClient = ({
+	breed,
+	species,
+	onSuccess,
+}: BreedFormClientProps) => {
 	const {
 		control,
 		register,
@@ -46,23 +47,6 @@ const BreedFormClient = ({ breed, onSuccess }: BreedFormClientProps) => {
 			specieId: breed?.specieId || '',
 		},
 	});
-
-	useEffect(() => {
-		const fetchData = async () => {
-			const species = await getSpecies();
-			setSpecies(species);
-		};
-
-		if (breed) {
-			reset({
-				id: breed.id,
-				name: breed.name,
-				specieId: breed.specieId,
-			});
-		}
-
-		fetchData();
-	}, [breed, reset]);
 
 	const { mutate: handleUpsertBreed, isPending } = useMutation({
 		mutationFn: upsertBreed,

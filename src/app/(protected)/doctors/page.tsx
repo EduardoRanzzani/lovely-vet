@@ -1,3 +1,5 @@
+import { getDoctorsPaginated } from '@/api/actions/doctors.actions';
+import { MAX_PAGE_SIZE } from '@/api/config/consts';
 import {
 	PageContainer,
 	PageContent,
@@ -6,7 +8,7 @@ import {
 	PageHeaderContent,
 	PageTitle,
 } from '@/components/shared/page-container';
-import React from 'react';
+import DoctorsListClient from './_components/doctors-list';
 
 interface DoctorsPageProps {
 	searchParams: Promise<{ page?: string; filter?: string; keyword?: string }>;
@@ -17,7 +19,7 @@ const DoctorsPage = async ({ searchParams }: DoctorsPageProps) => {
 	const page = Number(params.page) || 1;
 	const filter = params.filter || '';
 
-	console.log(page, filter);
+	const dataPromise = getDoctorsPaginated(page, MAX_PAGE_SIZE, filter);
 
 	return (
 		<PageContainer>
@@ -31,7 +33,7 @@ const DoctorsPage = async ({ searchParams }: DoctorsPageProps) => {
 			</PageHeader>
 
 			<PageContent>
-				<h1>Hello World!</h1>
+				<DoctorsListClient doctors={dataPromise} />
 			</PageContent>
 		</PageContainer>
 	);

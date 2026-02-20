@@ -1,4 +1,7 @@
+import { getBreeds } from '@/api/actions/breeds.actions';
+import { getCustomers } from '@/api/actions/customers.actions';
 import { getPetsPaginated } from '@/api/actions/pets.actions';
+import { getSpecies } from '@/api/actions/species.actions';
 import { MAX_PAGE_SIZE } from '@/api/config/consts';
 import {
 	PageContainer,
@@ -20,6 +23,11 @@ const PetsPage = async ({ searchParams }: PetsPageProps) => {
 	const filter = params.filter || '';
 
 	const dataPromise = getPetsPaginated(page, MAX_PAGE_SIZE, filter);
+	const [species, breeds, customers] = await Promise.all([
+		getSpecies(),
+		getBreeds(),
+		getCustomers(),
+	]);
 
 	return (
 		<PageContainer>
@@ -33,7 +41,12 @@ const PetsPage = async ({ searchParams }: PetsPageProps) => {
 			</PageHeader>
 
 			<PageContent>
-				<PetsListClient pets={dataPromise} />
+				<PetsListClient
+					pets={dataPromise}
+					species={species}
+					breeds={breeds}
+					customers={customers}
+				/>
 			</PageContent>
 		</PageContainer>
 	);

@@ -1,15 +1,12 @@
-import { Specie } from '@/api/schema/species.schema';
+'use client';
+
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogTrigger } from '@/components/ui/dialog';
 import { PlusIcon } from 'lucide-react';
 import { useState } from 'react';
-import BreedFormClient from './breed-form';
+import DoctorFormClient from './doctor-form';
 
-interface AddBreedButtonProps {
-	species: Specie[];
-}
-
-const AddBreedButton = ({ species }: AddBreedButtonProps) => {
+const AddDoctorButton = () => {
 	const [isOpen, setIsOpen] = useState<boolean>(false);
 
 	return (
@@ -17,13 +14,13 @@ const AddBreedButton = ({ species }: AddBreedButtonProps) => {
 			<DialogTrigger asChild>
 				<Button className='w-full lg:w-60'>
 					<PlusIcon />
-					Adicionar Raça
+					Adicionar Veterinário
 				</Button>
 			</DialogTrigger>
 
-			<BreedFormClient species={species} onSuccess={() => setIsOpen(false)} />
+			<DoctorFormClient onSuccess={() => setIsOpen(false)} />
 		</Dialog>
 	);
 };
 
-export default AddBreedButton;
+export default AddDoctorButton;
