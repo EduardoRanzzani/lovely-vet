@@ -15,11 +15,8 @@ export type PaginatedData<T> = {
 export const searchAddressByPostalCode = async (
 	postalCode: string,
 ): Promise<ViaCepResponse> => {
-	console.log(postalCode);
-
 	const response = await fetch(`https://viacep.com.br/ws/${postalCode}/json`);
 	const data = await response.json();
-	console.log(data);
 	return data;
 };
 

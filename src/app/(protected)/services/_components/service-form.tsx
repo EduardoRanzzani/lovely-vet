@@ -55,7 +55,6 @@ const ServiceFormClient = ({ service, onSuccess }: ServiceFormClientProps) => {
 			onSuccess?.();
 		},
 		onError: (error) => {
-			console.log(error);
 			toast.error('Erro ao salvar o serviço: ' + error.message);
 		},
 	});

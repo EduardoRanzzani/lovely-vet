@@ -75,7 +75,6 @@ const PetFormClient = ({
 			onSuccess?.();
 		},
 		onError: (error) => {
-			console.log(error);
 			toast.error('Erro ao salvar o pet: ' + error.message);
 		},
 	});

@@ -56,8 +56,6 @@ export async function POST(req: Request) {
 
 		const eventType = evt.type;
 
-		console.log(eventType);
-
 		switch (eventType) {
 			case 'user.created': {
 				const data = evt.data as UserJSON;

@@ -80,7 +80,6 @@ const CustomerFormClient = ({
 			onSuccess?.();
 		},
 		onError: (error) => {
-			console.log(error);
 			toast.error('Erro ao salvar o cliente: ' + error.message);
 		},
 	});

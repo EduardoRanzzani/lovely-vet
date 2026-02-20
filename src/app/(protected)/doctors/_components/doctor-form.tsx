@@ -69,7 +69,6 @@ const DoctorFormClient = ({ doctor, onSuccess }: DoctorFormClientProps) => {
 			onSuccess?.();
 		},
 		onError: (error) => {
-			console.log(error);
 			toast.error('Erro ao salvar o Veterinário: ' + error.message);
 		},
 	});
@@ -81,8 +80,6 @@ const DoctorFormClient = ({ doctor, onSuccess }: DoctorFormClientProps) => {
 			userId: doctor?.user.clerkUserId || '',
 		});
 	};
-
-	console.log({ errors });
 
 	return (
 		<DialogContent

@@ -58,7 +58,6 @@ const BreedFormClient = ({
 			onSuccess?.();
 		},
 		onError: (error) => {
-			console.log(error);
 			toast.error('Erro ao salvar a raça: ' + error.message);
 		},
 	});

@@ -73,8 +73,6 @@ const OnboardingCustomerFormDialog = ({ isOpen }: { isOpen: boolean }) => {
 		handleCreateCustomer(data);
 	};
 
-	console.log({ errors });
-
 	return (
 		<Dialog open={isOpen}>
 			<DialogContent

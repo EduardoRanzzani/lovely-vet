@@ -51,7 +51,6 @@ const SpecieFormClient = ({ specie, onSuccess }: SpecieFormClientProps) => {
 			onSuccess?.();
 		},
 		onError: (error) => {
-			console.log(error);
 			toast.error('Erro ao salvar a espécie: ' + error.message);
 		},
 	});
