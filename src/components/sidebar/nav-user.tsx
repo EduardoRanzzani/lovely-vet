@@ -14,8 +14,8 @@ import {
 	SidebarMenuItem,
 	useSidebar,
 } from '@/components/ui/sidebar';
-import { useAuth } from '@clerk/nextjs';
-import { EllipsisVerticalIcon, LogOutIcon } from 'lucide-react';
+import { useAuth, useClerk } from '@clerk/nextjs';
+import { EllipsisVerticalIcon, LogOutIcon, UserIcon } from 'lucide-react';
 
 export type NavUserType = {
 	image: string;
@@ -30,6 +30,7 @@ interface NavUserProps {
 export function NavUser({ user }: NavUserProps) {
 	const { isMobile } = useSidebar();
 	const { signOut } = useAuth();
+	const { openUserProfile } = useClerk();
 
 	return (
 		<SidebarMenu>
@@ -79,7 +80,16 @@ export function NavUser({ user }: NavUserProps) {
 								</div>
 							</div>
 						</DropdownMenuLabel>
+
 						<DropdownMenuSeparator />
+
+						<DropdownMenuItem onClick={() => openUserProfile()}>
+							<UserIcon className='mr-2 size-4' />
+							<span>Meus Dados</span>
+						</DropdownMenuItem>
+
+						<DropdownMenuSeparator />
+
 						<DropdownMenuItem onClick={() => signOut()}>
 							<LogOutIcon />
 							Sair
