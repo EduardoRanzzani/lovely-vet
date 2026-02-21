@@ -55,8 +55,8 @@
 	--popover-foreground: var(--foreground);
 
 	/* 💚 Primário (verde menta) */
-	/*--primary: oklch(92.5% 0.084 155.995); /* #b9f7ce */
-	--primary: oklch(96.2% 0.044 156.743); /* #b9f7ce */
+	/* --primary: oklch(92.5% 0.084 155.995); #b9f7ce */
+	--primary: oklch(96.2% 0.044 156.743);
 	--primary-foreground: oklch(0.141 0.005 285.823);
 
 	/* 🔹 Secundário (um azul acinzentado suave) */

@@ -120,7 +120,6 @@ export const petsTable = pgTable('pets', {
 	id: uuid('id').primaryKey().defaultRandom(),
 	name: text('name').notNull(),
 	birthDate: date('birth_date').notNull(),
-	// Sem specieId aqui (pega-se via breedId para evitar inconsistência)
 	breedId: uuid('breed_id')
 		.notNull()
 		.references(() => breedsTable.id),

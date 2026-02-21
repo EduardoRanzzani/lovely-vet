@@ -3,7 +3,7 @@
 import { MAX_PAGE_SIZE, PaginatedData } from '@/api/config/consts';
 import { AppointmentsWithPetAndServiceAndDoctor } from '@/api/schema/appointments.schema';
 import { DoctorsWithUser } from '@/api/schema/doctors.schema';
-import { PetsWithTutorAndBreed } from '@/api/schema/pets.schema';
+import { PetWithTutorAndBreed } from '@/api/schema/pets.schema';
 import { Services } from '@/api/schema/services.schema';
 import SearchInput from '@/components/list/search-input';
 import TableComponent from '@/components/list/table-component';
@@ -16,7 +16,7 @@ import AddAppointmentButton from './add-appointment-button';
 interface AppointmentsListClientProps {
 	appointments: Promise<PaginatedData<AppointmentsWithPetAndServiceAndDoctor>>;
 	services: Services[];
-	pets: PetsWithTutorAndBreed[];
+	pets: PetWithTutorAndBreed[];
 	doctors: DoctorsWithUser[];
 }
 

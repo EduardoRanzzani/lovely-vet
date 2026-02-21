@@ -1,219 +1,3 @@
-// 'use client';
-
-// import { Check, ChevronsUpDown, X } from 'lucide-react';
-// import * as React from 'react';
-// import {
-// 	Control,
-// 	Controller,
-// 	FieldValues,
-// 	Path,
-// 	PathValue,
-// } from 'react-hook-form';
-
-// import { Badge } from '@/components/ui/badge';
-// import { Button } from '@/components/ui/button';
-// import {
-// 	Command,
-// 	CommandEmpty,
-// 	CommandGroup,
-// 	CommandInput,
-// 	CommandItem,
-// 	CommandList,
-// } from '@/components/ui/command';
-// import {
-// 	Popover,
-// 	PopoverContent,
-// 	PopoverTrigger,
-// } from '@/components/ui/popover';
-// import { cn } from '@/lib/utils';
-
-// // Tipo para as opções do select
-// export interface SelectOption {
-// 	value: string | number;
-// 	label: string;
-// 	group?: string;
-// }
-
-// interface SelectFormProps<T extends FieldValues> {
-// 	label: string;
-// 	options: SelectOption[];
-// 	name: Path<T>;
-// 	control: Control<T>;
-// 	error?: string;
-// 	required?: boolean;
-// 	placeholder?: string;
-// 	className?: string;
-// 	multiple?: boolean;
-// }
-
-// const SelectForm = <T extends FieldValues>({
-// 	label,
-// 	options,
-// 	name,
-// 	control,
-// 	error,
-// 	required,
-// 	placeholder = 'Selecione...',
-// 	className,
-// 	multiple = false,
-// }: SelectFormProps<T>) => {
-// 	const [open, setOpen] = React.useState(false);
-
-// 	// Tipo auxiliar para garantir que o TS não infira 'never'
-// 	type ValidValue = string | number;
-
-// 	// Agrupamento de opções memorizado
-// 	const groups = React.useMemo(() => {
-// 		return options.reduce(
-// 			(acc, option) => {
-// 				const groupName = option.group || 'Geral';
-// 				if (!acc[groupName]) acc[groupName] = [];
-// 				acc[groupName].push(option);
-// 				return acc;
-// 			},
-// 			{} as Record<string, SelectOption[]>,
-// 		);
-// 	}, [options]);
-
-// 	return (
-// 		<Controller
-// 			name={name}
-// 			control={control}
-// 			render={({ field }) => {
-// 				// Normalização segura: convertemos o valor do field para um array tipado
-// 				const currentValues: ValidValue[] = Array.isArray(field.value)
-// 					? (field.value as ValidValue[])
-// 					: field.value !== undefined &&
-// 						  field.value !== null &&
-// 						  field.value !== ''
-// 						? [field.value as ValidValue]
-// 						: [];
-
-// 				const handleSelect = (val: ValidValue) => {
-// 					if (multiple) {
-// 						const isSelected = currentValues.includes(val);
-// 						const newValue = isSelected
-// 							? currentValues.filter((v) => v !== val)
-// 							: [...currentValues, val];
-
-// 						field.onChange(newValue as PathValue<T, Path<T>>);
-// 					} else {
-// 						field.onChange(val as PathValue<T, Path<T>>);
-// 						setOpen(false);
-// 					}
-// 				};
-
-// 				const handleRemove = (val: ValidValue) => {
-// 					if (multiple) {
-// 						const newValue = currentValues.filter((v) => v !== val);
-// 						field.onChange(newValue as PathValue<T, Path<T>>);
-// 					} else {
-// 						field.onChange('' as PathValue<T, Path<T>>);
-// 					}
-// 				};
-
-// 				return (
-// 					<div className={cn('flex flex-col gap-1.5', className)}>
-// 						<label className='text-xs font-medium'>
-// 							{label} {required && <span className='text-red-500'>*</span>}
-// 						</label>
-
-// 						<Popover open={open} onOpenChange={setOpen}>
-// 							<PopoverTrigger asChild>
-// 								<Button
-// 									variant='outline'
-// 									role='combobox'
-// 									aria-expanded={open}
-// 									className={cn(
-// 										'w-full justify-between font-normal min-h-9 h-auto py-1.5 px-3 text-left',
-// 										currentValues.length === 0 && 'text-muted-foreground',
-// 										error && 'border-destructive',
-// 									)}
-// 								>
-// 									<div className='flex flex-wrap gap-1 items-center overflow-hidden'>
-// 										{currentValues.length > 0 ? (
-// 											multiple ? (
-// 												currentValues.map((val) => {
-// 													const option = options.find((o) => o.value === val);
-// 													return (
-// 														<Badge
-// 															key={val}
-// 															variant='secondary'
-// 															className='font-normal flex items-center gap-1 pr-1'
-// 														>
-// 															<span className='truncate max-w-[150px]'>
-// 																{option?.label ?? val}
-// 															</span>
-// 															<X
-// 																className='h-3 w-3 cursor-pointer text-muted-foreground hover:text-foreground shrink-0'
-// 																onClick={(e) => {
-// 																	e.stopPropagation();
-// 																	handleRemove(val);
-// 																}}
-// 															/>
-// 														</Badge>
-// 													);
-// 												})
-// 											) : (
-// 												(options.find((opt) => opt.value === field.value)
-// 													?.label ?? field.value)
-// 											)
-// 										) : (
-// 											<span>{placeholder}</span>
-// 										)}
-// 									</div>
-// 									<ChevronsUpDown className='ml-2 h-4 w-4 shrink-0 opacity-50' />
-// 								</Button>
-// 							</PopoverTrigger>
-// 							<PopoverContent
-// 								className='w-[--radix-popover-trigger-width] p-0'
-// 								align='start'
-// 							>
-// 								<Command>
-// 									<CommandInput
-// 										placeholder={`Buscar ${label.toLowerCase()}...`}
-// 									/>
-// 									<CommandList className='max-h-64 overflow-y-auto'>
-// 										<CommandEmpty>Nenhum resultado encontrado.</CommandEmpty>
-// 										{Object.entries(groups).map(([groupName, items]) => (
-// 											<CommandGroup key={groupName} heading={groupName}>
-// 												{items.map((option) => (
-// 													<CommandItem
-// 														key={option.value}
-// 														value={option.label}
-// 														onSelect={() => handleSelect(option.value)}
-// 													>
-// 														<div
-// 															className={cn(
-// 																'mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary',
-// 																currentValues.includes(option.value)
-// 																	? 'bg-primary text-primary-foreground'
-// 																	: 'opacity-50 [&_svg]:invisible',
-// 															)}
-// 														>
-// 															<Check className='h-4 w-4' />
-// 														</div>
-// 														<span>{option.label}</span>
-// 													</CommandItem>
-// 												))}
-// 											</CommandGroup>
-// 										))}
-// 									</CommandList>
-// 								</Command>
-// 							</PopoverContent>
-// 						</Popover>
-
-// 						{error && (
-// 							<p className='text-xs text-destructive mt-0.5'>{error}</p>
-// 						)}
-// 					</div>
-// 				);
-// 			}}
-// 		/>
-// 	);
-// };
-
-// export default SelectForm;
 'use client';
 
 import { Input } from '@/components/ui/input';
@@ -230,7 +14,7 @@ import {
 
 interface SelectOption {
 	key?: string;
-	value: string | number;
+	value: string | number | boolean;
 	label: string;
 }
 
@@ -244,7 +28,9 @@ interface SelectFormProps<T extends FieldValues> {
 	className?: string;
 	placeholder?: string;
 	multiple?: boolean;
-	onSelect?: (value: string | number | (string | number)[]) => void;
+	onSelect?: (
+		value: string | number | boolean | (string | number | boolean)[],
+	) => void;
 }
 
 const SelectForm = <T extends FieldValues>({
@@ -295,14 +81,14 @@ const SelectForm = <T extends FieldValues>({
 			name={name}
 			control={control}
 			render={({ field }) => {
-				const values: (string | number)[] = multiple
+				const values: (string | number | boolean)[] = multiple
 					? Array.isArray(field.value)
 						? field.value
 						: []
 					: field.value !== undefined &&
 						  field.value !== null &&
 						  field.value !== ''
-						? [field.value as string | number]
+						? [field.value as string | number | boolean]
 						: [];
 
 				const selectedLabels = options
@@ -314,13 +100,13 @@ const SelectForm = <T extends FieldValues>({
 					opt.label.toLowerCase().includes(search.toLowerCase()),
 				);
 
-				const handleSelect = (value: string | number) => {
+				const handleSelect = (value: string | number | boolean) => {
 					let newValue: PathValue<T, Path<T>>;
 
 					if (multiple) {
 						const currentValues = (
 							Array.isArray(field.value) ? field.value : []
-						) as (string | number)[];
+						) as (string | number | boolean)[];
 						const updatedArray = currentValues.includes(value)
 							? currentValues.filter((v) => v !== value)
 							: [...currentValues, value];
@@ -332,7 +118,13 @@ const SelectForm = <T extends FieldValues>({
 					}
 
 					field.onChange(newValue);
-					onSelect?.(newValue as string | number | (string | number)[]);
+					onSelect?.(
+						newValue as
+							| string
+							| number
+							| boolean
+							| (string | number | boolean)[],
+					);
 				};
 
 				return (
@@ -347,7 +139,6 @@ const SelectForm = <T extends FieldValues>({
 						<div
 							ref={triggerRef}
 							tabIndex={0}
-							role='combobox'
 							aria-expanded={open}
 							aria-haspopup='listbox'
 							onKeyDown={handleKeyDown}
@@ -395,7 +186,7 @@ const SelectForm = <T extends FieldValues>({
 								<div className='overflow-y-auto flex-1'>
 									{filteredOptions.map((opt) => (
 										<div
-											key={opt.key || opt.value}
+											key={opt.key || opt.value.toString()}
 											tabIndex={0}
 											role='option'
 											aria-selected={values.includes(opt.value)}

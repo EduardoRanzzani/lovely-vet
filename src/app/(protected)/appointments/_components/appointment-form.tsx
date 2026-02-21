@@ -5,7 +5,7 @@ import {
 	CreateAppointmentSchema,
 } from '@/api/schema/appointments.schema';
 import { DoctorsWithUser } from '@/api/schema/doctors.schema';
-import { PetsWithTutorAndBreed } from '@/api/schema/pets.schema';
+import { PetWithTutorAndBreed } from '@/api/schema/pets.schema';
 import { Services } from '@/api/schema/services.schema';
 import MoneyInputForm from '@/components/form/money-input-form';
 import SelectForm from '@/components/form/select-form';
@@ -27,7 +27,7 @@ import { toast } from 'sonner';
 interface AppointmentFormClientProps {
 	appointment?: AppointmentsWithPetAndServiceAndDoctor;
 	services: Services[];
-	pets: PetsWithTutorAndBreed[];
+	pets: PetWithTutorAndBreed[];
 	doctors: DoctorsWithUser[];
 	onSuccess?: () => void;
 }

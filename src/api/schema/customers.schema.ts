@@ -34,7 +34,7 @@ export const createCustomerWithUserSchema = z.object({
 	image: z.string().optional(),
 	phone: z.string().nonempty({ message: 'O campo telefone é obrigatório' }),
 	cpf: z.string().nonempty({ message: 'O campo cpf é obrigatório' }),
-	sex: z
+	gender: z
 		.enum(['male', 'female'])
 		.nonoptional({ message: 'O campo sexo é obrigatório' }),
 	postalCode: z.string().nonempty({ message: 'O campo cep é obrigatório' }),

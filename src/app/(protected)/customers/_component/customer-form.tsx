@@ -44,7 +44,7 @@ const CustomerFormClient = ({
 			email: customer?.user?.email || '',
 			phone: customer?.phone || '',
 			cpf: customer?.cpf || '',
-			sex: customer?.sex || 'male',
+			gender: customer?.gender || 'male',
 			postalCode: customer?.postalCode || '',
 			address: customer?.address || '',
 			addressNumber: customer?.addressNumber || '',
@@ -84,15 +84,12 @@ const CustomerFormClient = ({
 
 	return (
 		<DialogContent
-			onInteractOutside={(e) => {
-				e.preventDefault();
-			}}
+			onInteractOutside={(e) => e.preventDefault()}
 			showCloseButton={false}
 			className='max-w-lg'
 		>
 			<Form {...form}>
 				<form
-					id='registerForm'
 					onSubmit={form.handleSubmit(formSubmit)}
 					className='flex flex-col gap-2'
 				>
@@ -147,8 +144,8 @@ const CustomerFormClient = ({
 						<SelectForm
 							label='Sexo:'
 							control={form.control}
-							error={form.formState.errors.sex?.message}
-							name='sex'
+							error={form.formState.errors.gender?.message}
+							name='gender'
 							options={[
 								{
 									value: 'male',

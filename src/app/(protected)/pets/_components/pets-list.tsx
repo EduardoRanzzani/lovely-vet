@@ -1,24 +1,28 @@
 'use client';
 
+import { deletePet } from '@/api/actions/pets.actions';
 import { MAX_PAGE_SIZE, PaginatedData } from '@/api/config/consts';
 import { BreedsWithSpecies } from '@/api/schema/breeds.schema';
 import { CustomerWithUser } from '@/api/schema/customers.schema';
-import { PetsWithTutorAndBreed } from '@/api/schema/pets.schema';
+import { PetWithTutorAndBreed } from '@/api/schema/pets.schema';
 import { Specie } from '@/api/schema/species.schema';
 import { calculateAge, getInitials } from '@/api/util';
+import DeleteButton from '@/components/list/delete-button';
 import SearchInput from '@/components/list/search-input';
 import TableComponent from '@/components/list/table-component';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge'; // Opcional: para status ou gênero
 import { TableCell, TableRow } from '@/components/ui/table';
 import { handleNavigation } from '@/lib/utils';
+import { useAction } from 'next-safe-action/hooks';
 import { useSearchParams } from 'next/navigation';
 import { use } from 'react';
+import { toast } from 'sonner';
 import AddPetButton from './add-pet-button';
 import EditPetButton from './edit-pet-button';
 
 interface PetsListClientProps {
-	pets: Promise<PaginatedData<PetsWithTutorAndBreed>>;
+	pets: Promise<PaginatedData<PetWithTutorAndBreed>>;
 	species: Specie[];
 	breeds: BreedsWithSpecies[];
 	customers: CustomerWithUser[];
@@ -45,17 +49,33 @@ const PetsListClient = ({
 		return `${(grams / 1000).toFixed(1)} kg`;
 	};
 
+	const handleDelete = (petId: string) => {
+		deletePetAction.execute({
+			id: petId,
+		});
+	};
+
+	const deletePetAction = useAction(deletePet, {
+		onSuccess: () => {
+			toast.success('Pet deletado com sucesso!');
+		},
+		onError: (err) => {
+			toast.error(
+				'Ocorreu um erro ao tentar deletar o pet. Tente novamente mais tarde.',
+			);
+		},
+	});
+
 	const columns = [
 		{ header: 'Nome', accessorKey: 'name' },
 		{ header: 'Idade', accessorKey: 'age' },
 		{ header: 'Peso', accessorKey: 'weight' },
-		{ header: 'Sexo', accessorKey: 'gender' },
 		{ header: 'Castrado?', accessorKey: 'sterile' },
 		{ header: 'Tutor', accessorKey: 'tutor' },
 		{ header: 'Ações', accessorKey: 'actions' },
 	];
 
-	const renderRow = (pet: PetsWithTutorAndBreed) => {
+	const renderRow = (pet: PetWithTutorAndBreed) => {
 		return (
 			<TableRow key={pet.id} className='group'>
 				<TableCell className='flex gap-4 items-center'>
@@ -71,7 +91,7 @@ const PetsListClient = ({
 					<span className='flex flex-col'>
 						<span className='font-medium'>{pet.name}</span>
 						<p className='text-xs text-muted-foreground'>
-							{pet.breed.specie.name} • {pet.breed.name}
+							{pet.breed.specie.name} • {pet.breed.name} • {pet.color}
 						</p>
 					</span>
 				</TableCell>
@@ -80,12 +100,6 @@ const PetsListClient = ({
 				<TableCell>{calculateAge(new Date(pet.birthDate))}</TableCell>
 
 				<TableCell>{formatWeight(pet.weightInGrams)}</TableCell>
-
-				<TableCell>
-					<span className='text-sm'>
-						{pet.gender === 'male' ? 'Macho' : 'Fêmea'}
-					</span>
-				</TableCell>
 
 				<TableCell>
 					<Badge variant={pet.sterile ? 'default' : 'outline'}>
@@ -97,24 +111,26 @@ const PetsListClient = ({
 					<div className='flex flex-col'>
 						<span className='text-sm font-medium'>{pet.tutor.user.name}</span>
 						<span className='text-[10px] text-muted-foreground uppercase'>
-							{pet.tutor.city} - {pet.tutor.state}
+							{pet.tutor.phone}
 						</span>
 					</div>
 				</TableCell>
 
-				<TableCell className='w-20'>
+				<TableCell className='flex max-w-20 gap-2'>
 					<EditPetButton
 						pet={pet}
 						species={species}
 						breeds={breeds}
 						customers={customers}
 					/>
+
+					<DeleteButton action={() => handleDelete(pet.id)} />
 				</TableCell>
 			</TableRow>
 		);
 	};
 
-	const renderMobile = (pet: PetsWithTutorAndBreed) => {
+	const renderMobile = (pet: PetWithTutorAndBreed) => {
 		return (
 			<div
 				key={pet.id}

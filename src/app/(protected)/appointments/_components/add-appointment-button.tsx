@@ -1,5 +1,5 @@
 import { DoctorsWithUser } from '@/api/schema/doctors.schema';
-import { PetsWithTutorAndBreed } from '@/api/schema/pets.schema';
+import { PetWithTutorAndBreed } from '@/api/schema/pets.schema';
 import { Services } from '@/api/schema/services.schema';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogTrigger } from '@/components/ui/dialog';
@@ -8,7 +8,7 @@ import { useState } from 'react';
 import AppointmentFormClient from './appointment-form';
 
 interface AddAppointmentButtonProps {
-	pets: PetsWithTutorAndBreed[];
+	pets: PetWithTutorAndBreed[];
 	services: Services[];
 	doctors: DoctorsWithUser[];
 }

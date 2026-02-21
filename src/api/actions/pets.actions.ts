@@ -8,14 +8,17 @@ import {
 	speciesTable,
 	usersTable,
 } from '@/db/schema';
+import { actionClient } from '@/lib/next-safe-action';
 import { currentUser } from '@clerk/nextjs/server';
 import { and, asc, countDistinct, eq, ilike, or } from 'drizzle-orm';
-import { revalidatePath } from 'next/cache';
 import { PaginatedData } from '../config/consts';
 import {
-	CreatePetWithTutorAndBreedSchema,
-	PetsWithTutorAndBreed,
+	createPetWithTutorAndBreedSchema,
+	PetWithTutorAndBreed,
 } from '../schema/pets.schema';
+import { revalidatePath } from 'next/cache';
+import { format } from 'date-fns';
+import z from 'zod';
 
 // Helper para evitar repetição da base da query de listagem
 const getPetWithRelationsQuery = () => {
@@ -34,7 +37,7 @@ const getPetWithRelationsQuery = () => {
 		.innerJoin(usersTable, eq(customersTable.userId, usersTable.id));
 };
 
-export const getPets = async (): Promise<PetsWithTutorAndBreed[]> => {
+export const getPets = async (): Promise<PetWithTutorAndBreed[]> => {
 	const authUser = await currentUser();
 	if (!authUser) throw new Error('Usuário não autenticado');
 
@@ -65,7 +68,7 @@ export const getPetsPaginated = async (
 	page: number,
 	limit: number,
 	search?: string,
-): Promise<PaginatedData<PetsWithTutorAndBreed>> => {
+): Promise<PaginatedData<PetWithTutorAndBreed>> => {
 	const authUser = await currentUser();
 	if (!authUser) throw new Error('Usuário não autenticado');
 
@@ -127,28 +130,87 @@ export const getPetsPaginated = async (
 	};
 };
 
-export const upsertPet = async (data: CreatePetWithTutorAndBreedSchema) => {
-	const authUser = await currentUser();
-	if (!authUser) throw new Error('Não autorizado');
+export const upsertPet = actionClient
+	.schema(createPetWithTutorAndBreedSchema)
+	.action(async ({ parsedInput }) => {
+		const authenticatedUser = await currentUser();
+		if (!authenticatedUser) throw new Error('Usuário não autenticado');
 
-	const values = {
-		name: data.name,
-		birthDate: data.birthDate, // Drizzle aceita string ISO para campos date
-		breedId: data.breedId,
-		customerId: data.tutorId,
-		sterile: data.sterile === 'true',
-		photo: data.photo,
-		color: data.color,
-		gender: data.gender,
-		weightInGrams: data.weight, // Coluna nova do schema
-		observations: data.observations,
-	};
+		await db
+			.insert(petsTable)
+			.values({
+				id: parsedInput.id ?? undefined,
+				name: parsedInput.name,
+				birthDate: format(parsedInput.birthDate, 'yyyy-MM-dd'),
+				breedId: parsedInput.breedId,
+				customerId: parsedInput.customerId,
+				sterile: parsedInput.sterile ?? false,
+				status: parsedInput.status ?? 'alive',
+				photo: parsedInput.photo,
+				color: parsedInput.color,
+				gender: parsedInput.gender,
+				weightInGrams: parsedInput.weightInGrams * 1000,
+			})
+			.onConflictDoUpdate({
+				target: petsTable.id,
+				set: {
+					name: parsedInput.name,
+					birthDate: parsedInput.birthDate.toISOString(),
+					breedId: parsedInput.breedId,
+					customerId: parsedInput.customerId,
+					sterile: parsedInput.sterile ?? false,
+					status: parsedInput.status ?? 'alive',
+					photo: parsedInput.photo,
+					color: parsedInput.color,
+					gender: parsedInput.gender,
+					weightInGrams: parsedInput.weightInGrams * 1000,
+					updatedAt: new Date(),
+				},
+			})
+			.returning();
 
-	if (data.id) {
-		await db.update(petsTable).set(values).where(eq(petsTable.id, data.id));
-	} else {
-		await db.insert(petsTable).values(values);
-	}
+		revalidatePath('/pets');
+	});
 
-	revalidatePath('/pets');
-};
+export const deletePet = actionClient
+	.schema(z.object({ id: z.uuid() }))
+	.action(async ({ parsedInput }) => {
+		const authenticatedUser = await currentUser();
+		if (!authenticatedUser) throw new Error('Usuário não autenticado');
+
+		const pet = await db.query.petsTable.findFirst({
+			where: eq(petsTable.id, parsedInput.id),
+		});
+
+		if (!pet) throw new Error('Pet não encontrado');
+
+		await db.delete(petsTable).where(eq(petsTable.id, parsedInput.id));
+
+		revalidatePath('/pets');
+	});
+
+// export const upsertPet = async (data: CreatePetWithTutorAndBreedSchema) => {
+// 	const authUser = await currentUser();
+// 	if (!authUser) throw new Error('Não autorizado');
+
+// 	const values = {
+// 		name: data.name,
+// 		birthDate: data.birthDate, // Drizzle aceita string ISO para campos date
+// 		breedId: data.breedId,
+// 		customerId: data.tutorId,
+// 		sterile: data.sterile === 'true',
+// 		photo: data.photo,
+// 		color: data.color,
+// 		gender: data.gender,
+// 		weightInGrams: data.weight, // Coluna nova do schema
+// 		observations: data.observations,
+// 	};
+
+// 	if (data.id) {
+// 		await db.update(petsTable).set(values).where(eq(petsTable.id, data.id));
+// 	} else {
+// 		await db.insert(petsTable).values(values);
+// 	}
+
+// 	revalidatePath('/pets');
+// };

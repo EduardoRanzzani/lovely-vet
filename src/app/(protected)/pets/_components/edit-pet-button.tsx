@@ -2,7 +2,7 @@
 
 import { BreedsWithSpecies } from '@/api/schema/breeds.schema';
 import { CustomerWithUser } from '@/api/schema/customers.schema';
-import { PetsWithTutorAndBreed } from '@/api/schema/pets.schema';
+import { PetWithTutorAndBreed } from '@/api/schema/pets.schema';
 import { Specie } from '@/api/schema/species.schema';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogTrigger } from '@/components/ui/dialog';
@@ -11,7 +11,7 @@ import { useState } from 'react';
 import PetFormClient from './pet-form';
 
 interface EditPetButtonProps {
-	pet: PetsWithTutorAndBreed;
+	pet: PetWithTutorAndBreed;
 	species: Specie[];
 	breeds: BreedsWithSpecies[];
 	customers: CustomerWithUser[];
@@ -33,13 +33,15 @@ const EditPetButton = ({
 				</Button>
 			</DialogTrigger>
 
-			<PetFormClient
-				pet={pet}
-				onSuccess={() => setIsOpen(false)}
-				species={species}
-				breeds={breeds}
-				customers={customers}
-			/>
+			{isOpen && (
+				<PetFormClient
+					pet={pet}
+					onSuccess={() => setIsOpen(false)}
+					species={species}
+					breeds={breeds}
+					customers={customers}
+				/>
+			)}
 		</Dialog>
 	);
 };
