@@ -2,11 +2,13 @@
 
 import { db } from '@/db';
 import { breedsTable, speciesTable } from '@/db/schema';
+import { actionClient } from '@/lib/next-safe-action';
 import { currentUser } from '@clerk/nextjs/server';
 import { asc, count, eq, ilike, or } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
+import z from 'zod';
 import { PaginatedData } from '../config/consts';
-import { BreedsWithSpecies, CreateBreedSchema } from '../schema/breeds.schema';
+import { BreedsWithSpecies, createBreedSchema } from '../schema/breeds.schema';
 
 export const getBreeds = async (): Promise<BreedsWithSpecies[]> => {
 	const breeds = await db.query.breedsTable.findMany({
@@ -78,25 +80,44 @@ export const getBreedsPaginated = async (
 	};
 };
 
-export const upsertBreed = async (data: CreateBreedSchema) => {
-	const authenticatedUser = await currentUser();
-	if (!authenticatedUser) throw new Error('Usuário não autenticado');
+export const upsertBreed = actionClient
+	.schema(createBreedSchema)
+	.action(async ({ parsedInput }) => {
+		const authenticatedUser = await currentUser();
+		if (!authenticatedUser) throw new Error('Usuário não autenticado');
 
-	await db
-		.insert(breedsTable)
-		.values({
-			id: data.id,
-			name: data.name,
-			specieId: data.specieId,
-		})
-		.onConflictDoUpdate({
-			target: breedsTable.id,
-			set: {
-				name: data.name,
-				specieId: data.specieId,
-			},
-		})
-		.returning();
+		await db
+			.insert(breedsTable)
+			.values({
+				id: parsedInput.id ?? undefined,
+				name: parsedInput.name,
+				specieId: parsedInput.specieId,
+			})
+			.onConflictDoUpdate({
+				target: breedsTable.id,
+				set: {
+					name: parsedInput.name,
+					specieId: parsedInput.specieId,
+				},
+			})
+			.returning();
 
-	revalidatePath('/breeds');
-};
+		revalidatePath('/breeds');
+	});
+
+export const deleteBreed = actionClient
+	.schema(z.object({ id: z.string() }))
+	.action(async ({ parsedInput }) => {
+		const authenticatedUser = await currentUser();
+		if (!authenticatedUser) throw new Error('Usuário não autenticado');
+
+		const breed = await db.query.breedsTable.findFirst({
+			where: eq(breedsTable.id, parsedInput.id),
+		});
+
+		if (!breed) throw new Error('Raça não encontrada');
+
+		await db.delete(breedsTable).where(eq(breedsTable.id, parsedInput.id));
+
+		revalidatePath('/breeds');
+	});

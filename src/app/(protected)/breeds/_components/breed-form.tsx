@@ -16,9 +16,10 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from '@/components/ui/dialog';
+import { Form } from '@/components/ui/form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useMutation } from '@tanstack/react-query';
 import { BanIcon, Loader2Icon, SaveIcon } from 'lucide-react';
+import { useAction } from 'next-safe-action/hooks';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 
@@ -33,13 +34,7 @@ const BreedFormClient = ({
 	species,
 	onSuccess,
 }: BreedFormClientProps) => {
-	const {
-		control,
-		register,
-		handleSubmit,
-		reset,
-		formState: { errors },
-	} = useForm<CreateBreedSchema>({
+	const form = useForm<CreateBreedSchema>({
 		resolver: zodResolver(createBreedSchema),
 		shouldUnregister: true,
 		defaultValues: {
@@ -48,23 +43,24 @@ const BreedFormClient = ({
 		},
 	});
 
-	const { mutate: handleUpsertBreed, isPending } = useMutation({
-		mutationFn: upsertBreed,
+	const formSubmit = (data: CreateBreedSchema) => {
+		upsertBreedAction.execute({
+			...data,
+			id: breed?.id,
+		});
+	};
+
+	const upsertBreedAction = useAction(upsertBreed, {
 		onSuccess: () => {
-			toast.success(
-				breed ? 'Raça atualizada com sucesso!' : 'Raça cadastrada com sucesso!',
-			);
-			reset();
 			onSuccess?.();
+			toast.success('Raça salva com sucesso!');
+			form.reset();
 		},
-		onError: (error) => {
-			toast.error('Erro ao salvar a raça: ' + error.message);
+		onError: (err) => {
+			console.error({ err });
+			toast.error('Ocorreu um erro ao salvar a raça!');
 		},
 	});
-
-	const formSubmit = (data: CreateBreedSchema) => {
-		handleUpsertBreed(data);
-	};
 
 	return (
 		<DialogContent
@@ -72,73 +68,76 @@ const BreedFormClient = ({
 			showCloseButton={false}
 			className='max-w-lg'
 		>
-			<DialogHeader>
-				<DialogTitle>{breed ? 'Atualizar Raça' : 'Cadastrar Raça'}</DialogTitle>
-				<DialogDescription>
-					{breed
-						? 'Atualize as informações da raça selecionada'
-						: 'Adicione uma nova raça ao sistema'}
-				</DialogDescription>
-			</DialogHeader>
+			<Form {...form}>
+				<form
+					onSubmit={form.handleSubmit(formSubmit)}
+					className='flex flex-col gap-4'
+				>
+					<DialogHeader>
+						<DialogTitle>
+							{breed ? 'Atualizar Raça' : 'Cadastrar Raça'}
+						</DialogTitle>
+						<DialogDescription>
+							{breed
+								? 'Atualize as informações da raça selecionada'
+								: 'Adicione uma nova raça ao sistema'}
+						</DialogDescription>
+					</DialogHeader>
 
-			<form
-				id='registerForm'
-				onSubmit={handleSubmit(formSubmit)}
-				className='flex flex-col gap-4'
-			>
-				<SelectForm
-					label='Espécie:'
-					name='specieId'
-					control={control}
-					error={errors.specieId?.message}
-					options={species.map((specie) => ({
-						value: specie.id,
-						label: specie.name,
-						key: specie.id,
-					}))}
-				/>
+					<SelectForm
+						label='Espécie:'
+						name='specieId'
+						control={form.control}
+						error={form.formState.errors.specieId?.message}
+						options={species.map((specie) => ({
+							value: specie.id,
+							label: specie.name,
+							key: specie.id,
+						}))}
+					/>
 
-				<InputForm
-					label='Descrição:'
-					register={register}
-					name='name'
-					error={errors.name?.message}
-				/>
-			</form>
+					<InputForm
+						label='Descrição:'
+						register={form.register}
+						name='name'
+						error={form.formState.errors.name?.message}
+					/>
 
-			<DialogFooter>
-				<div className='flex flex-col lg:flex-row gap-4 w-full'>
-					<DialogClose asChild>
-						<Button
-							type='button'
-							variant={'destructive'}
-							onClick={() => {
-								if (!isPending) reset();
-							}}
-							className='flex-1'
-						>
-							<BanIcon />
-							Cancelar
-						</Button>
-					</DialogClose>
+					<DialogFooter>
+						<div className='flex flex-col lg:flex-row gap-4 w-full'>
+							<DialogClose asChild>
+								<Button
+									type='button'
+									variant={'destructive'}
+									onClick={() => {
+										if (!upsertBreedAction.isPending) form.reset();
+									}}
+									className='flex-1'
+								>
+									<BanIcon />
+									Cancelar
+								</Button>
+							</DialogClose>
 
-					<Button
-						type='submit'
-						disabled={isPending}
-						form='registerForm'
-						className='flex-1'
-					>
-						{isPending ? (
-							<Loader2Icon className='h-5 w-5 animate-spin' />
-						) : (
-							<>
-								<SaveIcon className='mr-2 h-4 w-4' />
-								Salvar
-							</>
-						)}
-					</Button>
-				</div>
-			</DialogFooter>
+							<Button
+								type='submit'
+								disabled={upsertBreedAction.isPending}
+								form='registerForm'
+								className='flex-1'
+							>
+								{upsertBreedAction.isPending ? (
+									<Loader2Icon className='h-5 w-5 animate-spin' />
+								) : (
+									<>
+										<SaveIcon className='mr-2 h-4 w-4' />
+										Salvar
+									</>
+								)}
+							</Button>
+						</div>
+					</DialogFooter>
+				</form>
+			</Form>
 		</DialogContent>
 	);
 };

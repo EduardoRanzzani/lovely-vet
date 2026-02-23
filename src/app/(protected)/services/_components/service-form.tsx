@@ -15,9 +15,10 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from '@/components/ui/dialog';
+import { Form } from '@/components/ui/form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useMutation } from '@tanstack/react-query';
 import { BanIcon, Loader2Icon, SaveIcon } from 'lucide-react';
+import { useAction } from 'next-safe-action/hooks';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 
@@ -27,13 +28,7 @@ interface ServiceFormClientProps {
 }
 
 const ServiceFormClient = ({ service, onSuccess }: ServiceFormClientProps) => {
-	const {
-		register,
-		handleSubmit,
-		control,
-		reset,
-		formState: { errors },
-	} = useForm<CreateServiceSchema>({
+	const form = useForm<CreateServiceSchema>({
 		resolver: zodResolver(createServiceSchema),
 		shouldUnregister: true,
 		defaultValues: {
@@ -43,25 +38,24 @@ const ServiceFormClient = ({ service, onSuccess }: ServiceFormClientProps) => {
 		},
 	});
 
-	const { mutate: handleUpsertService, isPending } = useMutation({
-		mutationFn: upsertService,
+	const formSubmit = (data: CreateServiceSchema) => {
+		upsertServiceAction.execute({
+			...data,
+			id: service?.id,
+		});
+	};
+
+	const upsertServiceAction = useAction(upsertService, {
 		onSuccess: () => {
-			toast.success(
-				service
-					? 'Serviço atualizado com sucesso!'
-					: 'Serviço cadastrado com sucesso!',
-			);
-			reset();
 			onSuccess?.();
+			toast.success('Serviço salvo com sucesso!');
+			form.reset();
 		},
-		onError: (error) => {
-			toast.error('Erro ao salvar o serviço: ' + error.message);
+		onError: (err) => {
+			console.error({ err });
+			toast.error('Ocorreu um erro ao salvar o serviço!');
 		},
 	});
-
-	const formSubmit = (data: CreateServiceSchema) => {
-		handleUpsertService({ ...data, price: data.price * 100 });
-	};
 
 	return (
 		<DialogContent
@@ -69,77 +63,77 @@ const ServiceFormClient = ({ service, onSuccess }: ServiceFormClientProps) => {
 			showCloseButton={false}
 			className='max-w-lg'
 		>
-			<DialogHeader>
-				<DialogTitle>
-					{service ? 'Editar Serviço' : 'Cadastrar Serviço'}
-				</DialogTitle>
-				<DialogDescription>
-					{service
-						? 'Atualize as informações do serviço selecionado'
-						: 'Adicione um novo serviço ao sistema'}
-				</DialogDescription>
-			</DialogHeader>
+			<Form {...form}>
+				<form
+					onSubmit={form.handleSubmit(formSubmit)}
+					className='flex flex-col gap-4'
+				>
+					<DialogHeader>
+						<DialogTitle>
+							{service ? 'Editar Serviço' : 'Cadastrar Serviço'}
+						</DialogTitle>
+						<DialogDescription>
+							{service
+								? 'Atualize as informações do serviço selecionado'
+								: 'Adicione um novo serviço ao sistema'}
+						</DialogDescription>
+					</DialogHeader>
 
-			<form
-				id='registerForm'
-				onSubmit={handleSubmit(formSubmit)}
-				className='flex flex-col gap-4'
-			>
-				<InputForm
-					label='Nome:'
-					register={register}
-					name='name'
-					error={errors.name?.message}
-				/>
+					<InputForm
+						label='Nome:'
+						register={form.register}
+						name='name'
+						error={form.formState.errors.name?.message}
+					/>
 
-				<MoneyInputForm
-					label='Valor:'
-					control={control}
-					name='price'
-					error={errors.price?.message}
-				/>
+					<MoneyInputForm
+						label='Valor:'
+						control={form.control}
+						name='price'
+						error={form.formState.errors.price?.message}
+					/>
 
-				<InputForm
-					label='Descrição:'
-					register={register}
-					name='description'
-					error={errors.description?.message}
-				/>
-			</form>
+					<InputForm
+						label='Descrição:'
+						register={form.register}
+						name='description'
+						error={form.formState.errors.description?.message}
+					/>
 
-			<DialogFooter>
-				<div className='flex flex-col lg:flex-row gap-4 w-full'>
-					<DialogClose asChild>
-						<Button
-							type='button'
-							variant={'destructive'}
-							onClick={() => {
-								if (!isPending) reset();
-							}}
-							className='flex-1'
-						>
-							<BanIcon />
-							Cancelar
-						</Button>
-					</DialogClose>
+					<DialogFooter>
+						<div className='flex flex-col lg:flex-row gap-4 w-full'>
+							<DialogClose asChild>
+								<Button
+									type='button'
+									variant={'destructive'}
+									onClick={() => {
+										if (!upsertServiceAction.isPending) form.reset();
+									}}
+									className='flex-1'
+								>
+									<BanIcon />
+									Cancelar
+								</Button>
+							</DialogClose>
 
-					<Button
-						type='submit'
-						disabled={isPending}
-						form='registerForm'
-						className='flex-1'
-					>
-						{isPending ? (
-							<Loader2Icon className='h-5 w-5 animate-spin' />
-						) : (
-							<>
-								<SaveIcon className='mr-2 h-4 w-4' />
-								Salvar
-							</>
-						)}
-					</Button>
-				</div>
-			</DialogFooter>
+							<Button
+								type='submit'
+								disabled={upsertServiceAction.isPending}
+								className='flex-1'
+							>
+								{upsertServiceAction.isPending ? (
+									<Loader2Icon className='h-5 w-5 animate-spin' />
+								) : (
+									<>
+										<SaveIcon className='mr-2 h-4 w-4' />
+										Salvar
+									</>
+								)}
+							</Button>
+						</div>
+					</DialogFooter>
+				</form>
+			</Form>
 		</DialogContent>
 	);
 };

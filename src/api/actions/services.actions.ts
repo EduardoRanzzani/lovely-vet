@@ -2,11 +2,17 @@
 
 import { db } from '@/db';
 import { servicesTable } from '@/db/schema';
+import { actionClient } from '@/lib/next-safe-action';
 import { currentUser } from '@clerk/nextjs/server';
-import { count, ilike, or } from 'drizzle-orm';
+import { count, eq, ilike, or } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
+import z from 'zod';
 import { PaginatedData } from '../config/consts';
-import { CreateServiceSchema, Services } from '../schema/services.schema';
+import {
+	createServiceSchema,
+	CreateServiceSchema,
+	Services,
+} from '../schema/services.schema';
 
 export const getServices = async (): Promise<Services[]> => {
 	const authenticatedUser = await currentUser();
@@ -70,7 +76,7 @@ export const getServicesPaginated = async (
 	};
 };
 
-export const upsertService = async (data: CreateServiceSchema) => {
+export const upsertServiceOld = async (data: CreateServiceSchema) => {
 	const authenticatedUser = await currentUser();
 	if (!authenticatedUser) throw new Error('Usuário não autenticado');
 
@@ -94,3 +100,47 @@ export const upsertService = async (data: CreateServiceSchema) => {
 
 	revalidatePath('/services');
 };
+
+export const upsertService = actionClient
+	.schema(createServiceSchema)
+	.action(async ({ parsedInput }) => {
+		const authenticatedUser = await currentUser();
+		if (!authenticatedUser) throw new Error('Usuário não autenticado');
+
+		await db
+			.insert(servicesTable)
+			.values({
+				id: parsedInput.id ?? undefined,
+				name: parsedInput.name,
+				description: parsedInput.description,
+				priceInCents: parsedInput.price * 100,
+			})
+			.onConflictDoUpdate({
+				target: servicesTable.id,
+				set: {
+					name: parsedInput.name,
+					description: parsedInput.description,
+					priceInCents: parsedInput.price * 100,
+					updatedAt: new Date(),
+				},
+			});
+
+		revalidatePath('/services');
+	});
+
+export const deleteService = actionClient
+	.schema(z.object({ id: z.string() }))
+	.action(async ({ parsedInput }) => {
+		const authenticatedUser = await currentUser();
+		if (!authenticatedUser) throw new Error('Usuário não autenticado');
+
+		const service = await db.query.servicesTable.findFirst({
+			where: eq(servicesTable.id, parsedInput.id),
+		});
+
+		if (!service) throw new Error('Serviço não encontrado');
+
+		await db.delete(servicesTable).where(eq(servicesTable.id, parsedInput.id));
+
+		revalidatePath('/services');
+	});

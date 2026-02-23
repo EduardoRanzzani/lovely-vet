@@ -1,15 +1,19 @@
 'use client';
 
+import { deleteService } from '@/api/actions/services.actions';
 import { MAX_PAGE_SIZE, PaginatedData } from '@/api/config/consts';
 import { Services } from '@/api/schema/services.schema';
+import DeleteButton from '@/components/list/delete-button';
 import SearchInput from '@/components/list/search-input';
 import TableComponent from '@/components/list/table-component';
 import { TableCell, TableRow } from '@/components/ui/table';
 import { formatCurrencyFromCents } from '@/helpers/currency';
 import { handleNavigation } from '@/lib/utils';
 import { DollarSignIcon, NotepadTextIcon } from 'lucide-react';
+import { useAction } from 'next-safe-action/hooks';
 import { useSearchParams } from 'next/navigation';
 import { use } from 'react';
+import { toast } from 'sonner';
 import AddServiceButton from './add-service-button';
 import EditServiceButton from './edit-service-button';
 
@@ -34,14 +38,34 @@ const ServicesListClient = ({ services }: ServicesListClientProps) => {
 		{ header: 'Ações', accessorKey: 'actions' },
 	];
 
+	const handleDelete = (serviceId: string) => {
+		deleteServiceAction.execute({
+			id: serviceId,
+		});
+	};
+
+	const deleteServiceAction = useAction(deleteService, {
+		onSuccess: () => {
+			toast.success('Serviço deletado com sucesso!');
+		},
+		onError: (err) => {
+			console.error('Erro ao deletar serviço:', err);
+			toast.error(
+				'Ocorreu um erro ao tentar deletar o serviço. Tente novamente mais tarde.',
+			);
+		},
+	});
+
 	const renderRow = (service: Services) => {
 		return (
 			<TableRow key={service.id}>
 				<TableCell>{service.name}</TableCell>
 				<TableCell>{formatCurrencyFromCents(service.priceInCents)}</TableCell>
 				<TableCell>{service.description}</TableCell>
-				<TableCell className='w-20'>
+				<TableCell className='w-20 space-x-2'>
 					<EditServiceButton service={service} />
+
+					<DeleteButton action={() => handleDelete(service.id)} />
 				</TableCell>
 			</TableRow>
 		);

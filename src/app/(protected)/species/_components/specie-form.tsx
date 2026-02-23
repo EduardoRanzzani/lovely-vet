@@ -14,9 +14,10 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from '@/components/ui/dialog';
+import { Form } from '@/components/ui/form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useMutation } from '@tanstack/react-query';
 import { BanIcon, Loader2Icon, SaveIcon } from 'lucide-react';
+import { useAction } from 'next-safe-action/hooks';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 
@@ -26,12 +27,7 @@ interface SpecieFormClientProps {
 }
 
 const SpecieFormClient = ({ specie, onSuccess }: SpecieFormClientProps) => {
-	const {
-		register,
-		handleSubmit,
-		reset,
-		formState: { errors },
-	} = useForm<CreateSpecieSchema>({
+	const form = useForm<CreateSpecieSchema>({
 		resolver: zodResolver(createSpecieSchema),
 		shouldUnregister: true,
 		defaultValues: {
@@ -39,94 +35,88 @@ const SpecieFormClient = ({ specie, onSuccess }: SpecieFormClientProps) => {
 		},
 	});
 
-	const { mutate: handleUpsertSpecie, isPending } = useMutation({
-		mutationFn: upsertSpecie,
-		onSuccess: () => {
-			toast.success(
-				specie
-					? 'Espécie atualizada com sucesso!'
-					: 'Espécie cadastrada com sucesso!',
-			);
-			reset();
-			onSuccess?.();
-		},
-		onError: (error) => {
-			toast.error('Erro ao salvar a espécie: ' + error.message);
-		},
-	});
-
 	const formSubmit = (data: CreateSpecieSchema) => {
-		handleUpsertSpecie({
+		upsertSpecieAction.execute({
 			...data,
 			id: specie?.id,
 		});
 	};
 
+	const upsertSpecieAction = useAction(upsertSpecie, {
+		onSuccess: () => {
+			onSuccess?.();
+			toast.success('Espécie salva com sucesso!');
+			form.reset();
+		},
+		onError: (err) => {
+			console.error({ err });
+			toast.error('Ocorreu um erro ao salvar a espécie!');
+		},
+	});
+
 	return (
 		<DialogContent
-			onInteractOutside={(e) => {
-				e.preventDefault();
-			}}
+			onInteractOutside={(e) => e.preventDefault()}
 			showCloseButton={false}
 			className='max-w-lg'
 		>
-			<DialogHeader>
-				<DialogTitle>
-					{specie ? 'Atualizar Espécie' : 'Cadastrar Espécie'}
-				</DialogTitle>
-				<DialogDescription>
-					{specie
-						? 'Atualize as informações da espécie selecionada'
-						: 'Adicione uma nova espécie ao sistema'}
-				</DialogDescription>
-			</DialogHeader>
+			<Form {...form}>
+				<form
+					onSubmit={form.handleSubmit(formSubmit)}
+					className='flex flex-col gap-2'
+				>
+					<DialogHeader>
+						<DialogTitle>
+							{specie ? 'Atualizar Espécie' : 'Cadastrar Espécie'}
+						</DialogTitle>
+						<DialogDescription>
+							{specie
+								? 'Atualize as informações da espécie selecionada'
+								: 'Adicione uma nova espécie ao sistema'}
+						</DialogDescription>
+					</DialogHeader>
 
-			<form
-				id='registerForm'
-				onSubmit={handleSubmit(formSubmit)}
-				className='flex flex-col gap-2'
-			>
-				<InputForm
-					label='Descrição'
-					register={register}
-					name='name'
-					error={errors.name?.message}
-				/>
-			</form>
+					<InputForm
+						label='Descrição'
+						register={form.register}
+						name='name'
+						error={form.formState.errors.name?.message}
+					/>
 
-			<DialogFooter>
-				<div className='flex flex-col lg:flex-row gap-4 w-full'>
-					<DialogClose asChild>
-						<Button
-							type='button'
-							variant={'destructive'}
-							onClick={() => {
-								if (!isPending) reset();
-							}}
-							className='flex-1'
-						>
-							<BanIcon />
-							Cancelar
-						</Button>
-					</DialogClose>
+					<DialogFooter>
+						<div className='flex flex-col lg:flex-row gap-4 w-full mt-4'>
+							<DialogClose asChild>
+								<Button
+									type='button'
+									variant={'destructive'}
+									onClick={() => {
+										if (!upsertSpecieAction.isPending) form.reset();
+									}}
+									className='flex-1'
+								>
+									<BanIcon />
+									Cancelar
+								</Button>
+							</DialogClose>
 
-					<Button
-						type='submit'
-						disabled={isPending}
-						form='registerForm'
-						className='flex-1'
-					>
-						{isPending ? (
-							<Loader2Icon className='h-5 w-5 animate-spin' />
-						) : (
-							<>
-								<SaveIcon className='mr-2 h-4 w-4' />
-								Salvar
-							</>
-						)}
-					</Button>
-				</div>
-			</DialogFooter>
+							<Button
+								type='submit'
+								disabled={upsertSpecieAction.isPending}
+								className='flex-1'
+							>
+								{upsertSpecieAction.isPending ? (
+									<Loader2Icon className='h-5 w-5 animate-spin' />
+								) : (
+									<>
+										<SaveIcon className='mr-2 h-4 w-4' />
+										Salvar
+									</>
+								)}
+							</Button>
+						</div>
+					</DialogFooter>
+				</form>
+			</Form>
 		</DialogContent>
 	);
 };

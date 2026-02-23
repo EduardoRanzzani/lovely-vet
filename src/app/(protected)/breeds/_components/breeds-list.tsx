@@ -1,16 +1,20 @@
 'use client';
 
+import { deleteBreed } from '@/api/actions/breeds.actions';
 import { MAX_PAGE_SIZE, PaginatedData } from '@/api/config/consts';
 import { BreedsWithSpecies } from '@/api/schema/breeds.schema';
+import { Specie } from '@/api/schema/species.schema';
+import DeleteButton from '@/components/list/delete-button';
 import SearchInput from '@/components/list/search-input';
 import TableComponent from '@/components/list/table-component';
 import { TableCell, TableRow } from '@/components/ui/table';
 import { handleNavigation } from '@/lib/utils';
+import { useAction } from 'next-safe-action/hooks';
 import { useSearchParams } from 'next/navigation';
 import { use } from 'react';
+import { toast } from 'sonner';
 import AddBreedButton from './add-breed-button';
 import EditBreedButton from './edit-breed-button';
-import { Specie } from '@/api/schema/species.schema';
 
 interface BreedsListClientProps {
 	breeds: Promise<PaginatedData<BreedsWithSpecies>>;
@@ -27,6 +31,24 @@ const BreedsListClient = ({ breeds, species }: BreedsListClientProps) => {
 		handleNavigation(params);
 	};
 
+	const handleDelete = (breedId: string) => {
+		deleteBreedAction.execute({
+			id: breedId,
+		});
+	};
+
+	const deleteBreedAction = useAction(deleteBreed, {
+		onSuccess: () => {
+			toast.success('Raça deletada com sucesso!');
+		},
+		onError: (err) => {
+			console.error('Erro ao deletar raça:', err);
+			toast.error(
+				'Ocorreu um erro ao tentar deletar a raça. Tente novamente mais tarde.',
+			);
+		},
+	});
+
 	const columns = [
 		{ header: 'Descrição', accessorKey: 'name' },
 		{ header: 'Espécie', accessorKey: 'specie' },
@@ -38,8 +60,10 @@ const BreedsListClient = ({ breeds, species }: BreedsListClientProps) => {
 			<TableRow key={breed.id}>
 				<TableCell>{breed.name}</TableCell>
 				<TableCell>{breed.specie.name}</TableCell>
-				<TableCell className='w-20'>
+				<TableCell className='w-20 space-x-2'>
 					<EditBreedButton breed={breed} species={species} />
+
+					<DeleteButton action={() => handleDelete(breed.id)} />
 				</TableCell>
 			</TableRow>
 		);

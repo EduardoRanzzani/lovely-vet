@@ -20,6 +20,7 @@ import { use } from 'react';
 import { toast } from 'sonner';
 import AddPetButton from './add-pet-button';
 import EditPetButton from './edit-pet-button';
+import { formatWeight } from '@/helpers/weight';
 
 interface PetsListClientProps {
 	pets: Promise<PaginatedData<PetWithTutorAndBreed>>;
@@ -44,11 +45,6 @@ const PetsListClient = ({
 	};
 
 	// Formata gramas para Kg com uma casa decimal
-	const formatWeight = (grams: number | null) => {
-		if (!grams) return '-';
-		return `${(grams / 1000).toFixed(1)} kg`;
-	};
-
 	const handleDelete = (petId: string) => {
 		deletePetAction.execute({
 			id: petId,
@@ -60,6 +56,7 @@ const PetsListClient = ({
 			toast.success('Pet deletado com sucesso!');
 		},
 		onError: (err) => {
+			console.error('Erro ao deletar pet:', err);
 			toast.error(
 				'Ocorreu um erro ao tentar deletar o pet. Tente novamente mais tarde.',
 			);
@@ -83,7 +80,7 @@ const PetsListClient = ({
 						{pet.photo ? (
 							<AvatarImage src={pet.photo} alt={pet.name} />
 						) : (
-							<AvatarFallback className='bg-primary/10 text-primary'>
+							<AvatarFallback className='bg-primary text-accent-foreground'>
 								{getInitials(pet.name)}
 							</AvatarFallback>
 						)}
@@ -116,7 +113,7 @@ const PetsListClient = ({
 					</div>
 				</TableCell>
 
-				<TableCell className='flex max-w-20 gap-2'>
+				<TableCell className='w-20 space-x-2'>
 					<EditPetButton
 						pet={pet}
 						species={species}
@@ -172,6 +169,7 @@ const PetsListClient = ({
 		<div className='flex flex-col w-full gap-4'>
 			<div className='flex flex-col lg:flex-row items-center justify-between gap-4'>
 				<SearchInput />
+
 				<AddPetButton species={species} breeds={breeds} customers={customers} />
 			</div>
 

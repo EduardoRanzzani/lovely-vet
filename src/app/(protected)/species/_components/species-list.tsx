@@ -1,15 +1,19 @@
 'use client';
 
+import { deleteSpecie } from '@/api/actions/species.actions';
 import { MAX_PAGE_SIZE, PaginatedData } from '@/api/config/consts';
 import { Specie } from '@/api/schema/species.schema';
 import SearchInput from '@/components/list/search-input';
 import TableComponent from '@/components/list/table-component';
 import { TableCell, TableRow } from '@/components/ui/table';
 import { handleNavigation } from '@/lib/utils';
+import { useAction } from 'next-safe-action/hooks';
 import { useSearchParams } from 'next/navigation';
 import { use } from 'react';
+import { toast } from 'sonner';
 import AddSpecieButton from './add-specie-button';
 import EditSpecieButton from './edit-specie-button';
+import DeleteButton from '@/components/list/delete-button';
 
 interface SpeciesListClientProps {
 	species: Promise<PaginatedData<Specie>>;
@@ -25,6 +29,24 @@ const SpeciesListClient = ({ species }: SpeciesListClientProps) => {
 		handleNavigation(params);
 	};
 
+	const handleDelete = (specieId: string) => {
+		deleteSpecieAction.execute({
+			id: specieId,
+		});
+	};
+
+	const deleteSpecieAction = useAction(deleteSpecie, {
+		onSuccess: () => {
+			toast.success('Espécie deletada com sucesso!');
+		},
+		onError: (err) => {
+			console.error('Erro ao deletar espécie:', err);
+			toast.error(
+				'Ocorreu um erro ao tentar deletar a espécie. Tente novamente mais tarde.',
+			);
+		},
+	});
+
 	const columns = [
 		{ header: 'Descrição', accessorKey: 'name' },
 		{ header: 'Ações', accessorKey: 'actions' },
@@ -34,8 +56,9 @@ const SpeciesListClient = ({ species }: SpeciesListClientProps) => {
 		return (
 			<TableRow key={specie.id}>
 				<TableCell>{specie.name}</TableCell>
-				<TableCell className='w-20'>
+				<TableCell className='w-20 space-x-2'>
 					<EditSpecieButton specie={specie} />
+					<DeleteButton action={() => handleDelete(specie.id)} />
 				</TableCell>
 			</TableRow>
 		);

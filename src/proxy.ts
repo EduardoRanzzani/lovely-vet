@@ -58,6 +58,12 @@ export default clerkMiddleware(async (auth, req) => {
 		// Verifica se a rota atual (ou sub-rotas) está na lista de permitidas
 		const isAllowed = allowedRoutes.some((route) => pathname.startsWith(route));
 
+		// Se o usuário está logado e tenta acessar a "/" (que não existe)
+		// Redirecionamos direto para o dashboard
+		if (userId && nextUrl.pathname === '/') {
+			return NextResponse.redirect(new URL('/dashboard', req.url));
+		}
+
 		// Se a rota não for pública e o usuário não tiver permissão
 		if (!isAllowed && pathname !== '/') {
 			// Redireciona para o dashboard se tentar acessar algo proibido

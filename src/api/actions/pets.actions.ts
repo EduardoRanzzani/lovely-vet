@@ -188,29 +188,3 @@ export const deletePet = actionClient
 
 		revalidatePath('/pets');
 	});
-
-// export const upsertPet = async (data: CreatePetWithTutorAndBreedSchema) => {
-// 	const authUser = await currentUser();
-// 	if (!authUser) throw new Error('Não autorizado');
-
-// 	const values = {
-// 		name: data.name,
-// 		birthDate: data.birthDate, // Drizzle aceita string ISO para campos date
-// 		breedId: data.breedId,
-// 		customerId: data.tutorId,
-// 		sterile: data.sterile === 'true',
-// 		photo: data.photo,
-// 		color: data.color,
-// 		gender: data.gender,
-// 		weightInGrams: data.weight, // Coluna nova do schema
-// 		observations: data.observations,
-// 	};
-
-// 	if (data.id) {
-// 		await db.update(petsTable).set(values).where(eq(petsTable.id, data.id));
-// 	} else {
-// 		await db.insert(petsTable).values(values);
-// 	}
-
-// 	revalidatePath('/pets');
-// };

@@ -2,11 +2,17 @@
 
 import { db } from '@/db';
 import { speciesTable } from '@/db/schema';
+import { actionClient } from '@/lib/next-safe-action';
 import { currentUser } from '@clerk/nextjs/server';
-import { asc, count, ilike, or } from 'drizzle-orm';
+import { asc, count, eq, ilike, or } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
+import z from 'zod';
 import { PaginatedData } from '../config/consts';
-import { CreateSpecieSchema, Specie } from '../schema/species.schema';
+import {
+	createSpecieSchema,
+	CreateSpecieSchema,
+	Specie,
+} from '../schema/species.schema';
 
 export const getSpecies = async (): Promise<Specie[]> => {
 	const species = await db.query.speciesTable.findMany({
@@ -67,7 +73,7 @@ export const getSpeciesPaginated = async (
 	};
 };
 
-export const upsertSpecie = async (data: CreateSpecieSchema) => {
+export const upsertSpecieOld = async (data: CreateSpecieSchema) => {
 	const authenticatedUser = await currentUser();
 	if (!authenticatedUser) throw new Error('Usuário não autenticado');
 
@@ -87,3 +93,43 @@ export const upsertSpecie = async (data: CreateSpecieSchema) => {
 
 	revalidatePath('/species');
 };
+
+export const upsertSpecie = actionClient
+	.schema(createSpecieSchema)
+	.action(async ({ parsedInput }) => {
+		const authenticatedUser = await currentUser();
+		if (!authenticatedUser) throw new Error('Usuário não autenticado');
+
+		await db
+			.insert(speciesTable)
+			.values({
+				id: parsedInput.id ?? undefined,
+				name: parsedInput.name,
+			})
+			.onConflictDoUpdate({
+				target: speciesTable.id, // O conflito ocorre no ID
+				set: {
+					name: parsedInput.name,
+				},
+			})
+			.returning();
+
+		revalidatePath('/species');
+	});
+
+export const deleteSpecie = actionClient
+	.schema(z.object({ id: z.uuid() }))
+	.action(async ({ parsedInput }) => {
+		const authenticatedUser = await currentUser();
+		if (!authenticatedUser) throw new Error('Usuário não autenticado');
+
+		const specie = await db.query.speciesTable.findFirst({
+			where: eq(speciesTable.id, parsedInput.id),
+		});
+
+		if (!specie) throw new Error('Espécie não encontrada');
+
+		await db.delete(speciesTable).where(eq(speciesTable.id, parsedInput.id));
+
+		revalidatePath('/species');
+	});
