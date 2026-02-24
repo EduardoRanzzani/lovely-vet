@@ -58,6 +58,7 @@ const SpeciesListClient = ({ species }: SpeciesListClientProps) => {
 				<TableCell>{specie.name}</TableCell>
 				<TableCell className='w-20 space-x-2'>
 					<EditSpecieButton specie={specie} />
+
 					<DeleteButton action={() => handleDelete(specie.id)} />
 				</TableCell>
 			</TableRow>
@@ -66,9 +67,18 @@ const SpeciesListClient = ({ species }: SpeciesListClientProps) => {
 
 	const renderMobile = (specie: Specie) => {
 		return (
-			<div key={specie.id} className='flex items-center justify-between'>
-				<h3>{specie.name}</h3>
-				<EditSpecieButton specie={specie} />
+			<div key={specie.id} className='flex flex-col gap-4'>
+				<div className='flex items-center justify-between'>
+					<span className='flex flex-col'>
+						<h3 className='font-bold'>{specie.name}</h3>
+					</span>
+
+					<span className='flex flex-col gap-2'>
+						<EditSpecieButton specie={specie} />
+
+						<DeleteButton action={() => handleDelete(specie.id)} />
+					</span>
+				</div>
 			</div>
 		);
 	};

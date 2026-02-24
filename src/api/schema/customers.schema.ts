@@ -8,7 +8,7 @@ export type CustomerWithUser = typeof customersTable.$inferSelect & {
 export const onboardingCustomerSchema = z.object({
 	phone: z.string().nonempty({ message: 'O campo telefone é obrigatório' }),
 	cpf: z.string().nonempty({ message: 'O campo CPF é obrigatório' }),
-	sex: z
+	gender: z
 		.enum(['male', 'female'])
 		.nonoptional({ message: 'O campo sexo é obrigatório' }),
 	postalCode: z.string().nonempty({ message: 'O campo CEP é obrigatório' }),

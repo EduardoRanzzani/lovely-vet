@@ -7,20 +7,31 @@ import { CustomerWithUser } from '@/api/schema/customers.schema';
 import { PetWithTutorAndBreed } from '@/api/schema/pets.schema';
 import { Specie } from '@/api/schema/species.schema';
 import { calculateAge, getInitials } from '@/api/util';
+import { WhatsappIcon } from '@/components/icons/icon-whatsapp';
 import DeleteButton from '@/components/list/delete-button';
 import SearchInput from '@/components/list/search-input';
 import TableComponent from '@/components/list/table-component';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge'; // Opcional: para status ou gênero
+import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
 import { TableCell, TableRow } from '@/components/ui/table';
+import { formatWeight } from '@/helpers/weight';
 import { handleNavigation } from '@/lib/utils';
+import {
+	CalendarIcon,
+	MarsIcon,
+	UserRoundIcon,
+	VenusIcon,
+	WeightIcon,
+} from 'lucide-react';
 import { useAction } from 'next-safe-action/hooks';
+import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { use } from 'react';
 import { toast } from 'sonner';
 import AddPetButton from './add-pet-button';
 import EditPetButton from './edit-pet-button';
-import { formatWeight } from '@/helpers/weight';
 
 interface PetsListClientProps {
 	pets: Promise<PaginatedData<PetWithTutorAndBreed>>;
@@ -73,18 +84,22 @@ const PetsListClient = ({
 	];
 
 	const renderRow = (pet: PetWithTutorAndBreed) => {
+		const firstName = pet.tutor.user.name.split(' ')[0];
+		const whatsappUrl = `https://wa.me/55${pet.tutor.phone.replace(/\D/g, '')}/?text=Ol%C3%A1,%20tudo%20bem%3F%20Gostaria%20de%20falar%20com%20${firstName}%20sobre%20${pet.gender === 'female' ? 'a' : 'o'}%20${pet.name}`;
+
 		return (
 			<TableRow key={pet.id} className='group'>
 				<TableCell className='flex gap-4 items-center'>
-					<Avatar className='h-10 w-10 border'>
+					<Avatar className='h-10 w-10 rounded-full' draggable={false}>
 						{pet.photo ? (
 							<AvatarImage src={pet.photo} alt={pet.name} />
 						) : (
-							<AvatarFallback className='bg-primary text-accent-foreground'>
+							<AvatarFallback className='rounded-full'>
 								{getInitials(pet.name)}
 							</AvatarFallback>
 						)}
 					</Avatar>
+
 					<span className='flex flex-col'>
 						<span className='font-medium'>{pet.name}</span>
 						<p className='text-xs text-muted-foreground'>
@@ -105,11 +120,19 @@ const PetsListClient = ({
 				</TableCell>
 
 				<TableCell>
-					<div className='flex flex-col'>
-						<span className='text-sm font-medium'>{pet.tutor.user.name}</span>
-						<span className='text-[10px] text-muted-foreground uppercase'>
-							{pet.tutor.phone}
-						</span>
+					<div className='flex gap-4'>
+						<div className='flex flex-col'>
+							<span className='text-sm font-medium'>{pet.tutor.user.name}</span>
+							<span className='text-[10px] text-muted-foreground uppercase'>
+								{pet.tutor.phone}
+							</span>
+						</div>
+						<Button asChild variant={'outline'}>
+							<Link target='_blank' href={whatsappUrl}>
+								<WhatsappIcon />
+								Conversar
+							</Link>
+						</Button>
 					</div>
 				</TableCell>
 
@@ -128,38 +151,96 @@ const PetsListClient = ({
 	};
 
 	const renderMobile = (pet: PetWithTutorAndBreed) => {
+		const firstName = pet.tutor.user.name.split(' ')[0];
+		const whatsappUrl = `https://wa.me/55${pet.tutor.phone.replace(/\D/g, '')}/?text=Ol%C3%A1,%20tudo%20bem%3F%20Gostaria%20de%20falar%20com%20${firstName}%20sobre%20${pet.gender === 'female' ? 'a' : 'o'}%20${pet.name}`;
+
 		return (
-			<div
-				key={pet.id}
-				className='p-4 border rounded-lg bg-card text-card-foreground shadow-sm'
-			>
-				<div className='flex gap-4 items-center justify-between'>
-					<div className='flex gap-3'>
-						<Avatar className='h-12 w-12 border'>
+			<div key={pet.id} className='flex flex-col gap-4'>
+				<div className='flex items-center justify-between'>
+					<div className='flex gap-4'>
+						<Avatar className='h-10 w-10 rounded-full' draggable={false}>
 							{pet.photo ? (
 								<AvatarImage src={pet.photo} alt={pet.name} />
 							) : (
-								<AvatarFallback>{getInitials(pet.name)}</AvatarFallback>
+								<AvatarFallback className='rounded-full'>
+									{getInitials(pet.name)}
+								</AvatarFallback>
 							)}
 						</Avatar>
 
-						<div className='flex flex-col'>
+						<span className='flex flex-col'>
 							<h3 className='font-bold'>{pet.name}</h3>
 							<p className='text-xs text-muted-foreground'>
-								{pet.breed.name} ({pet.gender === 'male' ? 'M' : 'F'})
+								{pet.breed.specie.name} • {pet.breed.name} • {pet.color} •{' '}
+								<Badge variant={pet.sterile ? 'default' : 'outline'}>
+									{pet.sterile ? 'Castrado' : 'Fértil'}
+								</Badge>
 							</p>
-							<p className='text-xs font-medium mt-1'>
-								Tutor: {pet.tutor.user.name}
-							</p>
-						</div>
+						</span>
 					</div>
 
-					<EditPetButton
-						pet={pet}
-						species={species}
-						breeds={breeds}
-						customers={customers}
-					/>
+					<span className='flex flex-col gap-2'>
+						<EditPetButton
+							pet={pet}
+							species={species}
+							breeds={breeds}
+							customers={customers}
+						/>
+
+						<DeleteButton action={() => handleDelete(pet.id)} />
+					</span>
+				</div>
+
+				<Separator />
+
+				<div className='flex flex-col gap-2'>
+					<p className='flex gap-2 items-center'>
+						<span className='text-sm font-semibold'>
+							{pet.gender === 'female' ? (
+								<VenusIcon className='w-4 h-4' />
+							) : (
+								<MarsIcon className='w-4 h-4' />
+							)}
+						</span>
+						<span className='text-sm'>
+							{pet.gender === 'female' ? 'Fêmea' : 'Macho'}
+						</span>
+					</p>
+
+					<p className='flex gap-2 items-center'>
+						<span className='text-sm font-semibold'>
+							<CalendarIcon className='w-4 h-4' />
+						</span>
+						<span className='text-sm'>
+							{calculateAge(new Date(pet.birthDate))}
+						</span>
+					</p>
+
+					<p className='flex gap-2 items-center'>
+						<span className='text-sm font-semibold'>
+							<WeightIcon className='w-4 h-4' />
+						</span>
+						<span className='text-sm'>{formatWeight(pet.weightInGrams)}</span>
+					</p>
+				</div>
+
+				<Separator />
+
+				<div className='flex flex-col gap-2'>
+					<p className='flex gap-2 items-center'>
+						<span className='text-sm font-semibold'>
+							<UserRoundIcon className='w-4 h-4' />
+						</span>
+						<span className='flex items-center text-sm gap-4'>
+							Tutor: {pet.tutor.user.name}
+							<Button asChild variant={'outline'}>
+								<Link target='_blank' href={whatsappUrl}>
+									<WhatsappIcon />
+									Conversar
+								</Link>
+							</Button>
+						</span>
+					</p>
 				</div>
 			</div>
 		);

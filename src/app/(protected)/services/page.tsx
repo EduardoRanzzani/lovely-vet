@@ -25,9 +25,9 @@ const ServicesPage = async ({ searchParams }: ServicesPageProps) => {
 		<PageContainer>
 			<PageHeader>
 				<PageHeaderContent>
-					<PageTitle>Listagem de Serviços Prestados</PageTitle>
+					<PageTitle>Listagem de Serviços Ofertados</PageTitle>
 					<PageDescription>
-						Listagem de todos os pets cadastrados no sistema
+						Listagem de todos os serviços ofertados cadastrados no sistema
 					</PageDescription>
 				</PageHeaderContent>
 			</PageHeader>

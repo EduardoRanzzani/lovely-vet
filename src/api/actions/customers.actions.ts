@@ -11,33 +11,70 @@ import { PaginatedData } from '../config/consts';
 import {
 	createCustomerWithUserSchema,
 	CustomerWithUser,
-	OnboardingCustomerSchema,
+	onboardingCustomerSchema,
 } from '../schema/customers.schema';
 import { createNewClerkUser } from './clerk.actions';
 
-export const onboardingCustomer = async (data: OnboardingCustomerSchema) => {
+export const onboardingCustomer = actionClient
+	.schema(onboardingCustomerSchema)
+	.action(async ({ parsedInput }) => {
+		const authenticatedUser = await currentUser();
+		if (!authenticatedUser) throw new Error('Usuário não autenticado');
+
+		const databaseUser = await db.query.usersTable.findFirst({
+			where: eq(usersTable.clerkUserId, authenticatedUser.id),
+		});
+		if (!databaseUser) throw new Error('Usuário não cadastrado no sistema');
+
+		await db
+			.insert(customersTable)
+			.values({
+				userId: databaseUser.id,
+				phone: parsedInput.phone,
+				cpf: parsedInput.cpf,
+				gender: parsedInput.gender,
+				postalCode: parsedInput.postalCode,
+				address: parsedInput.address,
+				addressNumber: parsedInput.addressNumber || 'S/N',
+				neighborhood: parsedInput.neighborhood,
+				city: parsedInput.city,
+				state: parsedInput.state,
+			})
+			.onConflictDoUpdate({
+				target: customersTable.cpf,
+				set: {
+					userId: databaseUser.id,
+					phone: parsedInput.phone,
+					gender: parsedInput.gender,
+					postalCode: parsedInput.postalCode,
+					address: parsedInput.address,
+					addressNumber: parsedInput.addressNumber || 'S/N',
+					neighborhood: parsedInput.neighborhood,
+					city: parsedInput.city,
+					state: parsedInput.state,
+					updatedAt: new Date(),
+				},
+			})
+			.returning();
+
+		revalidatePath('/customers');
+	});
+
+export const getCustomers = async (): Promise<CustomerWithUser[]> => {
 	const authenticatedUser = await currentUser();
 	if (!authenticatedUser) throw new Error('Usuário não autenticado');
 
-	const databaseUser = await db.query.usersTable.findFirst({
-		where: eq(usersTable.clerkUserId, authenticatedUser.id),
-	});
-	if (!databaseUser) throw new Error('Usuário não cadastrado no sistema');
+	// Usando select tradicional para permitir o join e a ordenação por outra tabela
+	const customers = await db
+		.select()
+		.from(customersTable)
+		.leftJoin(usersTable, eq(customersTable.userId, usersTable.id))
+		.orderBy(asc(usersTable.name));
 
-	await db.insert(customersTable).values({
-		userId: databaseUser.id,
-		phone: data.phone,
-		cpf: data.cpf,
-		gender: data.sex,
-		postalCode: data.postalCode,
-		address: data.address,
-		addressNumber: data.addressNumber,
-		neighborhood: data.neighborhood,
-		city: data.city,
-		state: data.state,
-	});
-
-	revalidatePath('/dashboard');
+	return customers.map((row) => ({
+		...row.customers,
+		user: row.users,
+	})) as CustomerWithUser[];
 };
 
 export const getCustomersPaginated = async (
@@ -107,95 +144,6 @@ export const getCustomersPaginated = async (
 	};
 };
 
-// export const upsertCustomer = async (data: CreateCustomerWithUserSchema) => {
-// 	const authenticatedUser = await currentUser();
-// 	if (!authenticatedUser) throw new Error('Usuário não autenticado');
-
-// 	let clerkUserId;
-
-// 	if (data.userId) {
-// 		clerkUserId = data.userId;
-// 	} else {
-// 		const newClerkUser = await createNewClerkUser(data);
-// 		clerkUserId = newClerkUser.id;
-// 	}
-
-// 	const [newUser] = await db
-// 		.insert(usersTable)
-// 		.values({
-// 			name: data.name,
-// 			email: data.email,
-// 			image: data.image,
-// 			clerkUserId: clerkUserId,
-// 			role: 'customer',
-// 		})
-// 		.onConflictDoUpdate({
-// 			target: usersTable.clerkUserId,
-// 			set: {
-// 				name: data.name,
-// 				email: data.email,
-// 				image: data.image,
-// 				updatedAt: new Date(),
-// 			},
-// 		})
-// 		.returning();
-
-// 	if (!newUser) throw new Error('Falha ao criar usuário base no sistema');
-
-// 	await db
-// 		.insert(customersTable)
-// 		.values({
-// 			userId: newUser.id,
-// 			phone: data.phone,
-// 			cpf: data.cpf,
-// 			sex: data.sex,
-// 			email: data.email,
-// 			postalCode: data.postalCode,
-// 			address: data.address,
-// 			addressNumber: data.addressNumber || 'S/N',
-// 			neighborhood: data.neighborhood,
-// 			city: data.city,
-// 			state: data.state,
-// 		})
-// 		.onConflictDoUpdate({
-// 			target: customersTable.cpf,
-// 			set: {
-// 				userId: newUser.id,
-// 				phone: data.phone,
-// 				cpf: data.cpf,
-// 				sex: data.sex,
-// 				email: data.email,
-// 				postalCode: data.postalCode,
-// 				address: data.address,
-// 				addressNumber: data.addressNumber || 'S/N',
-// 				neighborhood: data.neighborhood,
-// 				city: data.city,
-// 				state: data.state,
-// 				updatedAt: new Date(),
-// 			},
-// 		})
-// 		.returning();
-
-// 	revalidatePath('/customers');
-// };
-
-export const getCustomers = async (): Promise<CustomerWithUser[]> => {
-	const authenticatedUser = await currentUser();
-	if (!authenticatedUser) throw new Error('Usuário não autenticado');
-
-	// Usando select tradicional para permitir o join e a ordenação por outra tabela
-	const customers = await db
-		.select()
-		.from(customersTable)
-		.leftJoin(usersTable, eq(customersTable.userId, usersTable.id))
-		.orderBy(asc(usersTable.name));
-
-	return customers.map((row) => ({
-		...row.customers,
-		user: row.users,
-	})) as CustomerWithUser[];
-};
-
 export const upsertCustomer = actionClient
 	.schema(createCustomerWithUserSchema)
 	.action(async ({ parsedInput }) => {
@@ -209,14 +157,10 @@ export const upsertCustomer = actionClient
 		});
 
 		if (existingUser) {
-			clerkUserId = existingUser.id;
+			clerkUserId = existingUser.clerkUserId;
 		} else {
-			if (parsedInput.userId) {
-				clerkUserId = parsedInput.userId;
-			} else {
-				const newClerkUser = await createNewClerkUser(parsedInput);
-				clerkUserId = newClerkUser.id;
-			}
+			const newClerkUser = await createNewClerkUser(parsedInput);
+			clerkUserId = newClerkUser.id;
 		}
 
 		const [newUser] = await db
@@ -277,7 +221,7 @@ export const upsertCustomer = actionClient
 	});
 
 export const deleteCustomer = actionClient
-	.schema(z.object({ id: z.string().uuid() }))
+	.schema(z.object({ id: z.uuid() }))
 	.action(async ({ parsedInput }) => {
 		const authenticatedUser = await currentUser();
 		if (!authenticatedUser) throw new Error('Usuário não autenticado');

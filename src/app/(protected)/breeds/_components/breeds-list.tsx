@@ -71,14 +71,18 @@ const BreedsListClient = ({ breeds, species }: BreedsListClientProps) => {
 
 	const renderMobile = (breed: BreedsWithSpecies) => {
 		return (
-			<div key={breed.id}>
-				<div className='flex gap-4 items-center justify-between'>
+			<div key={breed.id} className='flex flex-col gap-4'>
+				<div className='flex items-center justify-between'>
 					<span className='flex flex-col gap-2'>
-						<h3>{breed.name}</h3>
-						<p className='text-xs'>{breed.specie.name}</p>
+						<h3 className='font-bold'>{breed.name}</h3>
+						<p className='text-xs text-muted-foreground'>{breed.specie.name}</p>
 					</span>
 
-					<EditBreedButton breed={breed} species={species} />
+					<div className='flex flex-col gap-2'>
+						<EditBreedButton breed={breed} species={species} />
+
+						<DeleteButton action={() => handleDelete(breed.id)} />
+					</div>
 				</div>
 			</div>
 		);

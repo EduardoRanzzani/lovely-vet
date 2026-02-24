@@ -20,7 +20,9 @@ const EditServiceButton = ({ service }: EditServiceButtonProps) => {
 				</Button>
 			</DialogTrigger>
 
-			<ServiceFormClient service={service} onSuccess={() => isOpen(false)} />
+			{isOpen && (
+				<ServiceFormClient service={service} onSuccess={() => isOpen(false)} />
+			)}
 		</Dialog>
 	);
 };

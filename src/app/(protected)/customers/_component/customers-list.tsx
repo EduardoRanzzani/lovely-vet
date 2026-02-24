@@ -1,10 +1,12 @@
 'use client';
 
+import { deleteCustomer } from '@/api/actions/customers.actions';
 import { MAX_PAGE_SIZE, PaginatedData } from '@/api/config/consts';
 import { CustomerWithUser } from '@/api/schema/customers.schema';
 import { getInitials } from '@/api/util';
 import { GoogleMapsIcon } from '@/components/icons/icon-googlemaps';
 import { WhatsappIcon } from '@/components/icons/icon-whatsapp';
+import DeleteButton from '@/components/list/delete-button';
 import SearchInput from '@/components/list/search-input';
 import TableComponent from '@/components/list/table-component';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -13,9 +15,11 @@ import { Separator } from '@/components/ui/separator';
 import { TableCell, TableRow } from '@/components/ui/table';
 import { handleNavigation } from '@/lib/utils';
 import { IdCardIcon, MapPinIcon, PhoneIcon } from 'lucide-react';
+import { useAction } from 'next-safe-action/hooks';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { use } from 'react';
+import { toast } from 'sonner';
 import AddCustomerButton from './add-customer-button';
 import EditCustomerButton from './edit-customer-button';
 
@@ -33,6 +37,24 @@ const CustomersListClient = ({ customers }: CustomersListClientProps) => {
 		handleNavigation(params);
 	};
 
+	const handleDelete = (customerId: string) => {
+		deleteCustomerAction.execute({
+			id: customerId,
+		});
+	};
+
+	const deleteCustomerAction = useAction(deleteCustomer, {
+		onSuccess: () => {
+			toast.success('Cliente deletado com sucesso!');
+		},
+		onError: (err) => {
+			console.error('Erro ao deletar cliente:', err);
+			toast.error(
+				'Ocorreu um erro ao tentar deletar o cliente. Tente novamente mais tarde.',
+			);
+		},
+	});
+
 	const columns = [
 		{ header: 'Nome', accessorKey: 'name' },
 		{ header: 'CPF', accessorKey: 'cpf' },
@@ -42,7 +64,10 @@ const CustomersListClient = ({ customers }: CustomersListClientProps) => {
 	];
 
 	const renderRow = (customer: CustomerWithUser) => {
+		const firstName = customer.user.name.split(' ')[0];
+		const whatsappUrl = `https://wa.me/55${customer.phone.replace(/\D/g, '')}/?text=Ol%C3%A1,%20tudo%20bem%3F%20Gostaria%20de%20falar%20com%20${firstName}`;
 		const fullAddress = `${customer.address}, ${customer.addressNumber} - ${customer.neighborhood}. ${customer.city}/${customer.state}`;
+		const googleMapsUrl = `https://www.google.com/maps/place/${fullAddress}`;
 
 		return (
 			<TableRow key={customer.id}>
@@ -64,10 +89,32 @@ const CustomersListClient = ({ customers }: CustomersListClientProps) => {
 					</span>
 				</TableCell>
 				<TableCell>{customer.cpf}</TableCell>
-				<TableCell>{customer.phone}</TableCell>
-				<TableCell>{fullAddress}</TableCell>
-				<TableCell className='w-20'>
+				<TableCell>
+					<div className='flex items-center gap-4'>
+						<span>{customer.phone}</span>
+						<Button asChild variant={'outline'}>
+							<Link target='_blank' href={whatsappUrl}>
+								<WhatsappIcon />
+								Conversar
+							</Link>
+						</Button>
+					</div>
+				</TableCell>
+				<TableCell>
+					<div className='flex items-center gap-4'>
+						<span className='hidden 2xl:flex'>{fullAddress}</span>
+						<Button asChild variant={'outline'}>
+							<Link href={googleMapsUrl} target='_blank'>
+								<GoogleMapsIcon className='w-4 h-4' />
+								Abrir no Google Maps
+							</Link>
+						</Button>
+					</div>
+				</TableCell>
+				<TableCell className='w-20 space-x-2'>
 					<EditCustomerButton customer={customer} />
+
+					<DeleteButton action={() => handleDelete(customer.id)} />
 				</TableCell>
 			</TableRow>
 		);
@@ -80,7 +127,7 @@ const CustomersListClient = ({ customers }: CustomersListClientProps) => {
 
 		return (
 			<div key={customer.id} className='flex flex-col gap-4'>
-				<span className='flex items-center justify-between'>
+				<div className='flex items-center justify-between'>
 					<div className='flex gap-4'>
 						<Avatar className='h-10 w-10 rounded-full' draggable={false}>
 							{customer.user.image ? (
@@ -103,8 +150,12 @@ const CustomersListClient = ({ customers }: CustomersListClientProps) => {
 						</span>
 					</div>
 
-					<EditCustomerButton customer={customer} />
-				</span>
+					<span className='flex flex-col gap-2'>
+						<EditCustomerButton customer={customer} />
+
+						<DeleteButton action={() => handleDelete(customer.id)} />
+					</span>
+				</div>
 
 				<Separator />
 
@@ -126,7 +177,7 @@ const CustomersListClient = ({ customers }: CustomersListClientProps) => {
 					<Button asChild variant={'outline'}>
 						<Link target='_blank' href={whatsappUrl}>
 							<WhatsappIcon />
-							Enviar Whatsapp
+							Conversar
 						</Link>
 					</Button>
 

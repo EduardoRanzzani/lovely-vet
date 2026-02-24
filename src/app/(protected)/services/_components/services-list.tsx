@@ -6,6 +6,7 @@ import { Services } from '@/api/schema/services.schema';
 import DeleteButton from '@/components/list/delete-button';
 import SearchInput from '@/components/list/search-input';
 import TableComponent from '@/components/list/table-component';
+import { Separator } from '@/components/ui/separator';
 import { TableCell, TableRow } from '@/components/ui/table';
 import { formatCurrencyFromCents } from '@/helpers/currency';
 import { handleNavigation } from '@/lib/utils';
@@ -75,16 +76,34 @@ const ServicesListClient = ({ services }: ServicesListClientProps) => {
 		return (
 			<div key={service.id} className='flex flex-col gap-4'>
 				<div className='flex items-center justify-between'>
-					<h3 className='text-xl font-bold'>{service.name}</h3>
-					<EditServiceButton service={service} />
+					<h3 className='font-bold'>{service.name}</h3>
+
+					<div className='flex flex-col gap-2'>
+						<EditServiceButton service={service} />
+
+						<DeleteButton action={() => handleDelete(service.id)} />
+					</div>
 				</div>
-				<p className='flex items-center gap-4'>
-					<NotepadTextIcon className='h-5 w-5' /> {service.description}
-				</p>
-				<span className='flex items-center gap-4'>
-					<DollarSignIcon className='h-5 w-5' />
-					<p>{formatCurrencyFromCents(service.priceInCents)}</p>
-				</span>
+
+				<Separator />
+
+				<div className='flex flex-col gap-2'>
+					<p className='flex items-center gap-4'>
+						<span className='text-sm font-semibold'>
+							<NotepadTextIcon className='h-4 w-4' />
+						</span>
+						<span className='text-sm'>{service.description}</span>
+					</p>
+
+					<p className='flex items-center gap-4'>
+						<span className='text-sm font-semibold'>
+							<DollarSignIcon className='h-4 w-4' />
+						</span>
+						<span className='text-sm'>
+							{formatCurrencyFromCents(service.priceInCents)}
+						</span>
+					</p>
+				</div>
 			</div>
 		);
 	};

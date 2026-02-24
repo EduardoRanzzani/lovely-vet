@@ -10,6 +10,7 @@ import {
 	SidebarMenu,
 	SidebarMenuButton,
 	SidebarMenuItem,
+	useSidebar,
 } from '@/components/ui/sidebar';
 import { useUser } from '@clerk/nextjs';
 import {
@@ -35,6 +36,8 @@ interface sidebarItems {
 
 const AppSidebar = () => {
 	const { user } = useUser();
+	const { setOpenMobile } = useSidebar();
+
 	const navUser: NavUserType = {
 		image: user?.imageUrl as string,
 		name: user?.fullName as string,
@@ -124,7 +127,11 @@ const AppSidebar = () => {
 							.map((item) => (
 								<SidebarMenuItem key={item.title}>
 									<SidebarMenuButton asChild isActive={pathname === item.url}>
-										<Link href={item.url} className='flex justify-between'>
+										<Link
+											href={item.url}
+											className='flex justify-between'
+											onClick={() => setOpenMobile(false)}
+										>
 											<span className='flex items-center gap-2'>
 												<item.icon className='h-5 w-5' />
 												<p
@@ -147,7 +154,11 @@ const AppSidebar = () => {
 							{settings.map((item) => (
 								<SidebarMenuItem key={item.title}>
 									<SidebarMenuButton asChild isActive={pathname === item.url}>
-										<Link href={item.url} className='flex justify-between'>
+										<Link
+											href={item.url}
+											className='flex justify-between'
+											onClick={() => setOpenMobile(false)}
+										>
 											<span className='flex items-center gap-2'>
 												<item.icon className='h-5 w-5' />
 												<p

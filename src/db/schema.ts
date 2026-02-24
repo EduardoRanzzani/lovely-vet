@@ -59,10 +59,13 @@ export const doctorsTable = pgTable('doctors', {
 		.references(() => usersTable.id, { onDelete: 'cascade' }),
 	phone: text('phone').notNull(),
 	cpf: text('cpf').notNull().unique(),
+	gender: sexEnum('gender').notNull(),
 	licenseNumber: text('license_number').notNull(),
 	licenseState: text('license_state').notNull(),
 	specialty: text('specialty'),
 	// Uso de TIME para facilitar lógica de agenda
+	availableFromWeekDay: integer('available_from_week_day').notNull().default(1),
+	availableToWeekDay: integer('available_to_week_day').notNull().default(5),
 	availableFromTime: time('available_from_time').notNull(),
 	availableToTime: time('available_to_time').notNull(),
 	createdAt: timestamp('created_at').defaultNow().notNull(),

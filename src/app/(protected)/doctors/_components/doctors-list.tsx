@@ -8,8 +8,9 @@ import TableComponent from '@/components/list/table-component';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
 import { TableCell, TableRow } from '@/components/ui/table';
+import { getWeekDay } from '@/helpers/week';
 import { handleNavigation } from '@/lib/utils';
-import { CalendarIcon, IdCardIcon, PhoneIcon } from 'lucide-react';
+import { CalendarIcon, ClockIcon, IdCardIcon, PhoneIcon } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
 import { use } from 'react';
 import AddDoctorButton from './add-doctor-button';
@@ -34,7 +35,7 @@ const DoctorsListClient = ({ doctors }: DoctorsListClientProps) => {
 		{ header: 'Email', accessorKey: 'email' },
 		{ header: 'CPF', accessorKey: 'cpf' },
 		{ header: 'Telefone', accessorKey: 'phone' },
-		{ header: 'Sexo', accessorKey: 'sex' },
+		{ header: 'Disponibilidade', accessorKey: 'available' },
 		{ header: 'Ações', accessorKey: 'actions' },
 	];
 
@@ -67,7 +68,9 @@ const DoctorsListClient = ({ doctors }: DoctorsListClientProps) => {
 				<TableCell>{doctor.cpf}</TableCell>
 				<TableCell>{doctor.phone}</TableCell>
 				<TableCell>
-					{doctor.sex === 'male' ? 'Masculino' : 'Feminino'}
+					{getWeekDay(doctor.availableFromWeekDay)} a{' '}
+					{getWeekDay(doctor.availableToWeekDay)} das {doctor.availableFromTime}{' '}
+					às {doctor.availableToTime}
 				</TableCell>
 				<TableCell>
 					<EditDoctorButton doctor={doctor} />
@@ -124,7 +127,17 @@ const DoctorsListClient = ({ doctors }: DoctorsListClientProps) => {
 							<CalendarIcon className='w-4 h-4' />
 						</span>
 						<span className='text-sm'>
-							{doctor.availableFromWeekDay}a {doctor.availableToWeekDay}
+							De {getWeekDay(doctor.availableFromWeekDay)} a{' '}
+							{getWeekDay(doctor.availableToWeekDay)}
+						</span>
+					</p>
+
+					<p className='flex gap-2 items-center'>
+						<span className='text-sm font-semibold'>
+							<ClockIcon className='w-4 h-4' />
+						</span>
+						<span className='text-sm'>
+							Das {doctor.availableFromTime} às {doctor.availableToTime}
 						</span>
 					</p>
 				</div>

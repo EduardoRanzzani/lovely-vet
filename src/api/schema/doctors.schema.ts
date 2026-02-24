@@ -7,22 +7,20 @@ export type DoctorsWithUser = typeof doctorsTable.$inferSelect & {
 
 export const createDoctorWithUserSchema = z
 	.object({
-		id: z.uuid().optional(),
-		userId: z.string().optional(),
+		id: z.uuid().optional().nullable(),
+		userId: z.string().optional().nullable(),
 		name: z.string().nonempty({ message: 'O campo Nome é obrigatório' }),
 		email: z.string().nonempty({ message: 'O campo Email é obrigatório' }),
 		image: z.string().optional(),
 		phone: z.string().nonempty({ message: 'O campo Telefone é obrigatório' }),
 		cpf: z.string().nonempty({ message: 'O campo CPF é obrigatório' }),
-		sex: z
+		gender: z
 			.enum(['male', 'female'])
 			.nonoptional({ message: 'O campo Sexo é obrigatório' }),
 		licenseNumber: z
 			.string()
-			.nonempty({ message: 'O campo Licença é obrigatório' }),
-		licenseState: z
-			.string()
-			.nonempty({ message: 'O campo Estado é obrigatório' }),
+			.nonempty({ message: 'O campo CRMV é obrigatório' }),
+		licenseState: z.string().nonempty({ message: 'O campo UF é obrigatório' }),
 		specialty: z
 			.string()
 			.nonempty({ message: 'O campo Especialidade é obrigatório' }),

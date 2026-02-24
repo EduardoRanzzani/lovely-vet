@@ -18,60 +18,54 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from '@/components/ui/dialog';
+import { Form } from '@/components/ui/form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useMutation } from '@tanstack/react-query';
-import { SaveIcon } from 'lucide-react';
+import { Loader2Icon, SaveIcon } from 'lucide-react';
+import { useAction } from 'next-safe-action/hooks';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 
 const OnboardingCustomerFormDialog = ({ isOpen }: { isOpen: boolean }) => {
-	const {
-		control,
-		register,
-		handleSubmit,
-		setValue,
-		formState: { errors },
-	} = useForm<OnboardingCustomerSchema>({
+	const form = useForm<OnboardingCustomerSchema>({
 		resolver: zodResolver(onboardingCustomerSchema),
+		shouldUnregister: true,
+		defaultValues: {
+			phone: '',
+			cpf: '',
+			gender: 'female',
+			postalCode: '',
+			address: '',
+			addressNumber: '',
+			neighborhood: '',
+			city: '',
+			state: '',
+		},
 	});
 
 	const handlePostalCodeChange = async (postalCode: string) => {
 		const fullAddress = await searchAddressByPostalCode(postalCode);
-		setValue('address', fullAddress.logradouro);
-		setValue('neighborhood', fullAddress.bairro);
-		setValue('city', fullAddress.localidade);
-		setValue('state', fullAddress.uf);
+		form.setValue('address', fullAddress.logradouro);
+		form.setValue('neighborhood', fullAddress.bairro);
+		form.setValue('city', fullAddress.localidade);
+		form.setValue('state', fullAddress.uf);
 	};
 
-	const resetForm = () => {
-		setValue('phone', '');
-		setValue('cpf', '');
-		setValue('sex', 'male');
-		setValue('postalCode', '');
-		setValue('address', '');
-		setValue('addressNumber', '');
-		setValue('neighborhood', '');
-		setValue('city', '');
-		setValue('state', '');
+	const formSubmit = (data: OnboardingCustomerSchema) => {
+		onboardingCustomerAction.execute({
+			...data,
+		});
 	};
 
-	const { mutate: handleCreateCustomer, isPending } = useMutation({
-		mutationFn: onboardingCustomer,
+	const onboardingCustomerAction = useAction(onboardingCustomer, {
 		onSuccess: () => {
 			toast.success('Dados atualizados com sucesso!');
-			resetForm();
+			form.reset();
 		},
 		onError: (error) => {
-			console.error(error);
-			toast.error(
-				'Não foi possível atualizar os dados. Tente novamente mais tarde',
-			);
+			console.error({ error });
+			toast.error('Ocorreu um erro ao salvar o cliente!');
 		},
 	});
-
-	const submitForm = (data: OnboardingCustomerSchema) => {
-		handleCreateCustomer(data);
-	};
 
 	return (
 		<Dialog open={isOpen}>
@@ -80,127 +74,134 @@ const OnboardingCustomerFormDialog = ({ isOpen }: { isOpen: boolean }) => {
 				onPointerDownOutside={(e) => e.preventDefault()}
 				showCloseButton={false}
 			>
-				<DialogHeader>
-					<DialogTitle>Complete seu cadastro</DialogTitle>
-					<DialogDescription>
-						Precisamos de mais alguns dados para finalizar o seu cadastro no
-						sistema.
-					</DialogDescription>
-				</DialogHeader>
-
-				<form
-					id='registerForm'
-					onSubmit={handleSubmit(submitForm)}
-					className='flex flex-col gap-2'
-				>
-					<span className='flex flex-col lg:flex-row gap-4'>
-						<InputFormMask
-							label='Telefone:'
-							control={control}
-							error={errors.phone?.message}
-							format='(##) #####-####'
-							mask='x'
-							name='phone'
-							className='w-full lg:w-[33%]'
-						/>
-
-						<InputFormMask
-							label='CPF:'
-							control={control}
-							error={errors.cpf?.message}
-							format='###.###.###-##'
-							mask='x'
-							name='cpf'
-							className='w-full lg:w-[33%]'
-						/>
-
-						<SelectForm
-							label='Sexo:'
-							control={control}
-							error={errors.sex?.message}
-							name='sex'
-							options={[
-								{
-									value: 'male',
-									label: 'Masculino',
-									key: 'male',
-								},
-								{
-									value: 'female',
-									label: 'Feminino',
-									key: 'female',
-								},
-							]}
-							className='w-full lg:w-[33%]'
-						/>
-					</span>
-
-					<span className='flex gap-4'>
-						<InputFormMask
-							label='CEP:'
-							control={control}
-							error={errors.postalCode?.message}
-							format='#####-###'
-							mask='x'
-							name='postalCode'
-							onBlur={(event) => handlePostalCodeChange(event.target.value)}
-						/>
-
-						<InputForm
-							label='Número:'
-							register={register}
-							error={errors.addressNumber?.message}
-							name='addressNumber'
-							type='number'
-						/>
-					</span>
-
-					<InputForm
-						label='Endereço:'
-						register={register}
-						name='address'
-						error={errors.address?.message}
-						disabled
-					/>
-
-					<InputForm
-						label='Bairro:'
-						register={register}
-						name='neighborhood'
-						error={errors.neighborhood?.message}
-						disabled
-					/>
-
-					<span className='flex gap-4'>
-						<InputForm
-							label='Cidade:'
-							register={register}
-							name='city'
-							error={errors.city?.message}
-							disabled
-						/>
-
-						<InputForm
-							label='Estado:'
-							register={register}
-							name='state'
-							error={errors.state?.message}
-							disabled
-						/>
-					</span>
-				</form>
-
-				<DialogFooter>
-					<Button
-						type='submit'
-						disabled={isPending}
-						className='w-full'
-						form='registerForm'
+				<Form {...form}>
+					<form
+						id='registerForm'
+						onSubmit={form.handleSubmit(formSubmit)}
+						className='flex flex-col gap-2'
 					>
-						<SaveIcon />
-						Salvar
-					</Button>
-				</DialogFooter>
+						<DialogHeader>
+							<DialogTitle>Complete seu cadastro</DialogTitle>
+							<DialogDescription>
+								Precisamos de mais alguns dados para finalizar o seu cadastro no
+								sistema.
+							</DialogDescription>
+						</DialogHeader>
+
+						<span className='flex flex-col lg:flex-row gap-4'>
+							<InputFormMask
+								label='Telefone:'
+								control={form.control}
+								error={form.formState.errors.phone?.message}
+								format='(##) #####-####'
+								mask='x'
+								name='phone'
+								className='w-full lg:w-[33%]'
+							/>
+
+							<InputFormMask
+								label='CPF:'
+								control={form.control}
+								error={form.formState.errors.cpf?.message}
+								format='###.###.###-##'
+								mask='x'
+								name='cpf'
+								className='w-full lg:w-[33%]'
+							/>
+
+							<SelectForm
+								label='Sexo:'
+								control={form.control}
+								error={form.formState.errors.gender?.message}
+								name='gender'
+								options={[
+									{
+										value: 'male',
+										label: 'Masculino',
+										key: 'male',
+									},
+									{
+										value: 'female',
+										label: 'Feminino',
+										key: 'female',
+									},
+								]}
+								className='w-full lg:w-[33%]'
+							/>
+						</span>
+
+						<span className='flex gap-4'>
+							<InputFormMask
+								label='CEP:'
+								control={form.control}
+								error={form.formState.errors.postalCode?.message}
+								format='#####-###'
+								mask='x'
+								name='postalCode'
+								onBlur={(event) => handlePostalCodeChange(event.target.value)}
+							/>
+
+							<InputForm
+								label='Número:'
+								register={form.register}
+								error={form.formState.errors.addressNumber?.message}
+								name='addressNumber'
+								type='number'
+							/>
+						</span>
+
+						<InputForm
+							label='Endereço:'
+							register={form.register}
+							name='address'
+							error={form.formState.errors.address?.message}
+							disabled
+						/>
+
+						<InputForm
+							label='Bairro:'
+							register={form.register}
+							name='neighborhood'
+							error={form.formState.errors.neighborhood?.message}
+							disabled
+						/>
+
+						<span className='flex gap-4'>
+							<InputForm
+								label='Cidade:'
+								register={form.register}
+								name='city'
+								error={form.formState.errors.city?.message}
+								disabled
+							/>
+
+							<InputForm
+								label='Estado:'
+								register={form.register}
+								name='state'
+								error={form.formState.errors.state?.message}
+								disabled
+							/>
+						</span>
+
+						<DialogFooter>
+							<Button
+								type='submit'
+								disabled={onboardingCustomerAction.isPending}
+								className='flex-1'
+							>
+								{onboardingCustomerAction.isPending ? (
+									<Loader2Icon className='h-5 w-5 animate-spin' />
+								) : (
+									<>
+										<SaveIcon className='mr-2 h-4 w-4' />
+										Salvar
+									</>
+								)}
+							</Button>
+						</DialogFooter>
+					</form>
+				</Form>
 			</DialogContent>
 		</Dialog>
 	);

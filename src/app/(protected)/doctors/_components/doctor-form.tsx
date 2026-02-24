@@ -19,9 +19,10 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from '@/components/ui/dialog';
+import { Form } from '@/components/ui/form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useMutation } from '@tanstack/react-query';
 import { BanIcon, Loader2Icon, SaveIcon } from 'lucide-react';
+import { useAction } from 'next-safe-action/hooks';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 
@@ -31,13 +32,7 @@ interface DoctorFormClientProps {
 }
 
 const DoctorFormClient = ({ doctor, onSuccess }: DoctorFormClientProps) => {
-	const {
-		register,
-		handleSubmit,
-		control,
-		reset,
-		formState: { errors },
-	} = useForm<CreateDoctorWithUserSchema>({
+	const form = useForm<CreateDoctorWithUserSchema>({
 		resolver: zodResolver(createDoctorWithUserSchema),
 		shouldUnregister: true,
 		defaultValues: {
@@ -46,40 +41,52 @@ const DoctorFormClient = ({ doctor, onSuccess }: DoctorFormClientProps) => {
 			email: doctor?.user?.email || '',
 			phone: doctor?.phone || '',
 			cpf: doctor?.cpf || '',
-			sex: doctor?.sex || 'female',
+			gender: (doctor?.gender as 'male' | 'female') || 'female',
 			licenseNumber: doctor?.licenseNumber || '',
 			licenseState: doctor?.licenseState || 'MS',
 			specialty: doctor?.specialty || '',
-			availableFromWeekDay: doctor?.availableFromWeekDay?.toString() || '1',
-			availableToWeekDay: doctor?.availableToWeekDay?.toString() || '5',
-			availableFromTime: doctor?.availableFromTime?.toString() || '08:00',
-			availableToTime: doctor?.availableToTime?.toString() || '19:00',
+			// Garantindo que números virem strings para o Select
+			availableFromWeekDay:
+				doctor?.availableFromWeekDay !== undefined
+					? String(doctor.availableFromWeekDay)
+					: '1',
+			availableToWeekDay:
+				doctor?.availableToWeekDay !== undefined
+					? String(doctor.availableToWeekDay)
+					: '5',
+			// Horários costumam vir como "HH:mm:ss" do banco, mas o select pode esperar "HH:mm"
+			availableFromTime: doctor?.availableFromTime
+				? doctor.availableFromTime.substring(0, 5)
+				: '08:00',
+			availableToTime: doctor?.availableToTime
+				? doctor.availableToTime.substring(0, 5)
+				: '19:00',
 		},
 	});
 
-	const { mutate: handleUpsertDoctor, isPending } = useMutation({
-		mutationFn: upsertDoctor,
+	const formSubmit = (data: CreateDoctorWithUserSchema) => {
+		upsertDoctorAction.execute({
+			...data,
+			id: doctor?.id,
+			userId: doctor?.user?.clerkUserId || '',
+		});
+	};
+
+	const upsertDoctorAction = useAction(upsertDoctor, {
 		onSuccess: () => {
 			toast.success(
 				doctor
 					? 'Veterinário atualizado com sucesso!'
 					: 'Veterinário cadastrado com sucesso!',
 			);
-			reset();
+			form.reset();
 			onSuccess?.();
 		},
 		onError: (error) => {
-			toast.error('Erro ao salvar o Veterinário: ' + error.message);
+			console.error({ error });
+			toast.error('Ocorreu um erro ao salvar o Veterinário: ' + { error });
 		},
 	});
-
-	const formSubmit = (data: CreateDoctorWithUserSchema) => {
-		handleUpsertDoctor({
-			...data,
-			id: doctor?.id,
-			userId: doctor?.user.clerkUserId || '',
-		});
-	};
 
 	return (
 		<DialogContent
@@ -87,177 +94,179 @@ const DoctorFormClient = ({ doctor, onSuccess }: DoctorFormClientProps) => {
 			showCloseButton={false}
 			className='max-w-lg'
 		>
-			<DialogHeader>
-				<DialogTitle>
-					{doctor ? 'Editar Veterinário' : 'Cadastrar Veterinário'}
-				</DialogTitle>
-				<DialogDescription>
-					{doctor
-						? 'Atualize as informações do Veterinário selecionado'
-						: 'Adicione um novo Veterinário ao sistema'}
-				</DialogDescription>
-			</DialogHeader>
+			<Form {...form}>
+				<form
+					id='registerForm'
+					onSubmit={form.handleSubmit(formSubmit)}
+					className='flex flex-col gap-2'
+				>
+					<DialogHeader>
+						<DialogTitle>
+							{doctor ? 'Editar Veterinário' : 'Cadastrar Veterinário'}
+						</DialogTitle>
+						<DialogDescription>
+							{doctor
+								? 'Atualize as informações do Veterinário selecionado'
+								: 'Adicione um novo Veterinário ao sistema'}
+						</DialogDescription>
+					</DialogHeader>
 
-			<form
-				id='registerForm'
-				onSubmit={handleSubmit(formSubmit)}
-				className='flex flex-col gap-2'
-			>
-				<input type='text' {...register('userId')} className='hidden' />
+					<input type='text' {...form.register('userId')} className='hidden' />
 
-				<InputForm
-					label='Nome: '
-					register={register}
-					name='name'
-					error={errors.name?.message}
-				/>
-
-				<InputForm
-					label='Email: '
-					register={register}
-					name='email'
-					error={errors.email?.message}
-				/>
-
-				<div className='w-full flex flex-col lg:flex-row gap-2'>
-					<InputFormMask
-						label='Telefone:'
-						control={control}
-						error={errors.phone?.message}
-						format='(##) #####-####'
-						mask='x'
-						name='phone'
-						className='w-full lg:w-[33%]'
-					/>
-
-					<InputFormMask
-						label='CPF:'
-						control={control}
-						error={errors.cpf?.message}
-						format='###.###.###-##'
-						mask='x'
-						name='cpf'
-						className='w-full lg:w-[33%]'
-					/>
-
-					<SelectForm
-						label='Sexo:'
-						control={control}
-						error={errors.sex?.message}
-						name='sex'
-						options={[
-							{
-								value: 'male',
-								label: 'Masculino',
-							},
-							{
-								value: 'female',
-								label: 'Feminino',
-							},
-						]}
-						className='w-full lg:w-[33%]'
-					/>
-				</div>
-
-				<div className='flex flex-col lg:flex-row w-full gap-2'>
 					<InputForm
-						label='CRMV:'
-						register={register}
-						name='licenseNumber'
-						error={errors.licenseNumber?.message}
-						className='w-full lg:w-1/4'
-					/>
-
-					<SelectForm
-						label='UF:'
-						control={control}
-						error={errors.licenseState?.message}
-						name='licenseState'
-						options={ufs}
-						className='w-full lg:w-1/4'
+						label='Nome: '
+						register={form.register}
+						name='name'
+						error={form.formState.errors.name?.message}
 					/>
 
 					<InputForm
-						label='Especialidade: '
-						register={register}
-						name='specialty'
-						error={errors.specialty?.message}
-						className='w-full lg:w-2/4'
-					/>
-				</div>
-
-				<div className='flex flex-col lg:flex-row w-full gap-2'>
-					<SelectForm
-						label='Disponível de: '
-						control={control}
-						name='availableFromWeekDay'
-						options={weekDays}
-						error={errors.availableFromWeekDay?.message}
+						label='Email: '
+						register={form.register}
+						name='email'
+						error={form.formState.errors.email?.message}
 					/>
 
-					<SelectForm
-						label='Disponível até: '
-						control={control}
-						name='availableToWeekDay'
-						options={weekDays}
-						error={errors.availableToWeekDay?.message}
-					/>
-				</div>
+					<div className='w-full flex flex-col lg:flex-row gap-2'>
+						<InputFormMask
+							label='Telefone:'
+							control={form.control}
+							error={form.formState.errors.phone?.message}
+							format='(##) #####-####'
+							mask='x'
+							name='phone'
+							className='w-full lg:w-[33%]'
+						/>
 
-				<div className='flex flex-col lg:flex-row w-full gap-2'>
-					<SelectForm
-						label='Horário de início:'
-						name='availableFromTime'
-						control={control}
-						options={timesOfDay}
-						className='w-full'
-						error={errors.availableFromTime?.message}
-					/>
+						<InputFormMask
+							label='CPF:'
+							control={form.control}
+							error={form.formState.errors.cpf?.message}
+							format='###.###.###-##'
+							mask='x'
+							name='cpf'
+							className='w-full lg:w-[33%]'
+						/>
 
-					<SelectForm
-						label='Horário de Término:'
-						name='availableToTime'
-						control={control}
-						options={timesOfDay}
-						className='w-full'
-						error={errors.availableToTime?.message}
-					/>
-				</div>
-			</form>
+						<SelectForm
+							label='Sexo:'
+							control={form.control}
+							error={form.formState.errors.gender?.message}
+							name='gender'
+							options={[
+								{
+									value: 'male',
+									label: 'Masculino',
+								},
+								{
+									value: 'female',
+									label: 'Feminino',
+								},
+							]}
+							className='w-full lg:w-[33%]'
+						/>
+					</div>
 
-			<DialogFooter>
-				<div className='flex flex-col lg:flex-row gap-2 w-full'>
-					<DialogClose asChild>
-						<Button
-							type='button'
-							variant={'destructive'}
-							onClick={() => {
-								if (!isPending) reset();
-							}}
-							className='flex-1'
-						>
-							<BanIcon />
-							Cancelar
-						</Button>
-					</DialogClose>
+					<div className='flex flex-col lg:flex-row w-full gap-2'>
+						<InputForm
+							label='CRMV:'
+							register={form.register}
+							name='licenseNumber'
+							error={form.formState.errors.licenseNumber?.message}
+							className='w-full lg:w-1/4'
+						/>
 
-					<Button
-						type='submit'
-						disabled={isPending}
-						form='registerForm'
-						className='flex-1'
-					>
-						{isPending ? (
-							<Loader2Icon className='h-5 w-5 animate-spin' />
-						) : (
-							<>
-								<SaveIcon className='mr-2 h-4 w-4' />
-								Salvar
-							</>
-						)}
-					</Button>
-				</div>
-			</DialogFooter>
+						<SelectForm
+							label='UF:'
+							control={form.control}
+							error={form.formState.errors.licenseState?.message}
+							name='licenseState'
+							options={ufs}
+							className='w-full lg:w-1/4'
+						/>
+
+						<InputForm
+							label='Especialidade: '
+							register={form.register}
+							name='specialty'
+							error={form.formState.errors.specialty?.message}
+							className='w-full lg:w-2/4'
+						/>
+					</div>
+
+					<div className='flex flex-col lg:flex-row w-full gap-2'>
+						<SelectForm
+							label='Disponível de: '
+							control={form.control}
+							name='availableFromWeekDay'
+							options={weekDays}
+							error={form.formState.errors.availableFromWeekDay?.message}
+						/>
+
+						<SelectForm
+							label='Disponível até: '
+							control={form.control}
+							name='availableToWeekDay'
+							options={weekDays}
+							error={form.formState.errors.availableToWeekDay?.message}
+						/>
+					</div>
+
+					<div className='flex flex-col lg:flex-row w-full gap-2'>
+						<SelectForm
+							label='Horário de início:'
+							name='availableFromTime'
+							control={form.control}
+							options={timesOfDay}
+							className='w-full'
+							error={form.formState.errors.availableFromTime?.message}
+						/>
+
+						<SelectForm
+							label='Horário de Término:'
+							name='availableToTime'
+							control={form.control}
+							options={timesOfDay}
+							className='w-full'
+							error={form.formState.errors.availableToTime?.message}
+						/>
+					</div>
+
+					<DialogFooter>
+						<div className='flex flex-col lg:flex-row gap-2 w-full'>
+							<DialogClose asChild>
+								<Button
+									type='button'
+									variant={'destructive'}
+									onClick={() => {
+										if (!upsertDoctorAction.isPending) form.reset();
+									}}
+									className='flex-1'
+								>
+									<BanIcon />
+									Cancelar
+								</Button>
+							</DialogClose>
+
+							<Button
+								type='submit'
+								disabled={upsertDoctorAction.isPending}
+								form='registerForm'
+								className='flex-1'
+							>
+								{upsertDoctorAction.isPending ? (
+									<Loader2Icon className='h-5 w-5 animate-spin' />
+								) : (
+									<>
+										<SaveIcon className='mr-2 h-4 w-4' />
+										Salvar
+									</>
+								)}
+							</Button>
+						</div>
+					</DialogFooter>
+				</form>
+			</Form>
 		</DialogContent>
 	);
 };

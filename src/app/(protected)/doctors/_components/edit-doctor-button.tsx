@@ -21,8 +21,9 @@ const EditDoctorButton = ({ doctor }: EditDoctorButtonProps) => {
 					<PencilIcon />
 				</Button>
 			</DialogTrigger>
-
-			<DoctorFormClient doctor={doctor} onSuccess={() => setIsOpen(false)} />
+			{isOpen && (
+				<DoctorFormClient doctor={doctor} onSuccess={() => setIsOpen(false)} />
+			)}
 		</Dialog>
 	);
 };
