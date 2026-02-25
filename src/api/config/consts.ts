@@ -367,3 +367,20 @@ export const ufs = [
 		value: 'TO',
 	},
 ];
+
+export const convertAppointmentStatus = (status: string) => {
+	switch (status) {
+		case 'pending':
+			return 'Pendente';
+		case 'confirmed':
+			return 'Confirmado';
+		case 'in_progress':
+			return 'Em Andamento';
+		case 'completed':
+			return 'Concluído';
+		case 'canceled':
+			return 'Cancelado';
+		default:
+			return 'Cliente não encontrado';
+	}
+};

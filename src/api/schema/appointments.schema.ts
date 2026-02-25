@@ -1,5 +1,7 @@
 import {
+	appointmentItemsTable,
 	appointmentsTable,
+	customersTable,
 	doctorsTable,
 	petsTable,
 	servicesTable,
@@ -7,29 +9,27 @@ import {
 } from '@/db/schema';
 import z from 'zod';
 
-export type AppointmentsWithPetAndServiceAndDoctor =
+// Tipo complexo para listagem (Join de Pet, Cliente do Pet e Médico)
+export type AppointmentsWithRelations =
 	typeof appointmentsTable.$inferSelect & {
-		pet: typeof petsTable.$inferSelect;
-		service: typeof servicesTable.$inferSelect;
+		pet: typeof petsTable.$inferSelect & {
+			customer: typeof customersTable.$inferSelect & {
+				user: typeof usersTable.$inferSelect;
+			};
+		};
 		doctor: typeof doctorsTable.$inferSelect & {
 			user: typeof usersTable.$inferSelect;
 		};
+		items: (typeof appointmentItemsTable.$inferSelect & {
+			service: typeof servicesTable.$inferSelect;
+		})[];
 	};
 
 export const createAppointmentSchema = z.object({
-	id: z.uuid().optional(),
-	petId: z
-		.uuid({ message: 'O pet é obrigatório' })
-		.nonempty({ message: 'O pet é obrigatório' }),
-	serviceId: z
-		.uuid({ message: 'O serviço é obrigatório' })
-		.nonempty({ message: 'O serviço é obrigatório' }),
-	veterinarianId: z
-		.uuid({ message: 'O veterinário é obrigatório' })
-		.nonempty({ message: 'O veterinário é obrigatório' }),
-	scheduledAt: z
-		.date({ message: 'A data é obrigatória' })
-		.nonoptional({ message: 'A data é obrigatória' }),
+	id: z.uuid().optional().nullable(),
+	petId: z.uuid().nonempty({ message: 'Selecione o pet' }),
+	doctorId: z.uuid().nonempty({ message: 'Selecione o veterinário' }),
+	scheduledAt: z.date('A data e hora são obrigatórias'),
 	status: z
 		.enum([
 			'pending',
@@ -39,12 +39,10 @@ export const createAppointmentSchema = z.object({
 			'cancelled',
 			'no_show',
 		])
-		.default('pending')
 		.nonoptional({ message: 'O status é obrigatório' }),
-	totalPriceInCents: z
-		.number({ message: 'O preço é obrigatório' })
-		.nonoptional({ message: 'O preço é obrigatório' }),
-	notes: z.string().optional(),
+	totalPriceInCents: z.number().min(0, 'O preço não pode ser negativo'),
+	notes: z.string().optional().nullable(),
+	services: z.array(z.uuid()).nonempty({ message: 'Selecione o serviço' }),
 });
 
 export type CreateAppointmentSchema = z.infer<typeof createAppointmentSchema>;

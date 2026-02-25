@@ -1,17 +1,24 @@
 import { ReactNode } from 'react';
-import { Card } from '../ui/card';
+import { Card, CardDescription } from '../ui/card';
 
 type MobileTableProps<T> = {
 	data: T[];
 	renderMobile: (item: T) => ReactNode;
+	emptyMessage?: string;
 };
 
-const MobileTable = <T,>({ data, renderMobile }: MobileTableProps<T>) => {
+const MobileTable = <T,>({
+	data,
+	renderMobile,
+	emptyMessage = 'Nenhum registro encontrado...',
+}: MobileTableProps<T>) => {
 	if (!data || data.length === 0) {
 		return (
-			<div className='text-center text-zinc-500'>
-				Nenhum registro encontrado...
-			</div>
+			<Card className='border rounded-lg p-4 w-full'>
+				<CardDescription className='text-center'>
+					<span className='italic'>{emptyMessage}</span>
+				</CardDescription>
+			</Card>
 		);
 	}
 

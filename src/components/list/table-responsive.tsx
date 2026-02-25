@@ -34,7 +34,11 @@ const ResponsiveTable = <T,>({
 			</div>
 			{/* mobile */}
 			<div className='flex xl:hidden'>
-				<MobileTable data={data} renderMobile={renderMobile!} />
+				<MobileTable
+					data={data}
+					renderMobile={renderMobile!}
+					emptyMessage={emptyMessage}
+				/>
 			</div>
 		</div>
 	);

@@ -12,4 +12,3 @@ export const handleNavigation = (params: URLSearchParams) => {
 		redirect(`?${params.toString()}`);
 	});
 };
-

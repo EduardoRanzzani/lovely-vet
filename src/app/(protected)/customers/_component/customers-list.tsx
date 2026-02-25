@@ -6,7 +6,7 @@ import { CustomerWithUser } from '@/api/schema/customers.schema';
 import { getInitials } from '@/api/util';
 import { GoogleMapsIcon } from '@/components/icons/icon-googlemaps';
 import { WhatsappIcon } from '@/components/icons/icon-whatsapp';
-import DeleteButton from '@/components/list/delete-button';
+import DeleteAlertButton from '@/components/list/delete-alert-dialog';
 import SearchInput from '@/components/list/search-input';
 import TableComponent from '@/components/list/table-component';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -114,7 +114,7 @@ const CustomersListClient = ({ customers }: CustomersListClientProps) => {
 				<TableCell className='w-20 space-x-2'>
 					<EditCustomerButton customer={customer} />
 
-					<DeleteButton action={() => handleDelete(customer.id)} />
+					<DeleteAlertButton action={() => handleDelete(customer.id)} />
 				</TableCell>
 			</TableRow>
 		);
@@ -153,7 +153,7 @@ const CustomersListClient = ({ customers }: CustomersListClientProps) => {
 					<span className='flex flex-col gap-2'>
 						<EditCustomerButton customer={customer} />
 
-						<DeleteButton action={() => handleDelete(customer.id)} />
+						<DeleteAlertButton action={() => handleDelete(customer.id)} />
 					</span>
 				</div>
 

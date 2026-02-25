@@ -2,7 +2,7 @@
 
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
-import { ChevronDown, ChevronUp } from 'lucide-react';
+import { ChevronDown, ChevronUp, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import {
 	Control,
@@ -28,6 +28,7 @@ interface SelectFormProps<T extends FieldValues> {
 	className?: string;
 	placeholder?: string;
 	multiple?: boolean;
+	maxVisible?: number;
 	onSelect?: (
 		value: string | number | boolean | (string | number | boolean)[],
 	) => void;
@@ -43,6 +44,7 @@ const SelectForm = <T extends FieldValues>({
 	className,
 	placeholder = 'Selecione...',
 	multiple = false,
+	maxVisible = 2,
 	onSelect,
 }: SelectFormProps<T>) => {
 	const [open, setOpen] = useState(false);
@@ -50,7 +52,6 @@ const SelectForm = <T extends FieldValues>({
 	const containerRef = useRef<HTMLDivElement>(null);
 	const triggerRef = useRef<HTMLDivElement>(null);
 
-	// Fecha ao clicar fora
 	useEffect(() => {
 		const handleClickOutside = (e: MouseEvent) => {
 			if (
@@ -64,7 +65,6 @@ const SelectForm = <T extends FieldValues>({
 		return () => document.removeEventListener('mousedown', handleClickOutside);
 	}, []);
 
-	// Atalhos de teclado para o container principal
 	const handleKeyDown = (e: React.KeyboardEvent) => {
 		if (e.key === 'Enter' || e.key === ' ') {
 			e.preventDefault();
@@ -91,10 +91,7 @@ const SelectForm = <T extends FieldValues>({
 						? [field.value as string | number | boolean]
 						: [];
 
-				const selectedLabels = options
-					.filter((o) => values.includes(o.value))
-					.map((o) => o.label)
-					.join(', ');
+				const selectedOptions = options.filter((o) => values.includes(o.value));
 
 				const filteredOptions = options.filter((opt) =>
 					opt.label.toLowerCase().includes(search.toLowerCase()),
@@ -114,7 +111,7 @@ const SelectForm = <T extends FieldValues>({
 					} else {
 						newValue = value as PathValue<T, Path<T>>;
 						setOpen(false);
-						triggerRef.current?.focus(); // Devolve o foco ao fechar
+						triggerRef.current?.focus();
 					}
 
 					field.onChange(newValue);
@@ -132,7 +129,7 @@ const SelectForm = <T extends FieldValues>({
 						className={cn('flex flex-col relative w-full', className)}
 						ref={containerRef}
 					>
-						<label className='text-xs font-medium mb-1'>
+						<label className='mb-1 text-xs font-medium'>
 							{label} {required && <span className='text-red-500'>*</span>}
 						</label>
 
@@ -140,32 +137,67 @@ const SelectForm = <T extends FieldValues>({
 							ref={triggerRef}
 							tabIndex={0}
 							aria-expanded={open}
-							aria-haspopup='listbox'
 							onKeyDown={handleKeyDown}
 							className={cn(
-								'file:text-foreground placeholder:text-muted-foreground border-input h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-all outline-none md:text-sm',
-								'flex items-center justify-between cursor-pointer',
+								'border-input h-10 w-full rounded-md border bg-transparent px-3 py-1 text-sm shadow-sm transition-all outline-none',
+								'flex items-center justify-between cursor-pointer gap-2',
 								'focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1',
 								error ? 'border-destructive' : 'focus-visible:border-ring',
 							)}
 							onClick={() => setOpen(!open)}
 						>
-							<span
-								className={cn('truncate', !selectedLabels && 'text-zinc-400')}
-								title={selectedLabels}
-							>
-								{selectedLabels || placeholder}
-							</span>
-							{open ? (
-								<ChevronUp className='w-4 h-4' />
-							) : (
-								<ChevronDown className='w-4 h-4' />
-							)}
+							<div className='flex items-center flex-1 min-w-0 gap-1 overflow-hidden'>
+								{selectedOptions.length > 0 ? (
+									multiple ? (
+										/* RENDERIZAÇÃO MULTIPLE: BADGES */
+										<>
+											<div className='flex items-center gap-1 overflow-hidden flex-nowrap'>
+												{selectedOptions.slice(0, maxVisible).map((opt) => (
+													<span
+														key={opt.key || opt.value.toString()}
+														className='bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 px-2 py-0.5 rounded-sm text-[11px] font-medium flex items-center shrink-0 border border-zinc-200 dark:border-zinc-700 whitespace-nowrap max-w-30'
+													>
+														<span className='truncate'>{opt.label}</span>
+														<X
+															className='w-3 h-3 ml-1 cursor-pointer hover:text-destructive'
+															onClick={(e) => {
+																e.stopPropagation();
+																handleSelect(opt.value);
+															}}
+														/>
+													</span>
+												))}
+											</div>
+											{selectedOptions.length > maxVisible && (
+												<span className='text-[10px] font-bold text-muted-foreground bg-zinc-50 dark:bg-zinc-900 px-1.5 py-0.5 rounded border shrink-0'>
+													+{selectedOptions.length - maxVisible}
+												</span>
+											)}
+										</>
+									) : (
+										/* RENDERIZAÇÃO SINGLE: TEXTO PURO */
+										<span className='truncate text-zinc-900 dark:text-zinc-100'>
+											{selectedOptions[0].label}
+										</span>
+									)
+								) : (
+									<span className='truncate text-zinc-400'>{placeholder}</span>
+								)}
+							</div>
+
+							<div className='flex items-center opacity-50 shrink-0'>
+								{open ? (
+									<ChevronUp className='w-4 h-4' />
+								) : (
+									<ChevronDown className='w-4 h-4' />
+								)}
+							</div>
 						</div>
 
+						{/* LISTBOX / DROPDOWN */}
 						{open && (
 							<div
-								className='absolute left-0 right-0 border border-zinc-300 rounded-md bg-white dark:bg-zinc-950 dark:border-zinc-800 shadow-lg z-50 max-h-60 w-full overflow-hidden mt-1 flex flex-col'
+								className='absolute left-0 right-0 z-50 flex flex-col w-full mt-1 overflow-hidden bg-white border rounded-md shadow-lg border-zinc-300 dark:bg-zinc-950 dark:border-zinc-800 max-h-60'
 								style={{ top: '100%' }}
 							>
 								<div className='p-2 border-b border-zinc-100 dark:border-zinc-800'>
@@ -175,7 +207,7 @@ const SelectForm = <T extends FieldValues>({
 										value={search}
 										onChange={(e) => setSearch(e.target.value)}
 										placeholder='Pesquisar...'
-										className='h-8'
+										className='h-8 focus-visible:ring-1'
 										onKeyDown={(e) => {
 											if (e.key === 'Escape') setOpen(false);
 											e.stopPropagation();
@@ -183,52 +215,45 @@ const SelectForm = <T extends FieldValues>({
 									/>
 								</div>
 
-								<div className='overflow-y-auto flex-1'>
-									{filteredOptions.map((opt) => (
-										<div
-											key={opt.key || opt.value.toString()}
-											tabIndex={0}
-											role='option'
-											aria-selected={values.includes(opt.value)}
-											className={cn(
-												'px-3 py-2 text-sm cursor-pointer transition flex items-center gap-2 outline-none',
-												'hover:bg-zinc-100 dark:hover:bg-zinc-800 focus:bg-zinc-100 dark:focus:bg-zinc-800',
-												values.includes(opt.value) &&
-													'bg-zinc-50 dark:bg-zinc-900 font-medium',
-											)}
-											onKeyDown={(e) => {
-												if (e.key === 'Enter' || e.key === ' ') {
-													e.preventDefault();
+								<div className='flex-1 overflow-y-auto'>
+									{filteredOptions.map((opt) => {
+										const isSelected = values.includes(opt.value);
+										return (
+											<div
+												key={opt.key || opt.value.toString()}
+												tabIndex={0}
+												className={cn(
+													'px-3 py-2 text-sm cursor-pointer transition flex items-center gap-2 outline-none',
+													'hover:bg-zinc-100 dark:hover:bg-zinc-800 focus:bg-zinc-100 dark:focus:bg-zinc-800',
+													isSelected &&
+														'bg-zinc-50 dark:bg-zinc-900 font-medium',
+												)}
+												onClick={(e) => {
+													e.stopPropagation();
 													handleSelect(opt.value);
-												}
-											}}
-											onClick={(e) => {
-												e.stopPropagation();
-												handleSelect(opt.value);
-											}}
-										>
-											{multiple && (
-												<input
-													type='checkbox'
-													checked={values.includes(opt.value)}
-													readOnly
-													className='w-4 h-4 rounded border-zinc-300 accent-primary'
-												/>
-											)}
-											<span>{opt.label}</span>
-										</div>
-									))}
-
+												}}
+											>
+												{multiple && (
+													<input
+														type='checkbox'
+														checked={isSelected}
+														readOnly
+														className='w-4 h-4 rounded border-zinc-300 accent-primary'
+													/>
+												)}
+												<span className='truncate'>{opt.label}</span>
+											</div>
+										);
+									})}
 									{filteredOptions.length === 0 && (
-										<div className='px-3 py-4 text-center text-sm text-zinc-400'>
+										<div className='px-3 py-4 text-sm text-center text-zinc-400'>
 											Nenhum resultado encontrado
 										</div>
 									)}
 								</div>
 							</div>
 						)}
-
-						{error && <p className='text-xs text-destructive mt-1'>{error}</p>}
+						{error && <p className='mt-1 text-xs text-destructive'>{error}</p>}
 					</div>
 				);
 			}}

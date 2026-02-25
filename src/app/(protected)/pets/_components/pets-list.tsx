@@ -8,7 +8,7 @@ import { PetWithTutorAndBreed } from '@/api/schema/pets.schema';
 import { Specie } from '@/api/schema/species.schema';
 import { calculateAge, getInitials } from '@/api/util';
 import { WhatsappIcon } from '@/components/icons/icon-whatsapp';
-import DeleteButton from '@/components/list/delete-button';
+import DeleteAlertButton from '@/components/list/delete-alert-dialog';
 import SearchInput from '@/components/list/search-input';
 import TableComponent from '@/components/list/table-component';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -144,7 +144,7 @@ const PetsListClient = ({
 						customers={customers}
 					/>
 
-					<DeleteButton action={() => handleDelete(pet.id)} />
+					<DeleteAlertButton action={() => handleDelete(pet.id)} />
 				</TableCell>
 			</TableRow>
 		);
@@ -187,7 +187,7 @@ const PetsListClient = ({
 							customers={customers}
 						/>
 
-						<DeleteButton action={() => handleDelete(pet.id)} />
+						<DeleteAlertButton action={() => handleDelete(pet.id)} />
 					</span>
 				</div>
 

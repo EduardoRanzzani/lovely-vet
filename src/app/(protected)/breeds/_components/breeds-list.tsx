@@ -4,7 +4,7 @@ import { deleteBreed } from '@/api/actions/breeds.actions';
 import { MAX_PAGE_SIZE, PaginatedData } from '@/api/config/consts';
 import { BreedsWithSpecies } from '@/api/schema/breeds.schema';
 import { Specie } from '@/api/schema/species.schema';
-import DeleteButton from '@/components/list/delete-button';
+import DeleteAlertButton from '@/components/list/delete-alert-dialog';
 import SearchInput from '@/components/list/search-input';
 import TableComponent from '@/components/list/table-component';
 import { TableCell, TableRow } from '@/components/ui/table';
@@ -63,7 +63,7 @@ const BreedsListClient = ({ breeds, species }: BreedsListClientProps) => {
 				<TableCell className='w-20 space-x-2'>
 					<EditBreedButton breed={breed} species={species} />
 
-					<DeleteButton action={() => handleDelete(breed.id)} />
+					<DeleteAlertButton action={() => handleDelete(breed.id)} />
 				</TableCell>
 			</TableRow>
 		);
@@ -81,7 +81,7 @@ const BreedsListClient = ({ breeds, species }: BreedsListClientProps) => {
 					<div className='flex flex-col gap-2'>
 						<EditBreedButton breed={breed} species={species} />
 
-						<DeleteButton action={() => handleDelete(breed.id)} />
+						<DeleteAlertButton action={() => handleDelete(breed.id)} />
 					</div>
 				</div>
 			</div>

@@ -3,7 +3,7 @@
 import { deleteService } from '@/api/actions/services.actions';
 import { MAX_PAGE_SIZE, PaginatedData } from '@/api/config/consts';
 import { Services } from '@/api/schema/services.schema';
-import DeleteButton from '@/components/list/delete-button';
+import DeleteAlertButton from '@/components/list/delete-alert-dialog';
 import SearchInput from '@/components/list/search-input';
 import TableComponent from '@/components/list/table-component';
 import { Separator } from '@/components/ui/separator';
@@ -66,7 +66,7 @@ const ServicesListClient = ({ services }: ServicesListClientProps) => {
 				<TableCell className='w-20 space-x-2'>
 					<EditServiceButton service={service} />
 
-					<DeleteButton action={() => handleDelete(service.id)} />
+					<DeleteAlertButton action={() => handleDelete(service.id)} />
 				</TableCell>
 			</TableRow>
 		);
@@ -81,7 +81,7 @@ const ServicesListClient = ({ services }: ServicesListClientProps) => {
 					<div className='flex flex-col gap-2'>
 						<EditServiceButton service={service} />
 
-						<DeleteButton action={() => handleDelete(service.id)} />
+						<DeleteAlertButton action={() => handleDelete(service.id)} />
 					</div>
 				</div>
 

@@ -13,7 +13,7 @@ import { use } from 'react';
 import { toast } from 'sonner';
 import AddSpecieButton from './add-specie-button';
 import EditSpecieButton from './edit-specie-button';
-import DeleteButton from '@/components/list/delete-button';
+import DeleteAlertButton from '@/components/list/delete-alert-dialog';
 
 interface SpeciesListClientProps {
 	species: Promise<PaginatedData<Specie>>;
@@ -59,7 +59,7 @@ const SpeciesListClient = ({ species }: SpeciesListClientProps) => {
 				<TableCell className='w-20 space-x-2'>
 					<EditSpecieButton specie={specie} />
 
-					<DeleteButton action={() => handleDelete(specie.id)} />
+					<DeleteAlertButton action={() => handleDelete(specie.id)} />
 				</TableCell>
 			</TableRow>
 		);
@@ -76,7 +76,7 @@ const SpeciesListClient = ({ species }: SpeciesListClientProps) => {
 					<span className='flex flex-col gap-2'>
 						<EditSpecieButton specie={specie} />
 
-						<DeleteButton action={() => handleDelete(specie.id)} />
+						<DeleteAlertButton action={() => handleDelete(specie.id)} />
 					</span>
 				</div>
 			</div>

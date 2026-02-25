@@ -1,6 +1,8 @@
+import { getAppointmentsPaginated } from '@/api/actions/appointments.actions';
 import { getDoctors } from '@/api/actions/doctors.actions';
 import { getPets } from '@/api/actions/pets.actions';
 import { getServices } from '@/api/actions/services.actions';
+import { MAX_PAGE_SIZE } from '@/api/config/consts';
 import {
 	PageContainer,
 	PageContent,
@@ -9,6 +11,7 @@ import {
 	PageHeaderContent,
 	PageTitle,
 } from '@/components/shared/page-container';
+import AppointmentsListClient from './_components/appointments-list';
 
 interface AppointmentsPageProps {
 	searchParams: Promise<{ page?: string; filter?: string; keyword?: string }>;
@@ -23,6 +26,8 @@ const AppointmentsPage = async ({ searchParams }: AppointmentsPageProps) => {
 	const doctors = await getDoctors();
 	const services = await getServices();
 
+	const dataPromise = getAppointmentsPaginated(page, MAX_PAGE_SIZE, filter);
+
 	return (
 		<PageContainer>
 			<PageHeader>
@@ -35,13 +40,12 @@ const AppointmentsPage = async ({ searchParams }: AppointmentsPageProps) => {
 			</PageHeader>
 
 			<PageContent>
-				<h1>teste</h1>
-				{/* <AppointmentsListClient
+				<AppointmentsListClient
 					appointments={dataPromise}
 					services={services}
 					pets={pets}
 					doctors={doctors}
-				/> */}
+				/>
 			</PageContent>
 		</PageContainer>
 	);
