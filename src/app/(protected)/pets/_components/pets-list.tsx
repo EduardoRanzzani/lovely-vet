@@ -8,7 +8,9 @@ import { PetWithTutorAndBreed } from '@/api/schema/pets.schema';
 import { Specie } from '@/api/schema/species.schema';
 import { calculateAge, getInitials } from '@/api/util';
 import { WhatsappIcon } from '@/components/icons/icon-whatsapp';
+import AddButton from '@/components/list/add-button';
 import DeleteAlertButton from '@/components/list/delete-alert-dialog';
+import EditButton from '@/components/list/edit-button';
 import SearchInput from '@/components/list/search-input';
 import TableComponent from '@/components/list/table-component';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -18,8 +20,10 @@ import { Separator } from '@/components/ui/separator';
 import { TableCell, TableRow } from '@/components/ui/table';
 import { formatWeight } from '@/helpers/weight';
 import { handleNavigation } from '@/lib/utils';
+import { useUser } from '@clerk/nextjs';
 import {
 	CalendarIcon,
+	EyeIcon,
 	MarsIcon,
 	UserRoundIcon,
 	VenusIcon,
@@ -30,8 +34,8 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { use } from 'react';
 import { toast } from 'sonner';
-import AddPetButton from './add-pet-button';
 import EditPetButton from './edit-pet-button';
+import PetFormClient from './pet-form';
 
 interface PetsListClientProps {
 	pets: Promise<PaginatedData<PetWithTutorAndBreed>>;
@@ -46,6 +50,9 @@ const PetsListClient = ({
 	breeds,
 	customers,
 }: PetsListClientProps) => {
+	const { user } = useUser();
+	const canDoActions = user?.publicMetadata?.role !== 'customer';
+
 	const petsResolved = use(pets);
 	const searchParams = useSearchParams();
 
@@ -80,7 +87,12 @@ const PetsListClient = ({
 		{ header: 'Peso', accessorKey: 'weight' },
 		{ header: 'Castrado?', accessorKey: 'sterile' },
 		{ header: 'Tutor', accessorKey: 'tutor' },
-		{ header: 'Ações', accessorKey: 'actions' },
+
+		{
+			header: 'Ações',
+			accessorKey: 'actions',
+			className: `${canDoActions ? '' : 'hidden'}`,
+		},
 	];
 
 	const renderRow = (pet: PetWithTutorAndBreed) => {
@@ -137,14 +149,30 @@ const PetsListClient = ({
 				</TableCell>
 
 				<TableCell className='w-20 space-x-2'>
-					<EditPetButton
-						pet={pet}
-						species={species}
-						breeds={breeds}
-						customers={customers}
-					/>
+					<Button size={'icon'} variant={'outline'} asChild>
+						<Link href={`/pets/${pet.id}`}>
+							<EyeIcon className='h-4 w-4' />
+						</Link>
+					</Button>
 
-					<DeleteAlertButton action={() => handleDelete(pet.id)} />
+					{canDoActions && (
+						<>
+							<EditButton
+								tooltip={`Editar ${pet.name}`}
+								renderForm={(close) => (
+									<PetFormClient
+										pet={pet}
+										breeds={breeds}
+										customers={customers}
+										species={species}
+										onSuccess={close}
+									/>
+								)}
+							/>
+
+							<DeleteAlertButton action={() => handleDelete(pet.id)} />
+						</>
+					)}
 				</TableCell>
 			</TableRow>
 		);
@@ -180,11 +208,17 @@ const PetsListClient = ({
 					</div>
 
 					<span className='flex flex-col gap-2'>
-						<EditPetButton
-							pet={pet}
-							species={species}
-							breeds={breeds}
-							customers={customers}
+						<EditButton
+							tooltip={`Editar ${pet.name}`}
+							renderForm={(close) => (
+								<PetFormClient
+									pet={pet}
+									breeds={breeds}
+									customers={customers}
+									species={species}
+									onSuccess={close}
+								/>
+							)}
 						/>
 
 						<DeleteAlertButton action={() => handleDelete(pet.id)} />
@@ -251,7 +285,17 @@ const PetsListClient = ({
 			<div className='flex flex-col lg:flex-row items-center justify-between gap-4'>
 				<SearchInput />
 
-				<AddPetButton species={species} breeds={breeds} customers={customers} />
+				<AddButton
+					text='Adicionar Pet'
+					renderForm={(close) => (
+						<PetFormClient
+							breeds={breeds}
+							customers={customers}
+							species={species}
+							onSuccess={close}
+						/>
+					)}
+				/>
 			</div>
 
 			<TableComponent

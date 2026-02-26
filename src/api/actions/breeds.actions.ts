@@ -86,6 +86,8 @@ export const upsertBreed = actionClient
 		const authenticatedUser = await currentUser();
 		if (!authenticatedUser) throw new Error('Usuário não autenticado');
 
+		console.log('aqui');
+
 		await db
 			.insert(breedsTable)
 			.values({

@@ -1,12 +1,15 @@
-import { servicesTable } from '@/db/schema';
+import { servicesTable, speciesTable } from '@/db/schema';
 import z from 'zod';
 
-export type Services = typeof servicesTable.$inferSelect;
+export type ServiceWithSpecie = typeof servicesTable.$inferSelect & {
+	specie: typeof speciesTable.$inferSelect;
+};
 
 export const createServiceSchema = z.object({
-	id: z.uuid().optional(),
+	id: z.uuid().optional().nullable(),
 	name: z.string().nonempty({ message: 'Nome é obrigatório' }),
-	description: z.string().nonempty({ message: 'Descrição é obrigatória' }),
+	description: z.string().optional().nullable(),
+	specieId: z.string().optional().nullable(),
 	price: z.number().min(1, { message: 'Preço é obrigatório' }),
 });
 

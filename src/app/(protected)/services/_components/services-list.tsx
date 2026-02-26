@@ -2,7 +2,7 @@
 
 import { deleteService } from '@/api/actions/services.actions';
 import { MAX_PAGE_SIZE, PaginatedData } from '@/api/config/consts';
-import { Services } from '@/api/schema/services.schema';
+import { Specie } from '@/api/schema/species.schema';
 import DeleteAlertButton from '@/components/list/delete-alert-dialog';
 import SearchInput from '@/components/list/search-input';
 import TableComponent from '@/components/list/table-component';
@@ -17,12 +17,14 @@ import { use } from 'react';
 import { toast } from 'sonner';
 import AddServiceButton from './add-service-button';
 import EditServiceButton from './edit-service-button';
+import { ServiceWithSpecie } from '@/api/schema/services.schema';
 
 interface ServicesListClientProps {
-	services: Promise<PaginatedData<Services>>;
+	services: Promise<PaginatedData<ServiceWithSpecie>>;
+	species: Specie[];
 }
 
-const ServicesListClient = ({ services }: ServicesListClientProps) => {
+const ServicesListClient = ({ services, species }: ServicesListClientProps) => {
 	const servicesResolved = use(services);
 	const searchParams = useSearchParams();
 
@@ -35,6 +37,7 @@ const ServicesListClient = ({ services }: ServicesListClientProps) => {
 	const columns = [
 		{ header: 'Nome', accessorKey: 'name' },
 		{ header: 'Preço', accessorKey: 'priceInCents' },
+		{ header: 'Espécie', accessorKey: 'specie' },
 		{ header: 'Descrição', accessorKey: 'description' },
 		{ header: 'Ações', accessorKey: 'actions' },
 	];
@@ -57,14 +60,21 @@ const ServicesListClient = ({ services }: ServicesListClientProps) => {
 		},
 	});
 
-	const renderRow = (service: Services) => {
+	const renderRow = (service: ServiceWithSpecie) => {
 		return (
 			<TableRow key={service.id}>
 				<TableCell>{service.name}</TableCell>
 				<TableCell>{formatCurrencyFromCents(service.priceInCents)}</TableCell>
-				<TableCell>{service.description}</TableCell>
+				<TableCell>{service.specie?.name ?? 'Geral'}</TableCell>
+				<TableCell>
+					{service.description ? (
+						service.description
+					) : (
+						<span className='italic'>---</span>
+					)}
+				</TableCell>
 				<TableCell className='w-20 space-x-2'>
-					<EditServiceButton service={service} />
+					<EditServiceButton service={service} species={species} />
 
 					<DeleteAlertButton action={() => handleDelete(service.id)} />
 				</TableCell>
@@ -72,14 +82,14 @@ const ServicesListClient = ({ services }: ServicesListClientProps) => {
 		);
 	};
 
-	const renderMobile = (service: Services) => {
+	const renderMobile = (service: ServiceWithSpecie) => {
 		return (
 			<div key={service.id} className='flex flex-col gap-4'>
 				<div className='flex items-center justify-between'>
 					<h3 className='font-bold'>{service.name}</h3>
 
 					<div className='flex flex-col gap-2'>
-						<EditServiceButton service={service} />
+						<EditServiceButton service={service} species={species} />
 
 						<DeleteAlertButton action={() => handleDelete(service.id)} />
 					</div>
@@ -92,7 +102,15 @@ const ServicesListClient = ({ services }: ServicesListClientProps) => {
 						<span className='text-sm font-semibold'>
 							<NotepadTextIcon className='h-4 w-4' />
 						</span>
-						<span className='text-sm'>{service.description}</span>
+						<span className='text-sm'>
+							{service.description ? (
+								service.description
+							) : (
+								<span className='italic text-muted-foreground'>
+									Descrição não fornecida
+								</span>
+							)}
+						</span>
 					</p>
 
 					<p className='flex items-center gap-4'>
@@ -113,7 +131,7 @@ const ServicesListClient = ({ services }: ServicesListClientProps) => {
 			<div className='flex flex-col lg:flex-row items-center justify-between gap-4'>
 				<SearchInput />
 
-				<AddServiceButton />
+				<AddServiceButton species={species} />
 			</div>
 
 			<TableComponent

@@ -64,7 +64,7 @@ const Pagination = ({
 			{/* Texto com faixa exibida */}
 			<span className='text-sm'>
 				Exibindo {totalElements > 0 ? start : 0} a {end} do total de{' '}
-				{totalElements} – Página {currentPage} de {totalPages}
+				{totalElements} - Página {currentPage} de {totalPages}
 			</span>
 
 			{/* Botões */}

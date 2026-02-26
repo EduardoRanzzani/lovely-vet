@@ -1,5 +1,6 @@
 'use client';
 import { upsertPet } from '@/api/actions/pets.actions';
+import { uploadImageAction } from '@/api/actions/upload-cloudinary';
 import { BreedsWithSpecies } from '@/api/schema/breeds.schema';
 import { CustomerWithUser } from '@/api/schema/customers.schema';
 import {
@@ -9,6 +10,7 @@ import {
 } from '@/api/schema/pets.schema';
 import { Specie } from '@/api/schema/species.schema';
 import DatePickerForm from '@/components/form/datepicker-form';
+import DropzoneForm from '@/components/form/image-dropzone-form';
 import InputForm from '@/components/form/input-form';
 import SelectForm from '@/components/form/select-form';
 import WeightInputForm from '@/components/form/weight-input-form';
@@ -25,7 +27,7 @@ import { Form } from '@/components/ui/form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { BanIcon, Loader2Icon, SaveIcon } from 'lucide-react';
 import { useAction } from 'next-safe-action/hooks';
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 
@@ -67,13 +69,37 @@ const PetFormClient = ({
 
 	// Deriva a lista de raças (sem useEffect!)
 	const filteredBreeds = useMemo(() => {
-		if (!selectedSpecieId) return [];
-		return breeds.filter((breed) => breed.specieId === selectedSpecieId);
-	}, [breeds, selectedSpecieId]);
+		const currentSpecieId = selectedSpecieId || pet?.breed.specieId;
+		if (!currentSpecieId) return [];
+		return breeds.filter((breed) => breed.specieId === currentSpecieId);
+	}, [breeds, selectedSpecieId, pet]);
+
+	useEffect(() => {
+		if (pet?.breedId && filteredBreeds.length > 0) {
+			// Garante que o valor da raça permaneça o do pet ao abrir para edição
+			const isValidBreed = filteredBreeds.some((b) => b.id === pet.breedId);
+			if (isValidBreed && !form.getValues('breedId')) {
+				form.setValue('breedId', pet.breedId);
+			}
+		}
+	}, [filteredBreeds, pet, form]);
 
 	const handleSpeciesChange = () => {
-		// Ao mudar a espécie manualmente, limpamos a raça selecionada
+		// Se mudou a espécie manualmente, limpa a raça
 		form.setValue('breedId', '');
+	};
+
+	const handlePhotoUpload = async (file: File): Promise<string> => {
+		const formData = new FormData();
+		formData.append('file', file);
+
+		try {
+			const url = await uploadImageAction(formData);
+			return url;
+		} catch (error) {
+			toast.error('Erro ao anexar a imagem!');
+			throw error;
+		}
 	};
 
 	const formSubmit = (data: CreatePetWithTutorAndBreedSchema) => {
@@ -134,6 +160,14 @@ const PetFormClient = ({
 						/>
 					</div>
 
+					<DropzoneForm
+						label='Foto:'
+						name='photo'
+						control={form.control}
+						onUpload={handlePhotoUpload}
+						error={form.formState.errors.photo?.message}
+					/>
+
 					<SelectForm
 						label='Tutor:'
 						control={form.control}
@@ -145,7 +179,7 @@ const PetFormClient = ({
 						error={form.formState.errors.customerId?.message}
 					/>
 
-					<div className='w-full flex flex-col lg:flex-row gap-4'>
+					<div className='w-full flex flex-row gap-4'>
 						<SelectForm
 							label='Espécie:'
 							control={form.control}
@@ -170,7 +204,7 @@ const PetFormClient = ({
 						/>
 					</div>
 
-					<div className='w-full flex flex-col lg:flex-row gap-4'>
+					<div className='w-full flex flex-row gap-4'>
 						<InputForm
 							label='Pelagem:'
 							register={form.register}
@@ -196,7 +230,7 @@ const PetFormClient = ({
 						/>
 					</div>
 
-					<div className='w-full flex flex-col lg:flex-row gap-4'>
+					<div className='w-full flex flex-row gap-4'>
 						<SelectForm
 							label='Castrado?'
 							control={form.control}

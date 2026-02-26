@@ -1,15 +1,18 @@
-import { Services } from '@/api/schema/services.schema';
+'use client';
+import { Specie } from '@/api/schema/species.schema';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogTrigger } from '@/components/ui/dialog';
 import { PencilIcon } from 'lucide-react';
 import { useState } from 'react';
 import ServiceFormClient from './service-form';
+import { ServiceWithSpecie } from '@/api/schema/services.schema';
 
 interface EditServiceButtonProps {
-	service: Services;
+	service: ServiceWithSpecie;
+	species: Specie[];
 }
 
-const EditServiceButton = ({ service }: EditServiceButtonProps) => {
+const EditServiceButton = ({ service, species }: EditServiceButtonProps) => {
 	const [open, isOpen] = useState<boolean>(false);
 
 	return (
@@ -21,7 +24,11 @@ const EditServiceButton = ({ service }: EditServiceButtonProps) => {
 			</DialogTrigger>
 
 			{isOpen && (
-				<ServiceFormClient service={service} onSuccess={() => isOpen(false)} />
+				<ServiceFormClient
+					service={service}
+					species={species}
+					onSuccess={() => isOpen(false)}
+				/>
 			)}
 		</Dialog>
 	);

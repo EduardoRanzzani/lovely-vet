@@ -62,6 +62,8 @@ const BreedFormClient = ({
 		},
 	});
 
+	console.log(form.formState.errors);
+
 	return (
 		<DialogContent
 			onInteractOutside={(e) => e.preventDefault()}
@@ -122,7 +124,6 @@ const BreedFormClient = ({
 							<Button
 								type='submit'
 								disabled={upsertBreedAction.isPending}
-								form='registerForm'
 								className='flex-1'
 							>
 								{upsertBreedAction.isPending ? (

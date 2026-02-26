@@ -5,10 +5,11 @@ import {
 	appointmentItemsTable,
 	appointmentsTable,
 	petsTable,
+	usersTable,
 } from '@/db/schema';
 import { actionClient } from '@/lib/next-safe-action';
 import { currentUser } from '@clerk/nextjs/server';
-import { count, desc, eq, ilike } from 'drizzle-orm';
+import { and, count, desc, eq, ilike, ne } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 import z from 'zod';
 import { MAX_PAGE_SIZE, PaginatedData } from '../config/consts';
@@ -25,35 +26,63 @@ export const getAppointmentsPaginated = async (
 	const authenticatedUser = await currentUser();
 	if (!authenticatedUser) throw new Error('Usuário não autenticado');
 
+	const dbUser = await db.query.usersTable.findFirst({
+		where: eq(usersTable.clerkUserId, authenticatedUser.id),
+		with: { customer: true },
+	});
+
+	if (!dbUser) throw new Error('Usuário não encontrado no banco');
+
 	const offset = (page - 1) * limit;
 
-	// Filtro busca por nome do pet
-	const filterCondition = search
-		? ilike(petsTable.name, `%${search}%`)
-		: undefined;
-
-	// 1. Buscar os dados usando a Relational Query API (resolve o problema de agrupamento)
 	const data = await db.query.appointmentsTable.findMany({
-		where: filterCondition,
+		where: (appointments, { and, eq, ilike, exists }) => {
+			const filters = [];
+
+			// FILTRO DE SEGURANÇA: Somente pets do cliente logado
+			if (dbUser.role === 'customer' && dbUser.customer) {
+				// Usamos subquery para verificar se o petId do agendamento
+				// pertence ao customerId do usuário logado
+				filters.push(
+					exists(
+						db
+							.select()
+							.from(petsTable)
+							.where(
+								and(
+									eq(petsTable.id, appointments.petId),
+									eq(petsTable.customerId, dbUser.customer!.id),
+								),
+							),
+					),
+				);
+			}
+
+			if (search) {
+				filters.push(
+					exists(
+						db
+							.select()
+							.from(petsTable)
+							.where(
+								and(
+									eq(petsTable.id, appointments.petId),
+									ilike(petsTable.name, `%${search}%`),
+								),
+							),
+					),
+				);
+			}
+
+			return filters.length > 0 ? and(...filters) : undefined;
+		},
 		limit: limit,
 		offset: offset,
 		orderBy: desc(appointmentsTable.scheduledAt),
 		with: {
-			pet: {
-				with: {
-					customer: {
-						with: { user: true },
-					},
-				},
-			},
-			doctor: {
-				with: { user: true },
-			},
-			items: {
-				with: {
-					service: true,
-				},
-			},
+			pet: { with: { tutor: { with: { user: true } } } },
+			doctor: { with: { user: true } },
+			items: { with: { service: true } },
 		},
 	});
 
@@ -61,8 +90,15 @@ export const getAppointmentsPaginated = async (
 	const totalCountResult = await db
 		.select({ value: count() })
 		.from(appointmentsTable)
-		.leftJoin(petsTable, eq(appointmentsTable.petId, petsTable.id))
-		.where(filterCondition);
+		.innerJoin(petsTable, eq(appointmentsTable.petId, petsTable.id))
+		.where(
+			and(
+				dbUser.role === 'customer'
+					? eq(petsTable.customerId, dbUser.customer!.id)
+					: undefined,
+				search ? ilike(petsTable.name, `%${search}%`) : undefined,
+			),
+		);
 
 	const totalCount = Number(totalCountResult[0]?.value ?? 0);
 	const pageCount = Math.ceil(totalCount / limit);
@@ -85,55 +121,90 @@ export const upsertAppointment = actionClient
 		if (!authenticatedUser) throw new Error('Usuário não autenticado');
 
 		const { id, services, ...data } = parsedInput;
+		const totalPriceInCents = Math.round(data.totalPriceInCents * 100);
 
-		// Inicia uma transação
-		await db.transaction(async (tx) => {
-			let appointmentId = id;
-
-			// 1. Upsert do Agendamento Principal
-			if (id) {
-				await tx
-					.update(appointmentsTable)
-					.set({
-						...data,
-						totalPriceInCents: Math.round(data.totalPriceInCents * 100), // Converte para centavos
-						updatedAt: new Date(),
-					})
-					.where(eq(appointmentsTable.id, id));
-
-				// Limpa serviços antigos para reinserir (estratégia simples de sync)
-				await tx
-					.delete(appointmentItemsTable)
-					.where(eq(appointmentItemsTable.appointmentId, id));
-			} else {
-				const [newAppointment] = await tx
-					.insert(appointmentsTable)
-					.values({
-						...data,
-						totalPriceInCents: Math.round(data.totalPriceInCents * 100),
-					})
-					.returning();
-				appointmentId = newAppointment.id;
-			}
-
-			// 2. Inserir os Itens (Serviços)
-			if (appointmentId && services.length > 0) {
-				// Buscamos os preços atuais dos serviços para gravar o histórico
-				const servicesData = await tx.query.servicesTable.findMany({
-					where: (table, { inArray }) => inArray(table.id, services),
+		try {
+			await db.transaction(async (tx) => {
+				// 1. VALIDAÇÃO DE CONFLITO DE HORÁRIO
+				const conflict = await tx.query.appointmentsTable.findFirst({
+					where: and(
+						eq(appointmentsTable.doctorId, data.doctorId),
+						eq(appointmentsTable.scheduledAt, data.scheduledAt),
+						id ? ne(appointmentsTable.id, id) : undefined,
+					),
 				});
 
-				const itemsToInsert = servicesData.map((s) => ({
-					appointmentId: appointmentId as string,
-					serviceId: s.id,
-					priceAtTimeInCents: s.priceInCents,
-				}));
+				if (conflict) {
+					throw new Error(
+						'O veterinário já possui um agendamento neste horário.',
+					);
+				}
 
-				await tx.insert(appointmentItemsTable).values(itemsToInsert);
+				// Inicializamos como null para o TS rastrear a atribuição
+
+				let appointmentId: string | null = null;
+
+				if (id) {
+					// UPDATE
+					await tx
+						.update(appointmentsTable)
+						.set({
+							...data,
+							totalPriceInCents,
+							updatedAt: new Date(),
+						})
+						.where(eq(appointmentsTable.id, id));
+
+					appointmentId = id;
+
+					// Limpa serviços antigos
+					await tx
+						.delete(appointmentItemsTable)
+						.where(eq(appointmentItemsTable.appointmentId, id));
+				} else {
+					// INSERT
+					const [newAppointment] = await tx
+						.insert(appointmentsTable)
+						.values({
+							...data,
+							totalPriceInCents,
+						})
+						.returning({ id: appointmentsTable.id });
+
+					if (!newAppointment) throw new Error('Erro ao criar agendamento');
+					appointmentId = newAppointment.id;
+				}
+
+				// 2. INSERÇÃO DOS ITENS
+				// O check 'appointmentId' aqui atua como Type Guard, eliminando o erro de 'unassigned'
+				if (appointmentId && services.length > 0) {
+					const servicesData = await tx.query.servicesTable.findMany({
+						where: (table, { inArray }) => inArray(table.id, services),
+					});
+
+					if (servicesData.length > 0) {
+						const itemsToInsert = servicesData.map((s) => ({
+							appointmentId: appointmentId as string, // Cast seguro após a guarda
+							serviceId: s.id,
+							priceAtTimeInCents: s.priceInCents,
+						}));
+
+						await tx.insert(appointmentItemsTable).values(itemsToInsert);
+					}
+				}
+			});
+
+			revalidatePath('/appointments');
+			return { success: true };
+		} catch (error: unknown) {
+			console.error('Erro no upsert:', error);
+
+			if (error instanceof Error) {
+				throw error;
 			}
-		});
 
-		revalidatePath('/appointments');
+			throw new Error('Ocorreu um erro inesperado ao salvar o agendamento.');
+		}
 	});
 
 export const deleteAppointment = actionClient

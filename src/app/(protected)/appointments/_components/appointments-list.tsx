@@ -8,7 +8,7 @@ import { MAX_PAGE_SIZE, PaginatedData } from '@/api/config/consts';
 import { AppointmentsWithRelations } from '@/api/schema/appointments.schema';
 import { DoctorsWithUser } from '@/api/schema/doctors.schema';
 import { PetWithTutorAndBreed } from '@/api/schema/pets.schema';
-import { Services } from '@/api/schema/services.schema';
+import { ServiceWithSpecie } from '@/api/schema/services.schema';
 import ConfirmAlertButton from '@/components/list/confirm-alert-dialog';
 import DeleteAlertButton from '@/components/list/delete-alert-dialog';
 import SearchInput from '@/components/list/search-input';
@@ -17,6 +17,7 @@ import { Separator } from '@/components/ui/separator';
 import { TableCell, TableRow } from '@/components/ui/table';
 import { formatCurrencyFromCents } from '@/helpers/currency';
 import { handleNavigation } from '@/lib/utils';
+import { useUser } from '@clerk/nextjs';
 import {
 	ArrowRightIcon,
 	ClockIcon,
@@ -38,7 +39,7 @@ interface AppointmentsListClientProps {
 	appointments: Promise<PaginatedData<AppointmentsWithRelations>>;
 	pets: PetWithTutorAndBreed[];
 	doctors: DoctorsWithUser[];
-	services: Services[];
+	services: ServiceWithSpecie[];
 }
 
 const AppointmentsListClient = ({
@@ -49,6 +50,8 @@ const AppointmentsListClient = ({
 }: AppointmentsListClientProps) => {
 	const appointmentsResolved = use(appointments);
 	const searchParams = useSearchParams();
+	const { user } = useUser();
+	const profile = user?.publicMetadata.role;
 
 	const handlePageChange = (page: number) => {
 		const params = new URLSearchParams(searchParams.toString());
@@ -116,7 +119,7 @@ const AppointmentsListClient = ({
 					})}
 				</TableCell>
 				<TableCell>{appointment.pet.name}</TableCell>
-				<TableCell>{appointment.pet.customer.user.name}</TableCell>
+				<TableCell>{appointment.pet.tutor.user.name}</TableCell>
 				<TableCell>
 					<BadgeStatus appointment={appointment} />
 				</TableCell>
@@ -137,12 +140,14 @@ const AppointmentsListClient = ({
 					{formatCurrencyFromCents(appointment.totalPriceInCents)}
 				</TableCell>
 				<TableCell className='w-20 space-x-2'>
-					<ConfirmAlertButton
-						size='icon'
-						tooltip='Marcar como concluído'
-						disabled={appointment.status !== 'pending'}
-						action={() => handleCompleteAppointment(appointment.id)}
-					/>
+					{(profile === 'admin' || profile === 'doctor') && (
+						<ConfirmAlertButton
+							size='icon'
+							tooltip='Marcar como concluído'
+							disabled={appointment.status !== 'pending'}
+							action={() => handleCompleteAppointment(appointment.id)}
+						/>
+					)}
 
 					<EditAppointmentButton
 						appointment={appointment}
@@ -204,9 +209,7 @@ const AppointmentsListClient = ({
 						<span className='text-sm font-semibold'>
 							<UserRoundIcon className='w-4 h-4' />
 						</span>
-						<span className='text-sm'>
-							{appointment.pet.customer.user.name}
-						</span>
+						<span className='text-sm'>{appointment.pet.tutor.user.name}</span>
 					</p>
 					<p className='flex items-center gap-4'>
 						<span className='text-sm font-semibold'>
@@ -252,12 +255,18 @@ const AppointmentsListClient = ({
 					</p>
 				</div>
 
-				<ConfirmAlertButton
-					text='Marcar como Concluído'
-					variant='default'
-					disabled={appointment.status !== 'pending'}
-					action={() => handleCompleteAppointment(appointment.id)}
-				/>
+				{(profile === 'admin' || profile === 'doctor') && (
+					<>
+						<Separator />
+
+						<ConfirmAlertButton
+							text='Marcar como concluído'
+							tooltip='Marcar como concluído'
+							disabled={appointment.status !== 'pending'}
+							action={() => handleCompleteAppointment(appointment.id)}
+						/>
+					</>
+				)}
 			</div>
 		);
 	};

@@ -1,8 +1,16 @@
-import type { NextConfig } from "next";
+import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
-  /* config options here */
-  reactCompiler: true,
+	reactCompiler: true,
+	reactStrictMode: false,
+	images: {
+		remotePatterns: [
+			{ hostname: 'ui-avatars.com' },
+			{
+				hostname: 'res.cloudinary.com',
+			},
+		],
+	},
 };
 
 export default nextConfig;

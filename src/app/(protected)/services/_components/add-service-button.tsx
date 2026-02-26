@@ -1,10 +1,15 @@
+import { Specie } from '@/api/schema/species.schema';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogTrigger } from '@/components/ui/dialog';
 import { PlusIcon } from 'lucide-react';
 import { useState } from 'react';
 import ServiceFormClient from './service-form';
 
-const AddServiceButton = () => {
+interface AddServiceButtonProps {
+	species: Specie[];
+}
+
+const AddServiceButton = ({ species }: AddServiceButtonProps) => {
 	const [isOpen, setIsOpen] = useState(false);
 
 	return (
@@ -16,7 +21,7 @@ const AddServiceButton = () => {
 				</Button>
 			</DialogTrigger>
 
-			<ServiceFormClient onSuccess={() => setIsOpen(false)} />
+			<ServiceFormClient species={species} onSuccess={() => setIsOpen(false)} />
 		</Dialog>
 	);
 };

@@ -10,15 +10,39 @@ import {
 } from '@/db/schema';
 import { actionClient } from '@/lib/next-safe-action';
 import { currentUser } from '@clerk/nextjs/server';
+import { format } from 'date-fns';
 import { and, asc, countDistinct, eq, ilike, or } from 'drizzle-orm';
+import { revalidatePath } from 'next/cache';
+import z from 'zod';
 import { PaginatedData } from '../config/consts';
 import {
 	createPetWithTutorAndBreedSchema,
 	PetWithTutorAndBreed,
 } from '../schema/pets.schema';
-import { revalidatePath } from 'next/cache';
-import { format } from 'date-fns';
-import z from 'zod';
+
+export const getPetById = async (id: string): Promise<PetWithTutorAndBreed> => {
+	const authUser = await currentUser();
+	if (!authUser) throw new Error('Usuário não autenticado');
+
+	const pet = await db.query.petsTable.findFirst({
+		where: eq(petsTable.id, id),
+		with: {
+			tutor: {
+				with: {
+					user: true,
+				},
+			},
+			breed: {
+				with: {
+					specie: true,
+				},
+			},
+		},
+	});
+
+	if (!pet) throw new Error('Pet não encontrado');
+	return pet as PetWithTutorAndBreed;
+};
 
 // Helper para evitar repetição da base da query de listagem
 const getPetWithRelationsQuery = () => {

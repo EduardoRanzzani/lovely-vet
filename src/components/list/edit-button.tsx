@@ -1,31 +1,49 @@
+'use client';
+
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogTrigger } from '@/components/ui/dialog';
+import {
+	Tooltip,
+	TooltipContent,
+	TooltipTrigger,
+} from '@/components/ui/tooltip';
 import { PencilIcon } from 'lucide-react';
-import { ReactNode, useState } from 'react';
-import { Button } from '../ui/button';
-import { Dialog, DialogTrigger } from '../ui/dialog';
-import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip';
+import { ReactElement, useState } from 'react';
 
 interface EditButtonProps {
-	form: ReactNode;
+	variant?: 'default' | 'outline' | 'secondary';
+	tooltip?: string;
+	text?: string;
+	size?: 'default' | 'icon';
 	disabled?: boolean;
+	renderForm: (onSuccess: () => void) => ReactElement;
 }
 
-const EditButton = ({ form, disabled = false }: EditButtonProps) => {
+const EditButton = ({
+	renderForm,
+	variant = 'default',
+	size = 'icon',
+	tooltip = 'Editar',
+	disabled = false,
+}: EditButtonProps) => {
 	const [isOpen, setIsOpen] = useState<boolean>(false);
+
+	const handleSuccess = () => setIsOpen(false);
 
 	return (
 		<Dialog open={isOpen} onOpenChange={setIsOpen}>
 			<Tooltip>
-				<TooltipTrigger>
+				<TooltipTrigger asChild>
 					<DialogTrigger asChild>
-						<Button size={'icon'} disabled={disabled}>
-							<PencilIcon />
+						<Button size={size} variant={variant} disabled={disabled}>
+							<PencilIcon className='h-4 w-4' />
 						</Button>
 					</DialogTrigger>
 				</TooltipTrigger>
-				<TooltipContent>Editar o agendamento</TooltipContent>
+				<TooltipContent>{tooltip}</TooltipContent>
 			</Tooltip>
 
-			{isOpen && form}
+			{isOpen && renderForm(handleSuccess)}
 		</Dialog>
 	);
 };

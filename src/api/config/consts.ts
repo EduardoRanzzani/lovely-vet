@@ -378,7 +378,7 @@ export const convertAppointmentStatus = (status: string) => {
 			return 'Em Andamento';
 		case 'completed':
 			return 'Concluído';
-		case 'canceled':
+		case 'cancelled':
 			return 'Cancelado';
 		default:
 			return 'Cliente não encontrado';

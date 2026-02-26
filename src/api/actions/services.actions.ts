@@ -1,31 +1,33 @@
 'use server';
 
 import { db } from '@/db';
-import { servicesTable } from '@/db/schema';
+import { servicesTable, speciesTable } from '@/db/schema';
 import { actionClient } from '@/lib/next-safe-action';
 import { currentUser } from '@clerk/nextjs/server';
-import { count, eq, ilike, or } from 'drizzle-orm';
+import { asc, count, eq, ilike, or } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 import z from 'zod';
-import { PaginatedData } from '../config/consts';
+import { MAX_PAGE_SIZE, PaginatedData } from '../config/consts';
 import {
 	createServiceSchema,
-	CreateServiceSchema,
-	Services,
+	ServiceWithSpecie,
 } from '../schema/services.schema';
 
-export const getServices = async (): Promise<Services[]> => {
+export const getServices = async (): Promise<ServiceWithSpecie[]> => {
 	const authenticatedUser = await currentUser();
 	if (!authenticatedUser) throw new Error('Usuário não autenticado');
 
-	return await db.query.servicesTable.findMany();
+	const data = await db.query.servicesTable.findMany({
+		with: { specie: true },
+	});
+	return data as ServiceWithSpecie[];
 };
 
 export const getServicesPaginated = async (
-	page: number,
-	limit: number,
+	page: number = 1,
+	limit: number = MAX_PAGE_SIZE,
 	search?: string,
-): Promise<PaginatedData<Services>> => {
+): Promise<PaginatedData<ServiceWithSpecie>> => {
 	const authenticatedUser = await currentUser();
 	if (!authenticatedUser) throw new Error('Usuário não autenticado');
 
@@ -38,35 +40,25 @@ export const getServicesPaginated = async (
 			)
 		: undefined;
 
-	const dataPromise = db
-		.select({
-			servicesTable: servicesTable,
-		})
-		.from(servicesTable)
-		.where(filterCondition)
-		.limit(limit)
-		.offset(offset)
-		.orderBy(servicesTable.name);
+	const data = await db.query.servicesTable.findMany({
+		where: filterCondition,
+		limit: limit,
+		offset: offset,
+		orderBy: asc(servicesTable.name),
+		with: { specie: true },
+	});
 
-	const totalcountPromise = db
+	const totalCountResult = await db
 		.select({ value: count() })
 		.from(servicesTable)
+		.leftJoin(speciesTable, eq(servicesTable.specieId, speciesTable.id))
 		.where(filterCondition);
-
-	const [data, totalCountResult] = await Promise.all([
-		dataPromise,
-		totalcountPromise,
-	]);
 
 	const totalCount = Number(totalCountResult[0]?.value ?? 0);
 	const pageCount = Math.ceil(totalCount / limit);
 
-	const formattedData = data.map((row) => ({
-		...row.servicesTable,
-	}));
-
 	return {
-		data: formattedData,
+		data: data as ServiceWithSpecie[],
 		metadata: {
 			totalCount,
 			pageCount,
@@ -74,31 +66,6 @@ export const getServicesPaginated = async (
 			limit,
 		},
 	};
-};
-
-export const upsertServiceOld = async (data: CreateServiceSchema) => {
-	const authenticatedUser = await currentUser();
-	if (!authenticatedUser) throw new Error('Usuário não autenticado');
-
-	await db
-		.insert(servicesTable)
-		.values({
-			id: data.id,
-			name: data.name,
-			description: data.description,
-			priceInCents: data.price,
-		})
-		.onConflictDoUpdate({
-			target: servicesTable.id,
-			set: {
-				name: data.name,
-				description: data.description,
-				priceInCents: data.price,
-			},
-		})
-		.returning();
-
-	revalidatePath('/services');
 };
 
 export const upsertService = actionClient
@@ -113,6 +80,7 @@ export const upsertService = actionClient
 				id: parsedInput.id ?? undefined,
 				name: parsedInput.name,
 				description: parsedInput.description,
+				specieId: parsedInput.specieId,
 				priceInCents: parsedInput.price * 100,
 			})
 			.onConflictDoUpdate({
@@ -120,6 +88,7 @@ export const upsertService = actionClient
 				set: {
 					name: parsedInput.name,
 					description: parsedInput.description,
+					specieId: parsedInput.specieId,
 					priceInCents: parsedInput.price * 100,
 					updatedAt: new Date(),
 				},

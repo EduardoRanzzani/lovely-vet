@@ -8,7 +8,7 @@ import {
 } from '@/api/schema/appointments.schema';
 import { DoctorsWithUser } from '@/api/schema/doctors.schema';
 import { PetWithTutorAndBreed } from '@/api/schema/pets.schema';
-import { Services } from '@/api/schema/services.schema';
+import { ServiceWithSpecie } from '@/api/schema/services.schema';
 import DateTimePickerForm from '@/components/form/datetimepicker-form';
 import InputForm from '@/components/form/input-form';
 import MoneyInputForm from '@/components/form/money-input-form';
@@ -34,7 +34,7 @@ interface AppointmentFormClientProps {
 	appointment?: AppointmentsWithRelations;
 	pets: PetWithTutorAndBreed[];
 	doctors: DoctorsWithUser[];
-	services: Services[];
+	services: ServiceWithSpecie[];
 	onSuccess?: () => void;
 }
 
@@ -64,15 +64,53 @@ const AppointmentFormClient = ({
 		},
 	});
 
+	// 1. Monitorar o pet selecionado
+	const selectedPetId = form.watch('petId');
 	const selectedServicesIds = form.watch('services');
 
+	// 2. Identificar a espécie
+	const selectedPet = pets.find((p) => p.id === selectedPetId);
+	const specieIdOfSelectedPet = selectedPet?.breed?.specieId;
+
+	// 3. Filtro de exibição (Mantemos simples)
+	const filteredServices = services.filter((service) => {
+		// Se não tem pet selecionado, mostra só os gerais
+		if (!specieIdOfSelectedPet) return !service.specieId;
+		// Se tem pet, mostra os da espécie + gerais
+		return service.specieId === specieIdOfSelectedPet || !service.specieId;
+	});
+
+	// 4. EFEITO DE LIMPEZA CORRIGIDO
+	useEffect(() => {
+		// IMPORTANTE: Se estamos editando, não queremos limpar os campos na primeira renderização
+		// A limpeza só deve ocorrer se o PetId mudar e o objeto do Pet já estiver localizado
+		if (!selectedPet) return;
+
+		const currentServices = form.getValues('services');
+		if (currentServices && currentServices.length > 0) {
+			// Validamos contra a lista mestre de services, não contra a variável filtrada de renderização
+			const validServices = currentServices.filter((id) => {
+				const service = services.find((s) => s.id === id);
+				if (!service) return false;
+				// É válido se: for geral OU for da espécie do pet selecionado
+				return (
+					!service.specieId || service.specieId === selectedPet.breed?.specieId
+				);
+			});
+
+			if (validServices.length !== currentServices.length) {
+				form.setValue('services', validServices);
+			}
+		}
+		// Removemos filteredServices das dependências para evitar loops e limpezas precoces
+	}, [selectedPetId, selectedPet, services, form]);
+
+	// 5. Cálculo do valor total (Mantido)
 	useEffect(() => {
 		if (selectedServicesIds && selectedServicesIds.length > 0) {
 			const total = services
 				.filter((s) => selectedServicesIds.includes(s.id))
 				.reduce((acc, curr) => acc + curr.priceInCents / 100, 0);
-
-			// Atualiza o campo de valor total (em reais/decimal para o MoneyInput)
 			form.setValue('totalPriceInCents', total, { shouldValidate: true });
 		} else {
 			form.setValue('totalPriceInCents', 0);
@@ -148,10 +186,10 @@ const AppointmentFormClient = ({
 					<SelectForm
 						label='Serviços (Selecione um ou mais):'
 						name='services'
-						multiple // Certifique-se que seu SelectForm suporta a prop multiple
+						multiple
 						control={form.control}
 						error={form.formState.errors.services?.message}
-						options={services.map((service) => ({
+						options={filteredServices.map((service) => ({
 							value: service.id,
 							label: `${service.name} - R$ ${(service.priceInCents / 100).toFixed(2)}`,
 						}))}

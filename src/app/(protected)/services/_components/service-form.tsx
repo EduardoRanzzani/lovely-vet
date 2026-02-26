@@ -2,10 +2,12 @@ import { upsertService } from '@/api/actions/services.actions';
 import {
 	createServiceSchema,
 	CreateServiceSchema,
-	Services,
+	ServiceWithSpecie,
 } from '@/api/schema/services.schema';
+import { Specie } from '@/api/schema/species.schema';
 import InputForm from '@/components/form/input-form';
 import MoneyInputForm from '@/components/form/money-input-form';
+import SelectForm from '@/components/form/select-form';
 import { Button } from '@/components/ui/button';
 import {
 	DialogClose,
@@ -23,17 +25,23 @@ import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 
 interface ServiceFormClientProps {
-	service?: Services;
+	service?: ServiceWithSpecie;
+	species: Specie[];
 	onSuccess?: () => void;
 }
 
-const ServiceFormClient = ({ service, onSuccess }: ServiceFormClientProps) => {
+const ServiceFormClient = ({
+	service,
+	species,
+	onSuccess,
+}: ServiceFormClientProps) => {
 	const form = useForm<CreateServiceSchema>({
 		resolver: zodResolver(createServiceSchema),
 		shouldUnregister: true,
 		defaultValues: {
 			name: service?.name || '',
 			description: service?.description || '',
+			specieId: service?.specieId || '',
 			price: service?.priceInCents ? service.priceInCents / 100 : 0,
 		},
 	});
@@ -42,6 +50,7 @@ const ServiceFormClient = ({ service, onSuccess }: ServiceFormClientProps) => {
 		upsertServiceAction.execute({
 			...data,
 			id: service?.id,
+			specieId: service?.specieId || undefined,
 		});
 	};
 
@@ -84,6 +93,18 @@ const ServiceFormClient = ({ service, onSuccess }: ServiceFormClientProps) => {
 						register={form.register}
 						name='name'
 						error={form.formState.errors.name?.message}
+					/>
+
+					<SelectForm
+						label='Espécie:'
+						name='specieId'
+						control={form.control}
+						error={form.formState.errors.specieId?.message}
+						options={species.map((specie) => ({
+							value: specie.id,
+							label: specie.name,
+							key: specie.id,
+						}))}
 					/>
 
 					<MoneyInputForm

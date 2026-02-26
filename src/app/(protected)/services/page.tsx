@@ -9,6 +9,7 @@ import {
 	PageTitle,
 } from '@/components/shared/page-container';
 import ServicesListClient from './_components/services-list';
+import { getSpecies } from '@/api/actions/species.actions';
 
 interface ServicesPageProps {
 	searchParams: Promise<{ page?: string; filter?: string; keyword?: string }>;
@@ -20,6 +21,7 @@ const ServicesPage = async ({ searchParams }: ServicesPageProps) => {
 	const filter = params.filter || '';
 
 	const dataPromise = getServicesPaginated(page, MAX_PAGE_SIZE, filter);
+	const species = await getSpecies();
 
 	return (
 		<PageContainer>
@@ -33,7 +35,7 @@ const ServicesPage = async ({ searchParams }: ServicesPageProps) => {
 			</PageHeader>
 
 			<PageContent>
-				<ServicesListClient services={dataPromise} />
+				<ServicesListClient services={dataPromise} species={species} />
 			</PageContent>
 		</PageContainer>
 	);

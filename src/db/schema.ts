@@ -148,6 +148,9 @@ export const servicesTable = pgTable('services', {
 	description: text('description'),
 	priceInCents: integer('price_in_cents').notNull(),
 	durationMinutes: integer('duration_minutes').default(30).notNull(),
+	specieId: uuid('specie_id').references(() => speciesTable.id, {
+		onDelete: 'cascade',
+	}),
 	createdAt: timestamp('created_at').defaultNow().notNull(),
 	updatedAt: timestamp('updated_at')
 		.defaultNow()
@@ -252,6 +255,7 @@ export const customersRelations = relations(
 
 export const speciesRelations = relations(speciesTable, ({ many }) => ({
 	breeds: many(breedsTable),
+	services: many(servicesTable),
 }));
 
 export const breedsRelations = relations(breedsTable, ({ one, many }) => ({
@@ -262,12 +266,19 @@ export const breedsRelations = relations(breedsTable, ({ one, many }) => ({
 	pets: many(petsTable),
 }));
 
+export const servicesRelations = relations(servicesTable, ({ one }) => ({
+	specie: one(speciesTable, {
+		fields: [servicesTable.specieId],
+		references: [speciesTable.id],
+	}),
+}));
+
 export const petsRelations = relations(petsTable, ({ one, many }) => ({
 	breed: one(breedsTable, {
 		fields: [petsTable.breedId],
 		references: [breedsTable.id],
 	}),
-	customer: one(customersTable, {
+	tutor: one(customersTable, {
 		fields: [petsTable.customerId],
 		references: [customersTable.id],
 	}),

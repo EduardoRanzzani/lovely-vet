@@ -41,8 +41,9 @@ const DeleteAlertButton = ({
 			<AlertDialogContent>
 				<AlertDialogHeader>
 					<AlertDialogTitle>Você tem certeza?</AlertDialogTitle>
-					<AlertDialogDescription>
-						Essa ação não poderá ser desfeita.
+					<AlertDialogDescription className='space-y-1'>
+						Tem certeza que deseja excluir o registro? Essa ação não poderá ser
+						desfeita.
 					</AlertDialogDescription>
 				</AlertDialogHeader>
 

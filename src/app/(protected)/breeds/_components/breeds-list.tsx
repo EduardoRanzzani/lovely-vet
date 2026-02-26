@@ -4,7 +4,9 @@ import { deleteBreed } from '@/api/actions/breeds.actions';
 import { MAX_PAGE_SIZE, PaginatedData } from '@/api/config/consts';
 import { BreedsWithSpecies } from '@/api/schema/breeds.schema';
 import { Specie } from '@/api/schema/species.schema';
+import AddButton from '@/components/list/add-button';
 import DeleteAlertButton from '@/components/list/delete-alert-dialog';
+import EditButton from '@/components/list/edit-button';
 import SearchInput from '@/components/list/search-input';
 import TableComponent from '@/components/list/table-component';
 import { TableCell, TableRow } from '@/components/ui/table';
@@ -13,8 +15,7 @@ import { useAction } from 'next-safe-action/hooks';
 import { useSearchParams } from 'next/navigation';
 import { use } from 'react';
 import { toast } from 'sonner';
-import AddBreedButton from './add-breed-button';
-import EditBreedButton from './edit-breed-button';
+import BreedFormClient from './breed-form';
 
 interface BreedsListClientProps {
 	breeds: Promise<PaginatedData<BreedsWithSpecies>>;
@@ -61,7 +62,16 @@ const BreedsListClient = ({ breeds, species }: BreedsListClientProps) => {
 				<TableCell>{breed.name}</TableCell>
 				<TableCell>{breed.specie.name}</TableCell>
 				<TableCell className='w-20 space-x-2'>
-					<EditBreedButton breed={breed} species={species} />
+					<EditButton
+						tooltip={`Editar ${breed.name}`}
+						renderForm={(close) => (
+							<BreedFormClient
+								breed={breed}
+								species={species}
+								onSuccess={close}
+							/>
+						)}
+					/>
 
 					<DeleteAlertButton action={() => handleDelete(breed.id)} />
 				</TableCell>
@@ -79,7 +89,16 @@ const BreedsListClient = ({ breeds, species }: BreedsListClientProps) => {
 					</span>
 
 					<div className='flex flex-col gap-2'>
-						<EditBreedButton breed={breed} species={species} />
+						<EditButton
+							tooltip={`Editar ${breed.name}`}
+							renderForm={(close) => (
+								<BreedFormClient
+									breed={breed}
+									species={species}
+									onSuccess={close}
+								/>
+							)}
+						/>
 
 						<DeleteAlertButton action={() => handleDelete(breed.id)} />
 					</div>
@@ -93,7 +112,12 @@ const BreedsListClient = ({ breeds, species }: BreedsListClientProps) => {
 			<div className='flex flex-col lg:flex-row items-center justify-between gap-4'>
 				<SearchInput />
 
-				<AddBreedButton species={species} />
+				<AddButton
+					text='Adicionar Raça'
+					renderForm={(close) => (
+						<BreedFormClient species={species} onSuccess={close} />
+					)}
+				/>
 			</div>
 
 			<TableComponent

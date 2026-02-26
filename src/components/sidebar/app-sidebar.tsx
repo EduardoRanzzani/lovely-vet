@@ -107,7 +107,7 @@ const AppSidebar = () => {
 				<SidebarMenu>
 					<SidebarMenuItem>
 						{/* <SidebarMenuButton asChild> */}
-						<Link href={'/dashboard'}>
+						<Link href={'/dashboard'} onClick={() => setOpenMobile(false)}>
 							<span className='flex items-center gap-2 text-3xl'>
 								<StethoscopeIcon className='h-7 w-7' />
 								<span>LovelyVet</span>
