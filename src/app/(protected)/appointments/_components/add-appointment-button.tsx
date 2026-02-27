@@ -1,16 +1,16 @@
 import { DoctorsWithUser } from '@/api/schema/doctors.schema';
 import { PetWithTutorAndBreed } from '@/api/schema/pets.schema';
-import { Services } from '@/api/schema/services.schema';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogTrigger } from '@/components/ui/dialog';
 import { PlusIcon } from 'lucide-react';
 import { useState } from 'react';
 import AppointmentFormClient from './appointment-form';
+import { ServiceWithSpecie } from '@/api/schema/services.schema';
 
 interface AddAppointmentButtonProps {
 	pets: PetWithTutorAndBreed[];
 	doctors: DoctorsWithUser[];
-	services: Services[];
+	services: ServiceWithSpecie[];
 }
 
 const AddAppointmentButton = ({
