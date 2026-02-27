@@ -2,6 +2,7 @@
 
 import {
 	deleteAppointment,
+	markAppointmentAsCancelled,
 	markAppointmentAsCompleted,
 } from '@/api/actions/appointments.actions';
 import { MAX_PAGE_SIZE, PaginatedData } from '@/api/config/consts';
@@ -20,6 +21,7 @@ import { handleNavigation } from '@/lib/utils';
 import { useUser } from '@clerk/nextjs';
 import {
 	ArrowRightIcon,
+	BanIcon,
 	ClockIcon,
 	DollarSignIcon,
 	DotIcon,
@@ -98,6 +100,27 @@ const AppointmentsListClient = ({
 		},
 	);
 
+	const handleCancelAppointment = (appointmentId: string) => {
+		markAppointmentAsCancelledAction.execute({
+			id: appointmentId,
+		});
+	};
+
+	const markAppointmentAsCancelledAction = useAction(
+		markAppointmentAsCancelled,
+		{
+			onSuccess: () => {
+				toast.success('Agendamento cancelado com sucesso!');
+			},
+			onError: (err) => {
+				console.error('Erro cancelar agendamento:', err);
+				toast.error(
+					'Ocorreu um erro ao tentar cancelar o agendamento. Tente novamente mais tarde.',
+				);
+			},
+		},
+	);
+
 	const columns = [
 		{ header: 'Data e hora', accessorKey: 'scheduledAt' },
 		{ header: 'Paciente', accessorKey: 'pet' },
@@ -141,12 +164,19 @@ const AppointmentsListClient = ({
 				</TableCell>
 				<TableCell className='w-20 space-x-2'>
 					{(profile === 'admin' || profile === 'doctor') && (
-						<ConfirmAlertButton
-							size='icon'
-							tooltip='Marcar como concluído'
-							disabled={appointment.status !== 'pending'}
-							action={() => handleCompleteAppointment(appointment.id)}
-						/>
+						<>
+							<ConfirmAlertButton
+								size='icon'
+								tooltip='Marcar como concluído'
+								disabled={appointment.status !== 'pending'}
+								action={() => handleCompleteAppointment(appointment.id)}
+							/>
+
+							<DeleteAlertButton
+								action={() => handleDelete(appointment.id)}
+								tooltip='Deletar agendamento'
+							/>
+						</>
 					)}
 
 					<EditAppointmentButton
@@ -158,9 +188,10 @@ const AppointmentsListClient = ({
 					/>
 
 					<DeleteAlertButton
+						icon={<BanIcon />}
 						disabled={appointment.status !== 'pending'}
-						action={() => handleDelete(appointment.id)}
-						tooltip='Deletar agendamento'
+						action={() => handleCancelAppointment(appointment.id)}
+						tooltip='Cancelar agendamento'
 					/>
 				</TableCell>
 			</TableRow>

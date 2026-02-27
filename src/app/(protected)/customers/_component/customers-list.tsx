@@ -13,6 +13,11 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { TableCell, TableRow } from '@/components/ui/table';
+import {
+	Tooltip,
+	TooltipContent,
+	TooltipTrigger,
+} from '@/components/ui/tooltip';
 import { handleNavigation } from '@/lib/utils';
 import { IdCardIcon, MapPinIcon, PhoneIcon } from 'lucide-react';
 import { useAction } from 'next-safe-action/hooks';
@@ -88,32 +93,46 @@ const CustomersListClient = ({ customers }: CustomersListClientProps) => {
 						</p>
 					</span>
 				</TableCell>
-				<TableCell>{customer.cpf}</TableCell>
+
+				<TableCell className='max-w-30'>{customer.cpf}</TableCell>
+
 				<TableCell>
 					<div className='flex items-center gap-4'>
+						<Tooltip>
+							<TooltipTrigger asChild>
+								<Button asChild variant={'outline'} size={'icon'}>
+									<Link target='_blank' href={whatsappUrl}>
+										<WhatsappIcon />
+									</Link>
+								</Button>
+							</TooltipTrigger>
+							<TooltipContent>Conversar via WhatsApp</TooltipContent>
+						</Tooltip>
 						<span>{customer.phone}</span>
-						<Button asChild variant={'outline'}>
-							<Link target='_blank' href={whatsappUrl}>
-								<WhatsappIcon />
-								Conversar
-							</Link>
-						</Button>
 					</div>
 				</TableCell>
+
 				<TableCell>
 					<div className='flex items-center gap-4'>
+						<Tooltip>
+							<TooltipTrigger asChild>
+								<Button asChild variant={'outline'} className='2xl:size-9'>
+									<Link href={googleMapsUrl} target='_blank'>
+										<GoogleMapsIcon />
+										<span className='flex 2xl:hidden'>
+											Abrir no Google Maps
+										</span>
+									</Link>
+								</Button>
+							</TooltipTrigger>
+							<TooltipContent>Abrir no Google Maps</TooltipContent>
+						</Tooltip>
 						<span className='hidden 2xl:flex'>{fullAddress}</span>
-						<Button asChild variant={'outline'}>
-							<Link href={googleMapsUrl} target='_blank'>
-								<GoogleMapsIcon className='w-4 h-4' />
-								Abrir no Google Maps
-							</Link>
-						</Button>
 					</div>
 				</TableCell>
+
 				<TableCell className='w-20 space-x-2'>
 					<EditCustomerButton customer={customer} />
-
 					<DeleteAlertButton action={() => handleDelete(customer.id)} />
 				</TableCell>
 			</TableRow>
@@ -152,7 +171,6 @@ const CustomersListClient = ({ customers }: CustomersListClientProps) => {
 
 					<span className='flex flex-col gap-2'>
 						<EditCustomerButton customer={customer} />
-
 						<DeleteAlertButton action={() => handleDelete(customer.id)} />
 					</span>
 				</div>

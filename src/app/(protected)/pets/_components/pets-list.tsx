@@ -18,6 +18,11 @@ import { Badge } from '@/components/ui/badge'; // Opcional: para status ou gêne
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { TableCell, TableRow } from '@/components/ui/table';
+import {
+	Tooltip,
+	TooltipContent,
+	TooltipTrigger,
+} from '@/components/ui/tooltip';
 import { formatWeight } from '@/helpers/weight';
 import { handleNavigation } from '@/lib/utils';
 import { useUser } from '@clerk/nextjs';
@@ -34,7 +39,6 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { use } from 'react';
 import { toast } from 'sonner';
-import EditPetButton from './edit-pet-button';
 import PetFormClient from './pet-form';
 
 interface PetsListClientProps {
@@ -85,9 +89,7 @@ const PetsListClient = ({
 		{ header: 'Nome', accessorKey: 'name' },
 		{ header: 'Idade', accessorKey: 'age' },
 		{ header: 'Peso', accessorKey: 'weight' },
-		{ header: 'Castrado?', accessorKey: 'sterile' },
 		{ header: 'Tutor', accessorKey: 'tutor' },
-
 		{
 			header: 'Ações',
 			accessorKey: 'actions',
@@ -115,7 +117,12 @@ const PetsListClient = ({
 					<span className='flex flex-col'>
 						<span className='font-medium'>{pet.name}</span>
 						<p className='text-xs text-muted-foreground'>
-							{pet.breed.specie.name} • {pet.breed.name} • {pet.color}
+							<Badge variant={pet.sterile ? 'default' : 'outline'}>
+								<span className='text-xs'>
+									{pet.sterile ? 'Castrado' : 'Fértil'}
+								</span>
+							</Badge>{' '}
+							• {pet.breed.specie.name} • {pet.breed.name} • {pet.color}
 						</p>
 					</span>
 				</TableCell>
@@ -126,34 +133,38 @@ const PetsListClient = ({
 				<TableCell>{formatWeight(pet.weightInGrams)}</TableCell>
 
 				<TableCell>
-					<Badge variant={pet.sterile ? 'default' : 'outline'}>
-						{pet.sterile ? 'Sim' : 'Não'}
-					</Badge>
-				</TableCell>
+					<div className='flex gap-4 items-center'>
+						<Tooltip>
+							<TooltipTrigger asChild>
+								<Button asChild variant={'outline'} size={'icon'}>
+									<Link target='_blank' href={whatsappUrl}>
+										<WhatsappIcon />
+									</Link>
+								</Button>
+							</TooltipTrigger>
+							<TooltipContent>Conversar via WhatsApp</TooltipContent>
+						</Tooltip>
 
-				<TableCell>
-					<div className='flex gap-4'>
 						<div className='flex flex-col'>
 							<span className='text-sm font-medium'>{pet.tutor.user.name}</span>
 							<span className='text-[10px] text-muted-foreground uppercase'>
 								{pet.tutor.phone}
 							</span>
 						</div>
-						<Button asChild variant={'outline'}>
-							<Link target='_blank' href={whatsappUrl}>
-								<WhatsappIcon />
-								Conversar
-							</Link>
-						</Button>
 					</div>
 				</TableCell>
 
 				<TableCell className='w-20 space-x-2'>
-					<Button size={'icon'} variant={'outline'} asChild>
-						<Link href={`/pets/${pet.id}`}>
-							<EyeIcon className='h-4 w-4' />
-						</Link>
-					</Button>
+					<Tooltip>
+						<TooltipTrigger asChild>
+							<Button size={'icon'} variant={'secondary'} asChild>
+								<Link href={`/pets/${pet.id}`}>
+									<EyeIcon className='h-4 w-4' />
+								</Link>
+							</Button>
+						</TooltipTrigger>
+						<TooltipContent>Visualizar {pet.name}</TooltipContent>
+					</Tooltip>
 
 					{canDoActions && (
 						<>
@@ -170,7 +181,10 @@ const PetsListClient = ({
 								)}
 							/>
 
-							<DeleteAlertButton action={() => handleDelete(pet.id)} />
+							<DeleteAlertButton
+								tooltip={`Deletar ${pet.name}`}
+								action={() => handleDelete(pet.id)}
+							/>
 						</>
 					)}
 				</TableCell>

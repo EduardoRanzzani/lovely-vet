@@ -247,3 +247,26 @@ export const markAppointmentAsCompleted = actionClient
 
 		revalidatePath('/appointments');
 	});
+
+export const markAppointmentAsCancelled = actionClient
+	.schema(z.object({ id: z.uuid() }))
+	.action(async ({ parsedInput }) => {
+		const authenticatedUser = await currentUser();
+		if (!authenticatedUser) throw new Error('Usuário não autenticado');
+
+		const appointment = await db.query.appointmentsTable.findFirst({
+			where: eq(appointmentsTable.id, parsedInput.id),
+		});
+
+		if (!appointment) throw new Error('Agendamento não encontrado');
+
+		await db
+			.update(appointmentsTable)
+			.set({
+				status: 'cancelled',
+				updatedAt: new Date(),
+			})
+			.where(eq(appointmentsTable.id, parsedInput.id));
+
+		revalidatePath('/appointments');
+	});

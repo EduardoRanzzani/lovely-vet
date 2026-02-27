@@ -26,7 +26,7 @@ const DropzoneForm = <T extends FieldValues>({
 	control,
 	required,
 	className,
-	description = 'PNG, JPG ou WEBP (Max. 5MB)',
+	description = 'PNG, JPG ou WEBP (Max. 5mb)',
 	onUpload,
 }: DropzoneFormProps<T>) => {
 	const [isUploading, setIsUploading] = useState(false);

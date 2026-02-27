@@ -68,13 +68,25 @@ export async function POST(req: Request) {
 					(data.public_metadata.role as 'admin' | 'doctor' | 'customer') ??
 					'customer';
 
-				userResponse = await db.insert(usersTable).values({
-					name: `${data.first_name} ${data.last_name}`.trim(),
-					email: email,
-					image: data.image_url,
-					clerkUserId: data.id,
-					role: role,
-				});
+				userResponse = await db
+					.insert(usersTable)
+					.values({
+						name: `${data.first_name} ${data.last_name}`.trim(),
+						email: email,
+						image: data.image_url,
+						clerkUserId: data.id,
+						role: role,
+					})
+					.onConflictDoUpdate({
+						target: usersTable.email,
+						set: {
+							name: `${data.first_name} ${data.last_name}`.trim(),
+							image: data.image_url,
+							clerkUserId: data.id,
+							role,
+							updatedAt: new Date(),
+						},
+					});
 				break;
 			}
 

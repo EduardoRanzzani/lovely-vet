@@ -22,6 +22,7 @@ export const uploadImageAction = async (
 			.upload_stream(
 				{
 					folder: 'pets',
+					transformation: [{ width: 500, height: 500, crop: 'crop' }],
 				},
 				(error, result) => {
 					if (error) {

@@ -13,15 +13,18 @@ import { cn } from '@/lib/utils';
 import { BanIcon, CheckIcon, Trash2Icon } from 'lucide-react';
 import { Button, buttonVariants } from '../ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip';
+import { ReactElement } from 'react';
 
 interface DeleteButtonProps {
 	tooltip?: string;
 	disabled?: boolean;
+	icon?: ReactElement;
 	action: () => void;
 }
 
 const DeleteAlertButton = ({
 	action,
+	icon = <Trash2Icon />,
 	tooltip = 'Deletar',
 	disabled = false,
 }: DeleteButtonProps) => {
@@ -31,7 +34,7 @@ const DeleteAlertButton = ({
 				<TooltipTrigger asChild>
 					<AlertDialogTrigger asChild>
 						<Button variant='destructive' size={'icon'} disabled={disabled}>
-							<Trash2Icon />
+							{icon}
 						</Button>
 					</AlertDialogTrigger>
 				</TooltipTrigger>
