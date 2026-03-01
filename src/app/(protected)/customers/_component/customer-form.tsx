@@ -113,32 +113,12 @@ const CustomerFormClient = ({
 						error={form.formState.errors.name?.message}
 					/>
 
-					<InputForm
-						label='Email:'
-						register={form.register}
-						name='email'
-						error={form.formState.errors.email?.message}
-					/>
-
-					<div className='flex flex-col lg:flex-row gap-2'>
-						<InputFormMask
-							label='Telefone:'
-							control={form.control}
-							error={form.formState.errors.phone?.message}
-							format='(##) #####-####'
-							mask='x'
-							name='phone'
-							className='w-full lg:w-[33%]'
-						/>
-
-						<InputFormMask
-							label='CPF:'
-							control={form.control}
-							error={form.formState.errors.cpf?.message}
-							format='###.###.###-##'
-							mask='x'
-							name='cpf'
-							className='w-full lg:w-[33%]'
+					<div className='flex flex-row gap-4'>
+						<InputForm
+							label='Email:'
+							register={form.register}
+							name='email'
+							error={form.formState.errors.email?.message}
 						/>
 
 						<SelectForm
@@ -158,11 +138,29 @@ const CustomerFormClient = ({
 									key: 'female',
 								},
 							]}
-							className='w-full lg:w-[33%]'
 						/>
 					</div>
 
-					<div className='flex flex-col lg:flex-row gap-2'>
+					<div className='flex flex-row gap-4'>
+						<InputFormMask
+							label='Telefone:'
+							control={form.control}
+							error={form.formState.errors.phone?.message}
+							format='(##) #####-####'
+							mask='x'
+							name='phone'
+						/>
+						<InputFormMask
+							label='CPF:'
+							control={form.control}
+							error={form.formState.errors.cpf?.message}
+							format='###.###.###-##'
+							mask='x'
+							name='cpf'
+						/>
+					</div>
+
+					<div className='flex flex-row gap-4'>
 						<InputFormMask
 							label='CEP:'
 							control={form.control}
@@ -198,7 +196,7 @@ const CustomerFormClient = ({
 						disabled
 					/>
 
-					<div className='flex flex-col lg:flex-row gap-2'>
+					<div className='flex flex-row gap-4'>
 						<InputForm
 							label='Cidade:'
 							register={form.register}
@@ -213,11 +211,12 @@ const CustomerFormClient = ({
 							name='state'
 							error={form.formState.errors.state?.message}
 							disabled
+							className='w-30'
 						/>
 					</div>
 
 					<DialogFooter>
-						<div className='flex flex-col lg:flex-row gap-4 w-full'>
+						<div className='flex flex-col lg:flex-row gap-4 w-full mt-4'>
 							<DialogClose asChild>
 								<Button
 									type='button'
@@ -241,7 +240,7 @@ const CustomerFormClient = ({
 									<Loader2Icon className='h-5 w-5 animate-spin' />
 								) : (
 									<>
-										<SaveIcon className='mr-2 h-4 w-4' />
+										<SaveIcon />
 										Salvar
 									</>
 								)}

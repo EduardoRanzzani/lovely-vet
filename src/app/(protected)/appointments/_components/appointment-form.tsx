@@ -141,8 +141,8 @@ const AppointmentFormClient = ({
 
 	return (
 		<DialogContent
-			className='sm:max-w-120 w-[95vw]'
 			onInteractOutside={(e) => e.preventDefault()}
+			className='max-w-lg h-screen sm:h-auto overflow-scroll'
 		>
 			<Form {...form}>
 				<form

@@ -108,7 +108,7 @@ const SpecieFormClient = ({ specie, onSuccess }: SpecieFormClientProps) => {
 									<Loader2Icon className='h-5 w-5 animate-spin' />
 								) : (
 									<>
-										<SaveIcon className='mr-2 h-4 w-4' />
+										<SaveIcon />
 										Salvar
 									</>
 								)}

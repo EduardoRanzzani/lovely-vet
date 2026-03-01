@@ -122,7 +122,7 @@ const ServiceFormClient = ({
 					/>
 
 					<DialogFooter>
-						<div className='flex flex-col lg:flex-row gap-4 w-full'>
+						<div className='flex flex-col lg:flex-row gap-4 w-full mt-4'>
 							<DialogClose asChild>
 								<Button
 									type='button'
@@ -146,7 +146,7 @@ const ServiceFormClient = ({
 									<Loader2Icon className='h-5 w-5 animate-spin' />
 								) : (
 									<>
-										<SaveIcon className='mr-2 h-4 w-4' />
+										<SaveIcon />
 										Salvar
 									</>
 								)}

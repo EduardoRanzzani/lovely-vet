@@ -28,6 +28,9 @@ import { toast } from 'sonner';
 import AddCustomerButton from './add-customer-button';
 import EditCustomerButton from './edit-customer-button';
 import Image from 'next/image';
+import AddButton from '@/components/list/add-button';
+import CustomerFormClient from './customer-form';
+import EditButton from '@/components/list/edit-button';
 
 interface CustomersListClientProps {
 	customers: Promise<PaginatedData<CustomerWithUser>>;
@@ -131,7 +134,13 @@ const CustomersListClient = ({ customers }: CustomersListClientProps) => {
 				</TableCell>
 
 				<TableCell className='w-20 space-x-2'>
-					<EditCustomerButton customer={customer} />
+					<EditButton
+						tooltip={`Editar ${customer.user.name}`}
+						renderForm={(close) => (
+							<CustomerFormClient customer={customer} onSuccess={close} />
+						)}
+					/>
+
 					<DeleteAlertButton action={() => handleDelete(customer.id)} />
 				</TableCell>
 			</TableRow>
@@ -169,7 +178,12 @@ const CustomersListClient = ({ customers }: CustomersListClientProps) => {
 					</div>
 
 					<span className='flex flex-col gap-2'>
-						<EditCustomerButton customer={customer} />
+						<EditButton
+							tooltip={`Editar ${customer.user.name}`}
+							renderForm={(close) => (
+								<CustomerFormClient customer={customer} onSuccess={close} />
+							)}
+						/>
 						<DeleteAlertButton action={() => handleDelete(customer.id)} />
 					</span>
 				</div>
@@ -223,7 +237,10 @@ const CustomersListClient = ({ customers }: CustomersListClientProps) => {
 			<div className='flex flex-col lg:flex-row items-center justify-between gap-4'>
 				<SearchInput />
 
-				<AddCustomerButton />
+				<AddButton
+					text='Adicionar Cliente'
+					renderForm={(close) => <CustomerFormClient onSuccess={close} />}
+				/>
 			</div>
 
 			<TableComponent

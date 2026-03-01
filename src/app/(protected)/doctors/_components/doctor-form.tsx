@@ -109,7 +109,7 @@ const DoctorFormClient = ({ doctor, onSuccess }: DoctorFormClientProps) => {
 		<DialogContent
 			onInteractOutside={(e) => e.preventDefault()}
 			showCloseButton={false}
-			className='max-w-lg'
+			className='max-w-lg h-auto overflow-scroll'
 		>
 			<Form {...form}>
 				<form
@@ -152,7 +152,7 @@ const DoctorFormClient = ({ doctor, onSuccess }: DoctorFormClientProps) => {
 						error={form.formState.errors.image?.message}
 					/>
 
-					<div className='w-full flex flex-col lg:flex-row gap-2'>
+					<div className='flex flex-row gap-4'>
 						<InputFormMask
 							label='Telefone:'
 							control={form.control}
@@ -172,7 +172,9 @@ const DoctorFormClient = ({ doctor, onSuccess }: DoctorFormClientProps) => {
 							name='cpf'
 							className='w-full lg:w-[33%]'
 						/>
+					</div>
 
+					<div className='flex flex-row gap-4'>
 						<SelectForm
 							label='Sexo:'
 							control={form.control}
@@ -190,9 +192,7 @@ const DoctorFormClient = ({ doctor, onSuccess }: DoctorFormClientProps) => {
 							]}
 							className='w-full lg:w-[33%]'
 						/>
-					</div>
 
-					<div className='flex flex-col lg:flex-row w-full gap-2'>
 						<InputForm
 							label='CRMV:'
 							register={form.register}
@@ -209,17 +209,17 @@ const DoctorFormClient = ({ doctor, onSuccess }: DoctorFormClientProps) => {
 							options={ufs}
 							className='w-full lg:w-1/4'
 						/>
-
-						<InputForm
-							label='Especialidade: '
-							register={form.register}
-							name='specialty'
-							error={form.formState.errors.specialty?.message}
-							className='w-full lg:w-2/4'
-						/>
 					</div>
 
-					<div className='flex flex-col lg:flex-row w-full gap-2'>
+					<InputForm
+						label='Especialidade: '
+						register={form.register}
+						name='specialty'
+						error={form.formState.errors.specialty?.message}
+						className='w-full lg:w-2/4'
+					/>
+
+					<div className='flex flex-row gap-4'>
 						<SelectForm
 							label='Disponível de: '
 							control={form.control}
@@ -237,7 +237,7 @@ const DoctorFormClient = ({ doctor, onSuccess }: DoctorFormClientProps) => {
 						/>
 					</div>
 
-					<div className='flex flex-col lg:flex-row w-full gap-2'>
+					<div className='flex flex-row gap-4'>
 						<SelectForm
 							label='Horário de início:'
 							name='availableFromTime'
@@ -258,7 +258,7 @@ const DoctorFormClient = ({ doctor, onSuccess }: DoctorFormClientProps) => {
 					</div>
 
 					<DialogFooter>
-						<div className='flex flex-col lg:flex-row gap-2 w-full'>
+						<div className='flex flex-row gap-4 w-full'>
 							<DialogClose asChild>
 								<Button
 									type='button'
@@ -283,7 +283,7 @@ const DoctorFormClient = ({ doctor, onSuccess }: DoctorFormClientProps) => {
 									<Loader2Icon className='h-5 w-5 animate-spin' />
 								) : (
 									<>
-										<SaveIcon className='mr-2 h-4 w-4' />
+										<SaveIcon />
 										Salvar
 									</>
 								)}
