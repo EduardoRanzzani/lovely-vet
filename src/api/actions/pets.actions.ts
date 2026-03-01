@@ -95,11 +95,14 @@ export const getPetsPaginated = async (
 ): Promise<PaginatedData<PetWithTutorAndBreed>> => {
 	const authUser = await currentUser();
 	if (!authUser) throw new Error('Usuário não autenticado');
+	console.log({ authUser });
 
 	const dbUser = await db.query.usersTable.findFirst({
 		where: eq(usersTable.clerkUserId, authUser.id),
 		with: { customer: true },
 	});
+
+	console.log({ dbUser });
 
 	const offset = (page - 1) * limit;
 	const conditions = [];

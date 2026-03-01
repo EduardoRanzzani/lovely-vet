@@ -23,6 +23,8 @@ const PetsPage = async ({ searchParams }: PetsPageProps) => {
 	const filter = params.filter || '';
 
 	const dataPromise = getPetsPaginated(page, MAX_PAGE_SIZE, filter);
+	console.log(dataPromise);
+
 	const [species, breeds, customers] = await Promise.all([
 		getSpecies(),
 		getBreeds(),
