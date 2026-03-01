@@ -1,12 +1,14 @@
 'use client';
 
 import { upsertDoctor } from '@/api/actions/doctors.actions';
+import { uploadImageAction } from '@/api/actions/upload-cloudinary';
 import { timesOfDay, ufs, weekDays } from '@/api/config/consts';
 import {
 	CreateDoctorWithUserSchema,
 	createDoctorWithUserSchema,
 	DoctorsWithUser,
 } from '@/api/schema/doctors.schema';
+import DropzoneForm from '@/components/form/image-dropzone-form';
 import InputForm from '@/components/form/input-form';
 import InputFormMask from '@/components/form/input-mask-form';
 import SelectForm from '@/components/form/select-form';
@@ -39,6 +41,7 @@ const DoctorFormClient = ({ doctor, onSuccess }: DoctorFormClientProps) => {
 			userId: doctor?.user?.clerkUserId || '',
 			name: doctor?.user?.name || '',
 			email: doctor?.user?.email || '',
+			image: doctor?.user?.image || '',
 			phone: doctor?.phone || '',
 			cpf: doctor?.cpf || '',
 			gender: (doctor?.gender as 'male' | 'female') || 'female',
@@ -88,6 +91,20 @@ const DoctorFormClient = ({ doctor, onSuccess }: DoctorFormClientProps) => {
 		},
 	});
 
+	const handlePhotoUpload = async (file: File): Promise<string> => {
+		const formData = new FormData();
+		formData.append('file', file);
+		formData.append('folder', 'doctors');
+
+		try {
+			const url = await uploadImageAction(formData);
+			return url;
+		} catch (error) {
+			toast.error('Erro ao anexar a imagem!');
+			throw error;
+		}
+	};
+
 	return (
 		<DialogContent
 			onInteractOutside={(e) => e.preventDefault()}
@@ -125,6 +142,14 @@ const DoctorFormClient = ({ doctor, onSuccess }: DoctorFormClientProps) => {
 						register={form.register}
 						name='email'
 						error={form.formState.errors.email?.message}
+					/>
+
+					<DropzoneForm
+						label='Foto:'
+						name='image'
+						control={form.control}
+						onUpload={handlePhotoUpload}
+						error={form.formState.errors.image?.message}
 					/>
 
 					<div className='w-full flex flex-col lg:flex-row gap-2'>

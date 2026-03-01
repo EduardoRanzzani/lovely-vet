@@ -92,6 +92,7 @@ const PetFormClient = ({
 	const handlePhotoUpload = async (file: File): Promise<string> => {
 		const formData = new FormData();
 		formData.append('file', file);
+		formData.append('folder', 'pets');
 
 		try {
 			const url = await uploadImageAction(formData);

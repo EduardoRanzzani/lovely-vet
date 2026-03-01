@@ -40,6 +40,7 @@ import { useSearchParams } from 'next/navigation';
 import { use } from 'react';
 import { toast } from 'sonner';
 import PetFormClient from './pet-form';
+import Image from 'next/image';
 
 interface PetsListClientProps {
 	pets: Promise<PaginatedData<PetWithTutorAndBreed>>;
@@ -104,15 +105,19 @@ const PetsListClient = ({
 		return (
 			<TableRow key={pet.id} className='group'>
 				<TableCell className='flex gap-4 items-center'>
-					<Avatar className='h-10 w-10 rounded-full' draggable={false}>
-						{pet.photo ? (
-							<AvatarImage src={pet.photo} alt={pet.name} />
-						) : (
-							<AvatarFallback className='rounded-full'>
-								{getInitials(pet.name)}
-							</AvatarFallback>
-						)}
-					</Avatar>
+					<Image
+						src={
+							pet?.photo
+								? `${pet.photo}`
+								: pet?.breed?.specie.name === 'Canino'
+									? '/dog-placeholder.png'
+									: '/cat-placeholder.svg'
+						}
+						alt='Foto do pet'
+						width={500}
+						height={500}
+						className='rounded-full border border-zinc-300 overflow-hidden object-contain w-10 h-10 select-none'
+					/>
 
 					<span className='flex flex-col'>
 						<span className='font-medium'>{pet.name}</span>
@@ -127,7 +132,6 @@ const PetsListClient = ({
 					</span>
 				</TableCell>
 
-				{/* birthDate é string "YYYY-MM-DD", calculateAge precisa lidar com isso */}
 				<TableCell>{calculateAge(new Date(pet.birthDate))}</TableCell>
 
 				<TableCell>{formatWeight(pet.weightInGrams)}</TableCell>
@@ -167,25 +171,10 @@ const PetsListClient = ({
 					</Tooltip>
 
 					{canDoActions && (
-						<>
-							<EditButton
-								tooltip={`Editar ${pet.name}`}
-								renderForm={(close) => (
-									<PetFormClient
-										pet={pet}
-										breeds={breeds}
-										customers={customers}
-										species={species}
-										onSuccess={close}
-									/>
-								)}
-							/>
-
-							<DeleteAlertButton
-								tooltip={`Deletar ${pet.name}`}
-								action={() => handleDelete(pet.id)}
-							/>
-						</>
+						<DeleteAlertButton
+							tooltip={`Deletar ${pet.name}`}
+							action={() => handleDelete(pet.id)}
+						/>
 					)}
 				</TableCell>
 			</TableRow>

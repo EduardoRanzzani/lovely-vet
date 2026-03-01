@@ -82,6 +82,18 @@ const AppSidebar = () => {
 
 	const settings: sidebarItems[] = [
 		{
+			title: 'Modelos de Receitas',
+			url: '/prescriptions-template',
+			icon: CogIcon,
+			roles: ['admin', 'doctor'],
+		},
+		{
+			title: 'Cadastro de Serviços',
+			url: '/services',
+			icon: CogIcon,
+			roles: ['admin', 'doctor'],
+		},
+		{
 			title: 'Cadastro de Espécies',
 			url: '/species',
 			icon: CogIcon,
@@ -90,12 +102,6 @@ const AppSidebar = () => {
 		{
 			title: 'Cadastro de Raças',
 			url: '/breeds',
-			icon: CogIcon,
-			roles: ['admin', 'doctor'],
-		},
-		{
-			title: 'Cadastro de Serviços',
-			url: '/services',
 			icon: CogIcon,
 			roles: ['admin', 'doctor'],
 		},

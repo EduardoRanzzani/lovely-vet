@@ -1,4 +1,7 @@
+import { getBreeds } from '@/api/actions/breeds.actions';
+import { getCustomers } from '@/api/actions/customers.actions';
 import { getPetById } from '@/api/actions/pets.actions';
+import { getSpecies } from '@/api/actions/species.actions';
 import {
 	PageContainer,
 	PageContent,
@@ -20,6 +23,10 @@ const PetDetailsPage = async ({ params }: PetDetailsPageProps) => {
 
 	if (!pet) notFound();
 
+	const species = await getSpecies();
+	const breeds = await getBreeds();
+	const customers = await getCustomers();
+
 	return (
 		<PageContainer>
 			<PageHeader>
@@ -30,7 +37,12 @@ const PetDetailsPage = async ({ params }: PetDetailsPageProps) => {
 			</PageHeader>
 
 			<PageContent>
-				<PetDetailsClient pet={pet} />
+				<PetDetailsClient
+					pet={pet}
+					species={species}
+					breeds={breeds}
+					customers={customers}
+				/>
 			</PageContent>
 		</PageContainer>
 	);

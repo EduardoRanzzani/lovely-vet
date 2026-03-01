@@ -221,6 +221,40 @@ export const medicalRecordsTable = pgTable('medical_records', {
 		.notNull(),
 });
 
+// Modelos de receitas
+export const prescriptionTemplatesTable = pgTable('prescription_templates', {
+	id: uuid('id').primaryKey().defaultRandom(),
+	title: text('title').notNull(), // Ex: "Vermífugo Padrão", "Pós-Cirúrgico Castração"
+	content: text('content').notNull(), // O corpo do texto da receita
+	doctorId: uuid('doctor_id')
+		.notNull()
+		.references(() => doctorsTable.id, { onDelete: 'cascade' }),
+	createdAt: timestamp('created_at').defaultNow().notNull(),
+	updatedAt: timestamp('updated_at')
+		.defaultNow()
+		.$onUpdate(() => new Date())
+		.notNull(),
+});
+
+// Receitas
+export const prescriptionsTable = pgTable('prescriptions', {
+	id: uuid('id').primaryKey().defaultRandom(),
+	petId: uuid('pet_id')
+		.notNull()
+		.references(() => petsTable.id, { onDelete: 'cascade' }),
+	doctorId: uuid('doctor_id').notNull(),
+	appointmentId: uuid('appointment_id').references(() => appointmentsTable.id, {
+		onDelete: 'set null',
+	}),
+	content: text('content').notNull(), // O texto final da receita (editado ou do template)
+	issuedAt: timestamp('issued_at').defaultNow().notNull(),
+	createdAt: timestamp('created_at').defaultNow().notNull(),
+	updatedAt: timestamp('updated_at')
+		.defaultNow()
+		.$onUpdate(() => new Date())
+		.notNull(),
+});
+
 // --- RELATIONS ---
 
 export const usersRelations = relations(usersTable, ({ one }) => ({
@@ -315,6 +349,34 @@ export const appointmentItemsRelations = relations(
 		service: one(servicesTable, {
 			fields: [appointmentItemsTable.serviceId],
 			references: [servicesTable.id],
+		}),
+	}),
+);
+
+export const prescriptionTemplatesRelations = relations(
+	prescriptionTemplatesTable,
+	({ one }) => ({
+		doctor: one(doctorsTable, {
+			fields: [prescriptionTemplatesTable.doctorId],
+			references: [doctorsTable.id],
+		}),
+	}),
+);
+
+export const prescriptionsRelations = relations(
+	prescriptionsTable,
+	({ one }) => ({
+		pet: one(petsTable, {
+			fields: [prescriptionsTable.petId],
+			references: [petsTable.id],
+		}),
+		doctor: one(doctorsTable, {
+			fields: [prescriptionsTable.doctorId],
+			references: [doctorsTable.id],
+		}),
+		appointment: one(appointmentsTable, {
+			fields: [prescriptionsTable.appointmentId],
+			references: [appointmentsTable.id],
 		}),
 	}),
 );

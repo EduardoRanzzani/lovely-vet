@@ -62,8 +62,6 @@ const BreedFormClient = ({
 		},
 	});
 
-	console.log(form.formState.errors);
-
 	return (
 		<DialogContent
 			onInteractOutside={(e) => e.preventDefault()}

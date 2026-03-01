@@ -27,6 +27,7 @@ import { use } from 'react';
 import { toast } from 'sonner';
 import AddCustomerButton from './add-customer-button';
 import EditCustomerButton from './edit-customer-button';
+import Image from 'next/image';
 
 interface CustomersListClientProps {
 	customers: Promise<PaginatedData<CustomerWithUser>>;
@@ -77,15 +78,13 @@ const CustomersListClient = ({ customers }: CustomersListClientProps) => {
 		return (
 			<TableRow key={customer.id}>
 				<TableCell className='flex gap-4 items-center'>
-					<Avatar className='h-10 w-10 rounded-full'>
-						{customer.user.image ? (
-							<AvatarImage src={customer.user.image} alt={customer.user.name} />
-						) : (
-							<AvatarFallback className='rounded-full'>
-								{getInitials(customer.user.name)}
-							</AvatarFallback>
-						)}
-					</Avatar>
+					<Image
+						src={customer?.user?.image ?? ''}
+						alt='Foto do pet'
+						width={500}
+						height={500}
+						className='rounded-full border border-zinc-300 overflow-hidden object-contain w-10 h-10 select-none'
+					/>
 					<span className='flex flex-col'>
 						<h3>{customer.user.name}</h3>
 						<p className='text-xs text-muted-foreground'>
