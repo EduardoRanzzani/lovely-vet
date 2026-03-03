@@ -8,6 +8,7 @@ import DeleteAlertButton from '@/components/list/delete-alert-dialog';
 import EditButton from '@/components/list/edit-button';
 import SearchInput from '@/components/list/search-input';
 import TableComponent from '@/components/list/table-component';
+import LoadingDialog from '@/components/ui/loading';
 import { TableCell, TableRow } from '@/components/ui/table';
 import { handleNavigation } from '@/lib/utils';
 import { useAction } from 'next-safe-action/hooks';
@@ -132,6 +133,8 @@ const PrescriptionsTemplateListClient = ({
 					)}
 				/>
 			</div>
+
+			{deletePrescriptionTemplateAction.isPending && <LoadingDialog />}
 
 			<TableComponent
 				emptyMessage='Nenhum modelo de receita cadastrado...'

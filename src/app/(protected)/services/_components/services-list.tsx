@@ -2,8 +2,11 @@
 
 import { deleteService } from '@/api/actions/services.actions';
 import { MAX_PAGE_SIZE, PaginatedData } from '@/api/config/consts';
+import { ServiceWithSpecie } from '@/api/schema/services.schema';
 import { Specie } from '@/api/schema/species.schema';
+import AddButton from '@/components/list/add-button';
 import DeleteAlertButton from '@/components/list/delete-alert-dialog';
+import EditButton from '@/components/list/edit-button';
 import SearchInput from '@/components/list/search-input';
 import TableComponent from '@/components/list/table-component';
 import { Separator } from '@/components/ui/separator';
@@ -15,9 +18,8 @@ import { useAction } from 'next-safe-action/hooks';
 import { useSearchParams } from 'next/navigation';
 import { use } from 'react';
 import { toast } from 'sonner';
-import AddServiceButton from './add-service-button';
-import EditServiceButton from './edit-service-button';
-import { ServiceWithSpecie } from '@/api/schema/services.schema';
+import ServiceFormClient from './service-form';
+import LoadingDialog from '@/components/ui/loading';
 
 interface ServicesListClientProps {
 	services: Promise<PaginatedData<ServiceWithSpecie>>;
@@ -74,9 +76,21 @@ const ServicesListClient = ({ services, species }: ServicesListClientProps) => {
 					)}
 				</TableCell>
 				<TableCell className='w-20 space-x-2'>
-					<EditServiceButton service={service} species={species} />
+					<EditButton
+						tooltip={`Editar '${service.name}'`}
+						renderForm={(close) => (
+							<ServiceFormClient
+								species={species}
+								service={service}
+								onSuccess={close}
+							/>
+						)}
+					/>
 
-					<DeleteAlertButton action={() => handleDelete(service.id)} />
+					<DeleteAlertButton
+						tooltip={`Deletar '${service.name}'`}
+						action={() => handleDelete(service.id)}
+					/>
 				</TableCell>
 			</TableRow>
 		);
@@ -89,9 +103,21 @@ const ServicesListClient = ({ services, species }: ServicesListClientProps) => {
 					<h3 className='font-bold'>{service.name}</h3>
 
 					<div className='flex flex-col gap-2'>
-						<EditServiceButton service={service} species={species} />
+						<EditButton
+							tooltip={`Editar '${service.name}'`}
+							renderForm={(close) => (
+								<ServiceFormClient
+									species={species}
+									service={service}
+									onSuccess={close}
+								/>
+							)}
+						/>
 
-						<DeleteAlertButton action={() => handleDelete(service.id)} />
+						<DeleteAlertButton
+							tooltip={`Deletar '${service.name}'`}
+							action={() => handleDelete(service.id)}
+						/>
 					</div>
 				</div>
 
@@ -131,8 +157,15 @@ const ServicesListClient = ({ services, species }: ServicesListClientProps) => {
 			<div className='flex flex-col lg:flex-row items-center justify-between gap-4'>
 				<SearchInput />
 
-				<AddServiceButton species={species} />
+				<AddButton
+					text={'Adicionar Serviço'}
+					renderForm={(close) => (
+						<ServiceFormClient species={species} onSuccess={close} />
+					)}
+				/>
 			</div>
+
+			{deleteServiceAction.isPending && <LoadingDialog />}
 
 			<TableComponent
 				emptyMessage='Nenhum serviço encontrado...'

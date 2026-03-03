@@ -11,7 +11,10 @@ import {
 	PageHeaderContent,
 	PageTitle,
 } from '@/components/shared/page-container';
+import { Suspense } from 'react';
 import PetsListClient from './_components/pets-list';
+import { ListSkeleton } from '@/components/ui/list-skeleton';
+import LoadingDialog from '@/components/ui/loading';
 
 interface PetsPageProps {
 	searchParams: Promise<{ page?: string; filter?: string; keyword?: string }>;
@@ -23,7 +26,6 @@ const PetsPage = async ({ searchParams }: PetsPageProps) => {
 	const filter = params.filter || '';
 
 	const dataPromise = getPetsPaginated(page, MAX_PAGE_SIZE, filter);
-	console.log(dataPromise);
 
 	const [species, breeds, customers] = await Promise.all([
 		getSpecies(),
@@ -43,12 +45,21 @@ const PetsPage = async ({ searchParams }: PetsPageProps) => {
 			</PageHeader>
 
 			<PageContent>
-				<PetsListClient
-					pets={dataPromise}
-					species={species}
-					breeds={breeds}
-					customers={customers}
-				/>
+				<Suspense
+					fallback={
+						<>
+							<ListSkeleton />
+							<LoadingDialog />
+						</>
+					}
+				>
+					<PetsListClient
+						pets={dataPromise}
+						species={species}
+						breeds={breeds}
+						customers={customers}
+					/>
+				</Suspense>
 			</PageContent>
 		</PageContainer>
 	);

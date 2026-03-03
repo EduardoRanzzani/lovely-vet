@@ -5,7 +5,8 @@ import { useDebounce } from '@/hooks/use-debounce';
 import { SearchIcon } from 'lucide-react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import qs from 'query-string';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useTransition } from 'react'; // 1. Importe useTransition
+import LoadingDialog from '@/components/ui/loading'; // 2. Importe seu dialog
 
 const SearchInput = () => {
 	const router = useRouter();
@@ -14,6 +15,9 @@ const SearchInput = () => {
 
 	const [value, setValue] = useState<string>('');
 	const debouncedValue = useDebounce(value);
+
+	// 3. O isPending será true enquanto a URL estiver sendo atualizada
+	const [isPending, startTransition] = useTransition();
 
 	const currentQuery = searchParams.get('filter');
 
@@ -24,26 +28,29 @@ const SearchInput = () => {
 		const url = qs.stringifyUrl(
 			{
 				url: pathName,
-				query: {
-					filter: debouncedValue,
-				},
+				query: { filter: debouncedValue },
 			},
-			{
-				skipEmptyString: true,
-				skipNull: true,
-			},
+			{ skipEmptyString: true, skipNull: true },
 		);
-		router.push(url);
+
+		// 4. Envolva a navegação no startTransition
+		startTransition(() => {
+			router.push(url);
+		});
 	}, [currentQuery, debouncedValue, pathName, router]);
 
 	return (
-		<div className='flex-1 w-full lg:max-w-100 relative '>
+		<div className='flex-1 w-full lg:max-w-100 relative'>
+			{/* 5. Exibe o seu Dialog se estiver pendente */}
+			{isPending && <LoadingDialog />}
+
 			<Input
 				className='pl-9 peer'
 				placeholder='Informe um texto para buscar...'
 				value={value}
 				onChange={({ target }) => setValue(target.value)}
 			/>
+
 			<SearchIcon
 				className='absolute top-1/2 -translate-y-1/2 left-3 text-muted-foreground transition-all'
 				size={16}

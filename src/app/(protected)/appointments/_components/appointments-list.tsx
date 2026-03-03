@@ -10,10 +10,13 @@ import { AppointmentsWithRelations } from '@/api/schema/appointments.schema';
 import { DoctorsWithUser } from '@/api/schema/doctors.schema';
 import { PetWithTutorAndBreed } from '@/api/schema/pets.schema';
 import { ServiceWithSpecie } from '@/api/schema/services.schema';
+import AddButton from '@/components/list/add-button';
 import ConfirmAlertButton from '@/components/list/confirm-alert-dialog';
 import DeleteAlertButton from '@/components/list/delete-alert-dialog';
+import EditButton from '@/components/list/edit-button';
 import SearchInput from '@/components/list/search-input';
 import TableComponent from '@/components/list/table-component';
+import LoadingDialog from '@/components/ui/loading';
 import { Separator } from '@/components/ui/separator';
 import { TableCell, TableRow } from '@/components/ui/table';
 import { formatCurrencyFromCents } from '@/helpers/currency';
@@ -33,9 +36,8 @@ import { useAction } from 'next-safe-action/hooks';
 import { useSearchParams } from 'next/navigation';
 import { use } from 'react';
 import { toast } from 'sonner';
-import AddAppointmentButton from './add-appointment-button';
+import AppointmentFormClient from './appointment-form';
 import BadgeStatus from './badge-status';
-import EditAppointmentButton from './edit-appointment-button';
 
 interface AppointmentsListClientProps {
 	appointments: Promise<PaginatedData<AppointmentsWithRelations>>;
@@ -179,12 +181,17 @@ const AppointmentsListClient = ({
 						</>
 					)}
 
-					<EditAppointmentButton
-						appointment={appointment}
-						pets={pets}
-						doctors={doctors}
-						services={services}
-						disabled={appointment.status !== 'pending'}
+					<EditButton
+						tooltip={'Editar agendamento'}
+						renderForm={(close) => (
+							<AppointmentFormClient
+								appointment={appointment}
+								pets={pets}
+								doctors={doctors}
+								services={services}
+								onSuccess={close}
+							/>
+						)}
 					/>
 
 					<DeleteAlertButton
@@ -211,12 +218,17 @@ const AppointmentsListClient = ({
 					</span>
 
 					<span className='flex flex-col gap-2'>
-						<EditAppointmentButton
-							appointment={appointment}
-							pets={pets}
-							doctors={doctors}
-							services={services}
-							disabled={appointment.status !== 'pending'}
+						<EditButton
+							tooltip={'Editar agendamento'}
+							renderForm={(close) => (
+								<AppointmentFormClient
+									appointment={appointment}
+									pets={pets}
+									doctors={doctors}
+									services={services}
+									onSuccess={close}
+								/>
+							)}
 						/>
 
 						<DeleteAlertButton
@@ -307,12 +319,22 @@ const AppointmentsListClient = ({
 			<div className='flex flex-col items-center justify-between gap-4 lg:flex-row'>
 				<SearchInput />
 
-				<AddAppointmentButton
-					pets={pets}
-					doctors={doctors}
-					services={services}
+				<AddButton
+					text='Adicionar Agendamento'
+					renderForm={(close) => (
+						<AppointmentFormClient
+							pets={pets}
+							doctors={doctors}
+							services={services}
+							onSuccess={close}
+						/>
+					)}
 				/>
 			</div>
+
+			{(deleteAppointmentAction.isPending ||
+				markAppointmentAsCancelledAction.isPending ||
+				markAppointmentAsCompletedAction.isPending) && <LoadingDialog />}
 
 			<TableComponent
 				emptyMessage='Nenhum agendamento encontrado...'

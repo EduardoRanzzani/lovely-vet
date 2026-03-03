@@ -11,6 +11,7 @@ import { customersTable, usersTable } from '@/db/schema';
 import { auth } from '@clerk/nextjs/server';
 import { eq } from 'drizzle-orm';
 import OnboardingCustomerFormDialog from '../customers/_component/onboarding-customer-form';
+import LoadingDialog from '@/components/ui/loading';
 
 const DashboardPage = async () => {
 	const { userId, isAuthenticated } = await auth();

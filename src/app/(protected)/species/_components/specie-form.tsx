@@ -15,6 +15,7 @@ import {
 	DialogTitle,
 } from '@/components/ui/dialog';
 import { Form } from '@/components/ui/form';
+import LoadingDialog from '@/components/ui/loading';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { BanIcon, Loader2Icon, SaveIcon } from 'lucide-react';
 import { useAction } from 'next-safe-action/hooks';
@@ -69,6 +70,7 @@ const SpecieFormClient = ({ specie, onSuccess }: SpecieFormClientProps) => {
 						<DialogTitle>
 							{specie ? 'Atualizar Espécie' : 'Cadastrar Espécie'}
 						</DialogTitle>
+
 						<DialogDescription>
 							{specie
 								? 'Atualize as informações da espécie selecionada'
@@ -82,6 +84,8 @@ const SpecieFormClient = ({ specie, onSuccess }: SpecieFormClientProps) => {
 						name='name'
 						error={form.formState.errors.name?.message}
 					/>
+
+					{upsertSpecieAction.isPending && <LoadingDialog />}
 
 					<DialogFooter>
 						<div className='flex flex-col lg:flex-row gap-4 w-full mt-4'>

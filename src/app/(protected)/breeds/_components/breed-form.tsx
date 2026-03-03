@@ -17,6 +17,7 @@ import {
 	DialogTitle,
 } from '@/components/ui/dialog';
 import { Form } from '@/components/ui/form';
+import LoadingDialog from '@/components/ui/loading';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { BanIcon, Loader2Icon, SaveIcon } from 'lucide-react';
 import { useAction } from 'next-safe-action/hooks';
@@ -102,6 +103,8 @@ const BreedFormClient = ({
 						name='name'
 						error={form.formState.errors.name?.message}
 					/>
+
+					{upsertBreedAction.isPending && <LoadingDialog />}
 
 					<DialogFooter>
 						<div className='flex flex-col lg:flex-row gap-4 w-full mt-4'>

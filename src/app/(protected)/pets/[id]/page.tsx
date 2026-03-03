@@ -10,8 +10,11 @@ import {
 	PageHeaderContent,
 	PageTitle,
 } from '@/components/shared/page-container';
+import LoadingDialog from '@/components/ui/loading';
 import { notFound } from 'next/navigation';
+import { Suspense } from 'react';
 import PetDetailsClient from '../_components/pet-details';
+import { PetDetailsSkeleton } from '../_components/pet-details-skeleton';
 
 interface PetDetailsPageProps {
 	params: Promise<{ id: string }>;
@@ -19,13 +22,13 @@ interface PetDetailsPageProps {
 
 const PetDetailsPage = async ({ params }: PetDetailsPageProps) => {
 	const { id } = await params;
-	const pet = await getPetById(id);
 
+	const pet = await getPetById(id);
 	if (!pet) notFound();
 
-	const species = await getSpecies();
-	const breeds = await getBreeds();
-	const customers = await getCustomers();
+	const speciesPromise = getSpecies();
+	const breedsPromise = getBreeds();
+	const customersPromise = getCustomers();
 
 	return (
 		<PageContainer>
@@ -37,12 +40,21 @@ const PetDetailsPage = async ({ params }: PetDetailsPageProps) => {
 			</PageHeader>
 
 			<PageContent>
-				<PetDetailsClient
-					pet={pet}
-					species={species}
-					breeds={breeds}
-					customers={customers}
-				/>
+				<Suspense
+					fallback={
+						<>
+							<PetDetailsSkeleton />
+							<LoadingDialog />
+						</>
+					}
+				>
+					<PetDetailsClient
+						pet={pet}
+						speciesPromise={speciesPromise}
+						breedsPromise={breedsPromise}
+						customersPromise={customersPromise}
+					/>
+				</Suspense>
 			</PageContent>
 		</PageContainer>
 	);

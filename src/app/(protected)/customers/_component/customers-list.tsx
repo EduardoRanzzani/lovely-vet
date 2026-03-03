@@ -6,11 +6,14 @@ import { CustomerWithUser } from '@/api/schema/customers.schema';
 import { getInitials } from '@/api/util';
 import { GoogleMapsIcon } from '@/components/icons/icon-googlemaps';
 import { WhatsappIcon } from '@/components/icons/icon-whatsapp';
+import AddButton from '@/components/list/add-button';
 import DeleteAlertButton from '@/components/list/delete-alert-dialog';
+import EditButton from '@/components/list/edit-button';
 import SearchInput from '@/components/list/search-input';
 import TableComponent from '@/components/list/table-component';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
+import LoadingDialog from '@/components/ui/loading';
 import { Separator } from '@/components/ui/separator';
 import { TableCell, TableRow } from '@/components/ui/table';
 import {
@@ -21,16 +24,12 @@ import {
 import { handleNavigation } from '@/lib/utils';
 import { IdCardIcon, MapPinIcon, PhoneIcon } from 'lucide-react';
 import { useAction } from 'next-safe-action/hooks';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { use } from 'react';
 import { toast } from 'sonner';
-import AddCustomerButton from './add-customer-button';
-import EditCustomerButton from './edit-customer-button';
-import Image from 'next/image';
-import AddButton from '@/components/list/add-button';
 import CustomerFormClient from './customer-form';
-import EditButton from '@/components/list/edit-button';
 
 interface CustomersListClientProps {
 	customers: Promise<PaginatedData<CustomerWithUser>>;
@@ -242,6 +241,8 @@ const CustomersListClient = ({ customers }: CustomersListClientProps) => {
 					renderForm={(close) => <CustomerFormClient onSuccess={close} />}
 				/>
 			</div>
+
+			{deleteCustomerAction.isPending && <LoadingDialog />}
 
 			<TableComponent
 				emptyMessage='Nenhum cliente encontrado...'

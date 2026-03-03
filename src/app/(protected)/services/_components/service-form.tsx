@@ -18,6 +18,7 @@ import {
 	DialogTitle,
 } from '@/components/ui/dialog';
 import { Form } from '@/components/ui/form';
+import LoadingDialog from '@/components/ui/loading';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { BanIcon, Loader2Icon, SaveIcon } from 'lucide-react';
 import { useAction } from 'next-safe-action/hooks';
@@ -120,6 +121,8 @@ const ServiceFormClient = ({
 						name='description'
 						error={form.formState.errors.description?.message}
 					/>
+
+					{upsertServiceAction.isPending && <LoadingDialog />}
 
 					<DialogFooter>
 						<div className='flex flex-col lg:flex-row gap-4 w-full mt-4'>

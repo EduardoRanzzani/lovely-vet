@@ -1,4 +1,5 @@
 import { getServicesPaginated } from '@/api/actions/services.actions';
+import { getSpecies } from '@/api/actions/species.actions';
 import { MAX_PAGE_SIZE } from '@/api/config/consts';
 import {
 	PageContainer,
@@ -8,8 +9,10 @@ import {
 	PageHeaderContent,
 	PageTitle,
 } from '@/components/shared/page-container';
+import { ListSkeleton } from '@/components/ui/list-skeleton';
+import LoadingDialog from '@/components/ui/loading';
+import { Suspense } from 'react';
 import ServicesListClient from './_components/services-list';
-import { getSpecies } from '@/api/actions/species.actions';
 
 interface ServicesPageProps {
 	searchParams: Promise<{ page?: string; filter?: string; keyword?: string }>;
@@ -35,7 +38,16 @@ const ServicesPage = async ({ searchParams }: ServicesPageProps) => {
 			</PageHeader>
 
 			<PageContent>
-				<ServicesListClient services={dataPromise} species={species} />
+				<Suspense
+					fallback={
+						<>
+							<ListSkeleton />
+							<LoadingDialog />
+						</>
+					}
+				>
+					<ServicesListClient services={dataPromise} species={species} />
+				</Suspense>
 			</PageContent>
 		</PageContainer>
 	);

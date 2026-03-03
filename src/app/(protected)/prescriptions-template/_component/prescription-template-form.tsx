@@ -18,6 +18,7 @@ import {
 	DialogTitle,
 } from '@/components/ui/dialog';
 import { Form } from '@/components/ui/form';
+import LoadingDialog from '@/components/ui/loading';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { BanIcon, Loader2Icon, SaveIcon } from 'lucide-react';
 import { useAction } from 'next-safe-action/hooks';
@@ -71,7 +72,7 @@ const PrescriptionTemplateFormClient = ({
 		<DialogContent
 			onInteractOutside={(e) => e.preventDefault()}
 			showCloseButton={false}
-			className='max-w-lg h-screen xs:h-auto overflow-scroll'
+			className='max-w-lg h-auto overflow-scroll'
 		>
 			<Form {...form}>
 				<form
@@ -116,6 +117,8 @@ const PrescriptionTemplateFormClient = ({
 						className='w-full'
 						error={form.formState.errors.content?.message}
 					/>
+
+					{upsertPrescriptionTemplateAction.isPending && <LoadingDialog />}
 
 					<DialogFooter>
 						<div className='flex flex-col lg:flex-row gap-4 w-full mt-4'>

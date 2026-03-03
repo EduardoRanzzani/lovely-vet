@@ -8,6 +8,9 @@ import {
 	PageHeaderContent,
 	PageTitle,
 } from '@/components/shared/page-container';
+import { ListSkeleton } from '@/components/ui/list-skeleton';
+import LoadingDialog from '@/components/ui/loading';
+import { Suspense } from 'react';
 import CustomersListClient from './_component/customers-list';
 
 interface CustomersPageProps {
@@ -33,7 +36,16 @@ const CustomersPage = async ({ searchParams }: CustomersPageProps) => {
 			</PageHeader>
 
 			<PageContent>
-				<CustomersListClient customers={dataPromise} />
+				<Suspense
+					fallback={
+						<>
+							<ListSkeleton />
+							<LoadingDialog />
+						</>
+					}
+				>
+					<CustomersListClient customers={dataPromise} />
+				</Suspense>
 			</PageContent>
 		</PageContainer>
 	);

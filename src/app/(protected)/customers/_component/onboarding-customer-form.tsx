@@ -19,6 +19,7 @@ import {
 	DialogTitle,
 } from '@/components/ui/dialog';
 import { Form } from '@/components/ui/form';
+import LoadingDialog from '@/components/ui/loading';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Loader2Icon, SaveIcon } from 'lucide-react';
 import { useAction } from 'next-safe-action/hooks';
@@ -183,6 +184,8 @@ const OnboardingCustomerFormDialog = ({ isOpen }: { isOpen: boolean }) => {
 								disabled
 							/>
 						</span>
+
+						{onboardingCustomerAction.isPending && <LoadingDialog />}
 
 						<DialogFooter>
 							<Button

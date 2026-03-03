@@ -132,7 +132,10 @@ const AppSidebar = () => {
 							.filter((item) => item.roles.includes(userRole))
 							.map((item) => (
 								<SidebarMenuItem key={item.title}>
-									<SidebarMenuButton asChild isActive={pathname === item.url}>
+									<SidebarMenuButton
+										asChild
+										isActive={pathname.includes(item.url)}
+									>
 										<Link
 											href={item.url}
 											className='flex justify-between'
@@ -141,12 +144,12 @@ const AppSidebar = () => {
 											<span className='flex items-center gap-2'>
 												<item.icon className='h-5 w-5' />
 												<p
-													className={`${pathname === item.url && 'font-semibold'}`}
+													className={`${pathname.includes(item.url) && 'font-semibold'}`}
 												>
 													{item.title}
 												</p>
 											</span>
-											{pathname === item.url && <ChevronRightIcon />}
+											{pathname.includes(item.url) && <ChevronRightIcon />}
 										</Link>
 									</SidebarMenuButton>
 								</SidebarMenuItem>
@@ -159,7 +162,10 @@ const AppSidebar = () => {
 						<SidebarMenu>
 							{settings.map((item) => (
 								<SidebarMenuItem key={item.title}>
-									<SidebarMenuButton asChild isActive={pathname === item.url}>
+									<SidebarMenuButton
+										asChild
+										isActive={pathname.includes(item.url)}
+									>
 										<Link
 											href={item.url}
 											className='flex justify-between'
@@ -168,12 +174,12 @@ const AppSidebar = () => {
 											<span className='flex items-center gap-2'>
 												<item.icon className='h-5 w-5' />
 												<p
-													className={`${pathname === item.url && 'font-semibold'}`}
+													className={`${pathname.includes(item.url) && 'font-semibold'}`}
 												>
 													{item.title}
 												</p>
 											</span>
-											{pathname === item.url && <ChevronRightIcon />}
+											{pathname.includes(item.url) && <ChevronRightIcon />}
 										</Link>
 									</SidebarMenuButton>
 								</SidebarMenuItem>

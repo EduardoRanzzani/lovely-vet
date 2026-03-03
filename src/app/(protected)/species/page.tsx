@@ -8,7 +8,10 @@ import {
 	PageHeaderContent,
 	PageTitle,
 } from '@/components/shared/page-container';
+import { ListSkeleton } from '@/components/ui/list-skeleton';
+import { Suspense } from 'react';
 import SpeciesListClient from './_components/species-list';
+import LoadingDialog from '@/components/ui/loading';
 
 interface SpeciesPageProps {
 	searchParams: Promise<{ page?: string; filter?: string; keyword?: string }>;
@@ -33,7 +36,16 @@ const SpeciesPage = async ({ searchParams }: SpeciesPageProps) => {
 			</PageHeader>
 
 			<PageContent>
-				<SpeciesListClient species={dataPromise} />
+				<Suspense
+					fallback={
+						<>
+							<ListSkeleton />
+							<LoadingDialog />
+						</>
+					}
+				>
+					<SpeciesListClient species={dataPromise} />
+				</Suspense>
 			</PageContent>
 		</PageContainer>
 	);

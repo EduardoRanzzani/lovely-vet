@@ -8,21 +8,26 @@ import EditButton from '@/components/list/edit-button';
 import { Separator } from '@/components/ui/separator';
 import { format } from 'date-fns';
 import Image from 'next/image';
+import { use } from 'react';
 import PetFormClient from './pet-form';
 
 interface PetDetailsClientProps {
 	pet: PetWithTutorAndBreed;
-	species: Specie[];
-	breeds: BreedsWithSpecies[];
-	customers: CustomerWithUser[];
+	speciesPromise: Promise<Specie[]>;
+	breedsPromise: Promise<BreedsWithSpecies[]>;
+	customersPromise: Promise<CustomerWithUser[]>;
 }
 
 const PetDetailsClient = ({
 	pet,
-	species,
-	breeds,
-	customers,
+	speciesPromise,
+	breedsPromise,
+	customersPromise,
 }: PetDetailsClientProps) => {
+	const species = use(speciesPromise);
+	const breeds = use(breedsPromise);
+	const customers = use(customersPromise);
+
 	return (
 		<div className='flex flex-col gap-4 w-full'>
 			<div className='flex flex-col md:flex-row gap-4 w-full'>

@@ -16,6 +16,7 @@ import { useSearchParams } from 'next/navigation';
 import { use } from 'react';
 import { toast } from 'sonner';
 import BreedFormClient from './breed-form';
+import LoadingDialog from '@/components/ui/loading';
 
 interface BreedsListClientProps {
 	breeds: Promise<PaginatedData<BreedsWithSpecies>>;
@@ -119,6 +120,8 @@ const BreedsListClient = ({ breeds, species }: BreedsListClientProps) => {
 					)}
 				/>
 			</div>
+
+			{deleteBreedAction.isPending && <LoadingDialog />}
 
 			<TableComponent
 				emptyMessage='Nenhuma espécie encontrada...'

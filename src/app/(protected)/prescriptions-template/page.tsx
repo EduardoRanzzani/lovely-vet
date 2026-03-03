@@ -1,3 +1,4 @@
+import { getDoctors } from '@/api/actions/doctors.actions';
 import { getPrescriptionsTemplatePaginated } from '@/api/actions/prescriptions-template.actions';
 import { MAX_PAGE_SIZE } from '@/api/config/consts';
 import {
@@ -8,8 +9,10 @@ import {
 	PageHeaderContent,
 	PageTitle,
 } from '@/components/shared/page-container';
+import { ListSkeleton } from '@/components/ui/list-skeleton';
+import LoadingDialog from '@/components/ui/loading';
+import { Suspense } from 'react';
 import PrescriptionsTemplateListClient from './_component/prescriptions-template-list';
-import { getDoctors } from '@/api/actions/doctors.actions';
 
 interface PrescriptionsTemplatePageProps {
 	searchParams: Promise<{ page?: string; filter?: string; keyword?: string }>;
@@ -42,10 +45,19 @@ const PrescriptionsTemplatePage = async ({
 			</PageHeader>
 
 			<PageContent>
-				<PrescriptionsTemplateListClient
-					prescriptionsTemplate={dataPromise}
-					doctors={doctors}
-				/>
+				<Suspense
+					fallback={
+						<>
+							<ListSkeleton />
+							<LoadingDialog />
+						</>
+					}
+				>
+					<PrescriptionsTemplateListClient
+						prescriptionsTemplate={dataPromise}
+						doctors={doctors}
+					/>
+				</Suspense>
 			</PageContent>
 		</PageContainer>
 	);

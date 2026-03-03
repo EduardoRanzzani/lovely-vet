@@ -23,6 +23,7 @@ import {
 	DialogTitle,
 } from '@/components/ui/dialog';
 import { Form } from '@/components/ui/form';
+import LoadingDialog from '@/components/ui/loading';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { BanIcon, Loader2Icon, SaveIcon } from 'lucide-react';
 import { useAction } from 'next-safe-action/hooks';
@@ -217,6 +218,8 @@ const AppointmentFormClient = ({
 						name='notes'
 						error={form.formState.errors.notes?.message}
 					/>
+
+					{upsertAppointmentAction.isPending && <LoadingDialog />}
 
 					<DialogFooter>
 						<div className='flex flex-col w-full gap-4 lg:flex-row'>

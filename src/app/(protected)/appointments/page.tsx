@@ -11,6 +11,9 @@ import {
 	PageHeaderContent,
 	PageTitle,
 } from '@/components/shared/page-container';
+import { ListSkeleton } from '@/components/ui/list-skeleton';
+import LoadingDialog from '@/components/ui/loading';
+import { Suspense } from 'react';
 import AppointmentsListClient from './_components/appointments-list';
 
 interface AppointmentsPageProps {
@@ -40,12 +43,21 @@ const AppointmentsPage = async ({ searchParams }: AppointmentsPageProps) => {
 			</PageHeader>
 
 			<PageContent>
-				<AppointmentsListClient
-					appointments={dataPromise}
-					services={services}
-					pets={pets}
-					doctors={doctors}
-				/>
+				<Suspense
+					fallback={
+						<>
+							<ListSkeleton />
+							<LoadingDialog />
+						</>
+					}
+				>
+					<AppointmentsListClient
+						appointments={dataPromise}
+						services={services}
+						pets={pets}
+						doctors={doctors}
+					/>
+				</Suspense>
 			</PageContent>
 		</PageContainer>
 	);

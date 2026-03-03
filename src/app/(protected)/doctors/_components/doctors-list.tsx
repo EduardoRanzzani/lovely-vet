@@ -3,6 +3,8 @@
 import { MAX_PAGE_SIZE, PaginatedData } from '@/api/config/consts';
 import { DoctorsWithUser } from '@/api/schema/doctors.schema';
 import { getInitials } from '@/api/util';
+import AddButton from '@/components/list/add-button';
+import EditButton from '@/components/list/edit-button';
 import SearchInput from '@/components/list/search-input';
 import TableComponent from '@/components/list/table-component';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -11,11 +13,10 @@ import { TableCell, TableRow } from '@/components/ui/table';
 import { getWeekDay } from '@/helpers/week';
 import { handleNavigation } from '@/lib/utils';
 import { CalendarIcon, ClockIcon, IdCardIcon, PhoneIcon } from 'lucide-react';
+import Image from 'next/image';
 import { useSearchParams } from 'next/navigation';
 import { use } from 'react';
-import AddDoctorButton from './add-doctor-button';
-import EditDoctorButton from './edit-doctor-button';
-import Image from 'next/image';
+import DoctorFormClient from './doctor-form';
 
 interface DoctorsListClientProps {
 	doctors: Promise<PaginatedData<DoctorsWithUser>>;
@@ -72,7 +73,12 @@ const DoctorsListClient = ({ doctors }: DoctorsListClientProps) => {
 					às {doctor.availableToTime}
 				</TableCell>
 				<TableCell>
-					<EditDoctorButton doctor={doctor} />
+					<EditButton
+						tooltip={`Editar '${doctor.user.name}'`}
+						renderForm={(close) => (
+							<DoctorFormClient doctor={doctor} onSuccess={close} />
+						)}
+					/>
 				</TableCell>
 			</TableRow>
 		);
@@ -101,7 +107,12 @@ const DoctorsListClient = ({ doctors }: DoctorsListClientProps) => {
 						</span>
 					</div>
 
-					<EditDoctorButton doctor={doctor} />
+					<EditButton
+						tooltip={`Editar '${doctor.user.name}'`}
+						renderForm={(close) => (
+							<DoctorFormClient doctor={doctor} onSuccess={close} />
+						)}
+					/>
 				</div>
 
 				<Separator />
@@ -149,7 +160,10 @@ const DoctorsListClient = ({ doctors }: DoctorsListClientProps) => {
 			<div className='flex flex-col lg:flex-row items-center justify-between gap-4'>
 				<SearchInput />
 
-				<AddDoctorButton />
+				<AddButton
+					text='Adicionar Veterinário'
+					renderForm={(close) => <DoctorFormClient onSuccess={close} />}
+				/>
 			</div>
 
 			<TableComponent

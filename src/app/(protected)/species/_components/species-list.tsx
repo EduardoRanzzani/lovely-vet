@@ -5,15 +5,16 @@ import { MAX_PAGE_SIZE, PaginatedData } from '@/api/config/consts';
 import { Specie } from '@/api/schema/species.schema';
 import AddButton from '@/components/list/add-button';
 import DeleteAlertButton from '@/components/list/delete-alert-dialog';
+import EditButton from '@/components/list/edit-button';
 import SearchInput from '@/components/list/search-input';
 import TableComponent from '@/components/list/table-component';
+import LoadingDialog from '@/components/ui/loading';
 import { TableCell, TableRow } from '@/components/ui/table';
 import { handleNavigation } from '@/lib/utils';
 import { useAction } from 'next-safe-action/hooks';
 import { useSearchParams } from 'next/navigation';
 import { use } from 'react';
 import { toast } from 'sonner';
-import EditSpecieButton from './edit-specie-button';
 import SpecieFormClient from './specie-form';
 
 interface SpeciesListClientProps {
@@ -58,9 +59,17 @@ const SpeciesListClient = ({ species }: SpeciesListClientProps) => {
 			<TableRow key={specie.id}>
 				<TableCell>{specie.name}</TableCell>
 				<TableCell className='w-20 space-x-2'>
-					<EditSpecieButton specie={specie} />
+					<EditButton
+						tooltip={`Editar '${specie.name}'`}
+						renderForm={(close) => (
+							<SpecieFormClient specie={specie} onSuccess={close} />
+						)}
+					/>
 
-					<DeleteAlertButton action={() => handleDelete(specie.id)} />
+					<DeleteAlertButton
+						tooltip={`Deletar '${specie.name}'`}
+						action={() => handleDelete(specie.id)}
+					/>
 				</TableCell>
 			</TableRow>
 		);
@@ -75,7 +84,12 @@ const SpeciesListClient = ({ species }: SpeciesListClientProps) => {
 					</span>
 
 					<span className='flex flex-col gap-2'>
-						<EditSpecieButton specie={specie} />
+						<EditButton
+							tooltip={`Editar '${specie.name}'`}
+							renderForm={(close) => (
+								<SpecieFormClient specie={specie} onSuccess={close} />
+							)}
+						/>
 
 						<DeleteAlertButton action={() => handleDelete(specie.id)} />
 					</span>
@@ -95,6 +109,8 @@ const SpeciesListClient = ({ species }: SpeciesListClientProps) => {
 				/>
 			</div>
 
+			{deleteSpecieAction.isPending && <LoadingDialog />}
+
 			<TableComponent
 				emptyMessage='Nenhuma espécie encontrada...'
 				columns={columns}
@@ -110,4 +126,5 @@ const SpeciesListClient = ({ species }: SpeciesListClientProps) => {
 		</div>
 	);
 };
+
 export default SpeciesListClient;
