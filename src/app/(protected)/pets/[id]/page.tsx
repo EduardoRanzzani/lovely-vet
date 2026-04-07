@@ -35,11 +35,11 @@ const PetDetailsPage = async ({ params }: PetDetailsPageProps) => {
 			<PageHeader>
 				<PageHeaderContent>
 					<PageTitle>Detalhes do Pet</PageTitle>
-					<PageDescription>Detalhes do cadastro do pet</PageDescription>
 				</PageHeaderContent>
 			</PageHeader>
 
 			<PageContent>
+				{/* <PageDescription>Detalhes do cadastro do pet</PageDescription> */}
 				<Suspense
 					fallback={
 						<>

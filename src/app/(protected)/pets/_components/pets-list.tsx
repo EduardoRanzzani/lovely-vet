@@ -10,7 +10,6 @@ import { calculateAge, getInitials } from '@/api/util';
 import { WhatsappIcon } from '@/components/icons/icon-whatsapp';
 import AddButton from '@/components/list/add-button';
 import DeleteAlertButton from '@/components/list/delete-alert-dialog';
-import EditButton from '@/components/list/edit-button';
 import SearchInput from '@/components/list/search-input';
 import TableComponent from '@/components/list/table-component';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -40,7 +39,6 @@ import { useSearchParams } from 'next/navigation';
 import { use } from 'react';
 import { toast } from 'sonner';
 import PetFormClient from './pet-form';
-import Image from 'next/image';
 
 interface PetsListClientProps {
 	pets: Promise<PaginatedData<PetWithTutorAndBreed>>;
@@ -105,19 +103,20 @@ const PetsListClient = ({
 		return (
 			<TableRow key={pet.id} className='group'>
 				<TableCell className='flex gap-4 items-center'>
-					<Image
-						src={
-							pet?.photo
-								? `${pet.photo}`
-								: pet?.breed?.specie.name === 'Canino'
-									? '/dog-placeholder.png'
-									: '/cat-placeholder.svg'
-						}
-						alt='Foto do pet'
-						width={500}
-						height={500}
-						className='rounded-full border border-zinc-300 overflow-hidden object-contain w-10 h-10 select-none'
-					/>
+					<Avatar className='h-10 w-10 rounded-full' draggable={false}>
+						{pet.photo ? (
+							<AvatarImage src={pet.photo} alt={pet.name} />
+						) : (
+							<AvatarImage
+								src={
+									pet?.breed?.specie.name === 'Canino'
+										? '/dog-placeholder.png'
+										: '/cat-placeholder.svg'
+								}
+								alt={pet.name}
+							/>
+						)}
+					</Avatar>
 
 					<span className='flex flex-col'>
 						<span className='font-medium'>{pet.name}</span>
@@ -211,18 +210,16 @@ const PetsListClient = ({
 					</div>
 
 					<span className='flex flex-col gap-2'>
-						<EditButton
-							tooltip={`Editar ${pet.name}`}
-							renderForm={(close) => (
-								<PetFormClient
-									pet={pet}
-									breeds={breeds}
-									customers={customers}
-									species={species}
-									onSuccess={close}
-								/>
-							)}
-						/>
+						<Tooltip>
+							<TooltipTrigger asChild>
+								<Button size={'icon'} variant={'secondary'} asChild>
+									<Link href={`/pets/${pet.id}`}>
+										<EyeIcon className='h-4 w-4' />
+									</Link>
+								</Button>
+							</TooltipTrigger>
+							<TooltipContent>Visualizar {pet.name}</TooltipContent>
+						</Tooltip>
 
 						<DeleteAlertButton action={() => handleDelete(pet.id)} />
 					</span>

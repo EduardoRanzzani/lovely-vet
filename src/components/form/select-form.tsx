@@ -139,10 +139,11 @@ const SelectForm = <T extends FieldValues>({
 							aria-expanded={open}
 							onKeyDown={handleKeyDown}
 							className={cn(
-								'border-input h-10 w-full rounded-md border bg-transparent px-3 py-1 text-sm shadow-sm transition-all outline-none',
+								'border-input h-9 w-full rounded-md border bg-transparent px-3 py-1 text-sm shadow-sm transition-all outline-none',
 								'flex items-center justify-between cursor-pointer gap-2',
 								'focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1',
 								error ? 'border-destructive' : 'focus-visible:border-ring',
+								className,
 							)}
 							onClick={() => setOpen(!open)}
 						>

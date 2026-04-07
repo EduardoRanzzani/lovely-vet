@@ -89,7 +89,7 @@ const DateTimePickerForm = <T extends FieldValues>({
 									type='button'
 									disabled={disabled}
 									className={cn(
-										'w-full justify-start text-left font-normal h-10 px-3',
+										'w-full justify-start text-left font-normal h-9 px-3',
 										!selectedDate && 'text-muted-foreground',
 										error && 'border-destructive',
 									)}

@@ -29,13 +29,13 @@ const CustomersPage = async ({ searchParams }: CustomersPageProps) => {
 			<PageHeader>
 				<PageHeaderContent>
 					<PageTitle>Listagem de Clientes</PageTitle>
-					<PageDescription>
-						Listagem de todos os clientes cadastrados no sistema
-					</PageDescription>
 				</PageHeaderContent>
 			</PageHeader>
 
 			<PageContent>
+				<PageDescription>
+					Listagem de todos os clientes cadastrados no sistema
+				</PageDescription>
 				<Suspense
 					fallback={
 						<>

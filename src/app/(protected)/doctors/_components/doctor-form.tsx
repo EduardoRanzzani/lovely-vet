@@ -161,7 +161,7 @@ const DoctorFormClient = ({ doctor, onSuccess }: DoctorFormClientProps) => {
 							format='(##) #####-####'
 							mask='x'
 							name='phone'
-							className='w-full lg:w-[33%]'
+							className='w-full'
 						/>
 
 						<InputFormMask
@@ -171,7 +171,7 @@ const DoctorFormClient = ({ doctor, onSuccess }: DoctorFormClientProps) => {
 							format='###.###.###-##'
 							mask='x'
 							name='cpf'
-							className='w-full lg:w-[33%]'
+							className='w-full'
 						/>
 					</div>
 
@@ -191,7 +191,7 @@ const DoctorFormClient = ({ doctor, onSuccess }: DoctorFormClientProps) => {
 									label: 'Feminino',
 								},
 							]}
-							className='w-full lg:w-[33%]'
+							className='w-full'
 						/>
 
 						<InputForm
@@ -199,7 +199,6 @@ const DoctorFormClient = ({ doctor, onSuccess }: DoctorFormClientProps) => {
 							register={form.register}
 							name='licenseNumber'
 							error={form.formState.errors.licenseNumber?.message}
-							className='w-full lg:w-1/4'
 						/>
 
 						<SelectForm
@@ -208,7 +207,6 @@ const DoctorFormClient = ({ doctor, onSuccess }: DoctorFormClientProps) => {
 							error={form.formState.errors.licenseState?.message}
 							name='licenseState'
 							options={ufs}
-							className='w-full lg:w-1/4'
 						/>
 					</div>
 
@@ -217,7 +215,6 @@ const DoctorFormClient = ({ doctor, onSuccess }: DoctorFormClientProps) => {
 						register={form.register}
 						name='specialty'
 						error={form.formState.errors.specialty?.message}
-						className='w-full lg:w-2/4'
 					/>
 
 					<div className='flex flex-row gap-4'>

@@ -47,13 +47,16 @@ const DoctorsListClient = ({ doctors }: DoctorsListClientProps) => {
 				<TableCell>
 					<div className='flex items-center justify-between'>
 						<div className='flex gap-4'>
-							<Image
-								src={doctor?.user?.image ?? ''}
-								alt='Foto do pet'
-								width={500}
-								height={500}
-								className='rounded-full border border-zinc-300 overflow-hidden object-contain w-10 h-10 select-none'
-							/>
+							<Avatar className='h-10 w-10 rounded-full' draggable={false}>
+								{doctor.user.image ? (
+									<AvatarImage src={doctor.user.image} alt={doctor.user.name} />
+								) : (
+									<AvatarImage
+										src={'/avatar-placeholder.png'}
+										alt={doctor.user.name}
+									/>
+								)}
+							</Avatar>
 
 							<span className='flex flex-col'>
 								<h3>{doctor.user.name}</h3>

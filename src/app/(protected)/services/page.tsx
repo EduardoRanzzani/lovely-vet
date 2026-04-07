@@ -31,13 +31,13 @@ const ServicesPage = async ({ searchParams }: ServicesPageProps) => {
 			<PageHeader>
 				<PageHeaderContent>
 					<PageTitle>Listagem de Serviços Ofertados</PageTitle>
-					<PageDescription>
-						Listagem de todos os serviços ofertados cadastrados no sistema
-					</PageDescription>
 				</PageHeaderContent>
 			</PageHeader>
 
 			<PageContent>
+				<PageDescription>
+					Listagem de todos os serviços ofertados cadastrados no sistema
+				</PageDescription>
 				<Suspense
 					fallback={
 						<>

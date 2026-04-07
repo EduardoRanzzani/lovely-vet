@@ -29,13 +29,13 @@ const SpeciesPage = async ({ searchParams }: SpeciesPageProps) => {
 			<PageHeader>
 				<PageHeaderContent>
 					<PageTitle>Listagem de Espécies</PageTitle>
-					<PageDescription>
-						Listagem de todos as espécies de pets cadastradas no sistema
-					</PageDescription>
 				</PageHeaderContent>
 			</PageHeader>
 
 			<PageContent>
+				<PageDescription>
+					Listagem de todos as espécies de pets cadastradas no sistema
+				</PageDescription>
 				<Suspense
 					fallback={
 						<>

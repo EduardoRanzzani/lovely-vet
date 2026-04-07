@@ -36,14 +36,14 @@ const DashboardPage = async () => {
 			<PageHeader>
 				<PageHeaderContent>
 					<PageTitle>Dashboard</PageTitle>
-					<PageDescription>
-						Olá, {existingUser.name}! Aqui você vai encontrar as métricas de
-						todos os atendimentos e agendamentos próximos.
-					</PageDescription>
 				</PageHeaderContent>
 			</PageHeader>
 
 			<PageContent>
+				<PageDescription>
+					Olá, {existingUser.name}! Aqui você vai encontrar as métricas de todos
+					os atendimentos e agendamentos próximos.
+				</PageDescription>
 				<OnboardingCustomerFormDialog isOpen={needsToCreateCustomer} />
 			</PageContent>
 		</PageContainer>

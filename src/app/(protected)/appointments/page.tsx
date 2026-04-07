@@ -36,13 +36,13 @@ const AppointmentsPage = async ({ searchParams }: AppointmentsPageProps) => {
 			<PageHeader>
 				<PageHeaderContent>
 					<PageTitle>Listagem de Agendamentos</PageTitle>
-					<PageDescription>
-						Listagem de todos os agendamentos registrados no sistema
-					</PageDescription>
 				</PageHeaderContent>
 			</PageHeader>
 
 			<PageContent>
+				<PageDescription>
+					Listagem de todos os agendamentos registrados no sistema
+				</PageDescription>
 				<Suspense
 					fallback={
 						<>

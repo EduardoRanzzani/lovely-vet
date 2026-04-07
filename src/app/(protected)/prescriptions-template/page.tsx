@@ -38,13 +38,13 @@ const PrescriptionsTemplatePage = async ({
 			<PageHeader>
 				<PageHeaderContent>
 					<PageTitle>Modelos de Receitas</PageTitle>
-					<PageDescription>
-						Listagem e cadastro de modelos de receita para serem utilizados
-					</PageDescription>
 				</PageHeaderContent>
 			</PageHeader>
 
 			<PageContent>
+				<PageDescription>
+					Listagem e cadastro de modelos de receita para serem utilizados
+				</PageDescription>
 				<Suspense
 					fallback={
 						<>

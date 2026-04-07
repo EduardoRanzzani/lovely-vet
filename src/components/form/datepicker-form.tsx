@@ -53,7 +53,7 @@ const DatePickerForm = <T extends FieldValues>({
 								variant='outline'
 								disabled={disabled}
 								className={cn(
-									'w-full justify-start text-left font-normal h-10 px-3',
+									'w-full justify-start text-left font-normal h-9 px-3',
 									!field.value && 'text-muted-foreground',
 									error && 'border-destructive',
 								)}

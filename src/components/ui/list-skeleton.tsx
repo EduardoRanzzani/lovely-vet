@@ -14,8 +14,8 @@ export const ListSkeleton = () => {
 		<div className='flex flex-col w-full gap-4'>
 			{/* Skeleton para a barra de busca e botão */}
 			<div className='flex flex-col lg:flex-row items-center justify-between gap-4'>
-				<Skeleton className='h-10 w-full lg:max-w-100 bg-zinc-100' />
-				<Skeleton className='h-10 w-60 bg-zinc-100' />
+				<Skeleton className='h-9 w-full lg:max-w-100 bg-zinc-100' />
+				<Skeleton className='h-9 w-60 bg-zinc-100' />
 			</div>
 
 			{/* Estrutura da Tabela simulada */}

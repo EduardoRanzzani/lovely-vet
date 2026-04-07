@@ -26,6 +26,7 @@ import {
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { NavUser, NavUserType } from './nav-user';
+import { version } from '../../../package.json';
 
 interface sidebarItems {
 	title: string;
@@ -112,14 +113,13 @@ const AppSidebar = () => {
 			<SidebarHeader>
 				<SidebarMenu>
 					<SidebarMenuItem>
-						{/* <SidebarMenuButton asChild> */}
 						<Link href={'/dashboard'} onClick={() => setOpenMobile(false)}>
 							<span className='flex items-center gap-2 text-3xl'>
 								<StethoscopeIcon className='h-7 w-7' />
 								<span>LovelyVet</span>
 							</span>
 						</Link>
-						{/* </SidebarMenuButton> */}
+						<SidebarGroupLabel>v. {version}</SidebarGroupLabel>
 					</SidebarMenuItem>
 				</SidebarMenu>
 			</SidebarHeader>
