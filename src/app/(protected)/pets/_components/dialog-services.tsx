@@ -34,7 +34,7 @@ const DialogServices = () => {
 	return (
 		<Dialog>
 			<DialogTrigger asChild>
-				<Button className='bg-atendimento hover:bg-atendimento/80'>
+				<Button className='bg-appointment hover:bg-appointment/80'>
 					<BriefcaseMedicalIcon />
 					Atendimento
 				</Button>

@@ -28,7 +28,7 @@ const SpeciesPage = async ({ searchParams }: SpeciesPageProps) => {
 		<PageContainer>
 			<PageHeader>
 				<PageHeaderContent>
-					<PageTitle>Listagem de Espécies</PageTitle>
+					<PageTitle>Espécies</PageTitle>
 				</PageHeaderContent>
 			</PageHeader>
 

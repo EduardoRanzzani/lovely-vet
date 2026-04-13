@@ -56,6 +56,7 @@ const CustomerFormClient = ({
 	});
 
 	const handlePostalCodeChange = async (postalCode: string) => {
+		if (!postalCode) return;
 		const fullAddress = await searchAddressByPostalCode(postalCode);
 		form.setValue('address', fullAddress.logradouro);
 		form.setValue('neighborhood', fullAddress.bairro);

@@ -28,7 +28,7 @@ const DoctorsPage = async ({ searchParams }: DoctorsPageProps) => {
 		<PageContainer>
 			<PageHeader>
 				<PageHeaderContent>
-					<PageTitle>Listagem de Veterinários</PageTitle>
+					<PageTitle>Veterinários</PageTitle>
 				</PageHeaderContent>
 			</PageHeader>
 

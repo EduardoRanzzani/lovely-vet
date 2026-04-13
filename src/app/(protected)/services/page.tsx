@@ -30,7 +30,7 @@ const ServicesPage = async ({ searchParams }: ServicesPageProps) => {
 		<PageContainer>
 			<PageHeader>
 				<PageHeaderContent>
-					<PageTitle>Listagem de Serviços Ofertados</PageTitle>
+					<PageTitle>Serviços Ofertados</PageTitle>
 				</PageHeaderContent>
 			</PageHeader>
 

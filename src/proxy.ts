@@ -2,7 +2,11 @@ import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 
 // 1. Definição das Rotas Públicas e Webhooks
-const isPublicRoute = createRouteMatcher(['/sign-in(.*)', '/sign-up(.*)']);
+const isPublicRoute = createRouteMatcher([
+	'/sign-in(.*)',
+	'/sign-up(.*)',
+	'/dose-calculation',
+]);
 const isWebhookRoute = createRouteMatcher(['/api/webhooks/clerk']);
 
 // 2. Mapeamento de permissões baseado no seu Sidebar

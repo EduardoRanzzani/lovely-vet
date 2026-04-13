@@ -35,7 +35,7 @@ const AppointmentsPage = async ({ searchParams }: AppointmentsPageProps) => {
 		<PageContainer>
 			<PageHeader>
 				<PageHeaderContent>
-					<PageTitle>Listagem de Agendamentos</PageTitle>
+					<PageTitle>Agendamentos</PageTitle>
 				</PageHeaderContent>
 			</PageHeader>
 

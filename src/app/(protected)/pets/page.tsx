@@ -37,7 +37,7 @@ const PetsPage = async ({ searchParams }: PetsPageProps) => {
 		<PageContainer>
 			<PageHeader>
 				<PageHeaderContent>
-					<PageTitle>Listagem de Pets</PageTitle>
+					<PageTitle>Pets</PageTitle>
 				</PageHeaderContent>
 			</PageHeader>
 

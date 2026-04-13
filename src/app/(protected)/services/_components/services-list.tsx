@@ -9,17 +9,23 @@ import DeleteAlertButton from '@/components/list/delete-alert-dialog';
 import EditButton from '@/components/list/edit-button';
 import SearchInput from '@/components/list/search-input';
 import TableComponent from '@/components/list/table-component';
+import LoadingDialog from '@/components/ui/loading';
 import { Separator } from '@/components/ui/separator';
 import { TableCell, TableRow } from '@/components/ui/table';
 import { formatCurrencyFromCents } from '@/helpers/currency';
 import { handleNavigation } from '@/lib/utils';
-import { DollarSignIcon, NotepadTextIcon } from 'lucide-react';
+import {
+	CatIcon,
+	DogIcon,
+	DollarSignIcon,
+	NotepadTextIcon,
+	PawPrintIcon,
+} from 'lucide-react';
 import { useAction } from 'next-safe-action/hooks';
 import { useSearchParams } from 'next/navigation';
 import { use } from 'react';
 import { toast } from 'sonner';
 import ServiceFormClient from './service-form';
-import LoadingDialog from '@/components/ui/loading';
 
 interface ServicesListClientProps {
 	services: Promise<PaginatedData<ServiceWithSpecie>>;
@@ -137,6 +143,31 @@ const ServicesListClient = ({ services, species }: ServicesListClientProps) => {
 								</span>
 							)}
 						</span>
+					</p>
+
+					<p className='flex items-center gap-4'>
+						{service.specie && service.specie?.name === 'Canino' ? (
+							<>
+								<span className='text-sm font-semibold'>
+									<DogIcon className='h-4 w-4' />
+								</span>
+								<span className='text-sm'>{service.specie.name}</span>
+							</>
+						) : service.specie?.name === 'Felino' ? (
+							<>
+								<span className='text-sm font-semibold'>
+									<CatIcon className='h-4 w-4' />
+								</span>
+								<span className='text-sm'>{service.specie.name}</span>
+							</>
+						) : (
+							<>
+								<span className='text-sm font-semibold'>
+									<PawPrintIcon className='h-4 w-4' />
+								</span>
+								<span className='text-sm'>Geral</span>
+							</>
+						)}
 					</p>
 
 					<p className='flex items-center gap-4'>

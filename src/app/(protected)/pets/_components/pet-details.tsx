@@ -18,7 +18,6 @@ import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { format } from 'date-fns';
 import {
-	BriefcaseMedicalIcon,
 	CalendarIcon,
 	DropletIcon,
 	FileIcon,
@@ -35,8 +34,8 @@ import {
 import Image from 'next/image';
 import Link from 'next/link';
 import { use, useState } from 'react';
-import PetFormClient from './pet-form';
 import DialogServices from './dialog-services';
+import PetFormClient from './pet-form';
 
 interface PetDetailsClientProps {
 	pet: PetWithTutorAndBreed;
@@ -120,53 +119,60 @@ const PetDetailsClient = ({
 
 					<Separator />
 
-					<div className='grid grid-cols-1 sm:grid-cols-2 gap-y-3 gap-x-4 text-sm'>
+					<div className='grid grid-cols-2 gap-y-3 gap-x-4 text-sm'>
 						<p>
 							<span className='font-semibold text-muted-foreground'>
 								Espécie:
 							</span>{' '}
 							{pet.breed.specie.name}
 						</p>
+
 						<p>
 							<span className='font-semibold text-muted-foreground'>Raça:</span>{' '}
 							{pet.breed.name}
 						</p>
+
 						<p>
 							<span className='font-semibold text-muted-foreground'>
 								Gênero:
 							</span>{' '}
 							{pet.gender === 'female' ? 'Fêmea' : 'Macho'}
 						</p>
+
 						<p>
 							<span className='font-semibold text-muted-foreground'>Cor:</span>{' '}
 							{pet.color}
 						</p>
+
 						<p>
 							<span className='font-semibold text-muted-foreground'>
 								Nascimento:
 							</span>{' '}
 							{format(new Date(pet.birthDate + 'T12:00:00'), 'dd/MM/yyyy')}
 						</p>
+
 						<p>
 							<span className='font-semibold text-muted-foreground'>
 								Idade:
 							</span>{' '}
 							{age}
 						</p>
-						<p className='sm:col-span-2'>
+
+						<p className='col-span-2 w-full'>
 							<span className='font-semibold text-muted-foreground'>
 								Tutor:
 							</span>{' '}
 							{pet.tutor.user.name}
 						</p>
-						<p className='sm:col-span-2'>
+
+						<p className='col-span-2'>
 							<span className='font-semibold text-muted-foreground'>
 								Endereço:
 							</span>{' '}
 							{fullAddress}
 						</p>
 
-						<div className='sm:col-span-2 pt-2'>
+						<div className='col-span-2 pt-2'>
 							<Button asChild variant='outline' className='w-full gap-2'>
 								<Link href={googleMapsUrl} target='_blank'>
 									<GoogleMapsIcon className='w-4 h-4' />
@@ -223,36 +229,36 @@ const PetDetailsClient = ({
 								<div className='grid grid-cols-1 lg:grid-cols-3 gap-4 lg:w-2/3 bg-card'>
 									<DialogServices />
 
-									<Button className='bg-peso hover:bg-peso/80'>
+									<Button className='bg-weight hover:bg-weight/80'>
 										<ScaleIcon />
 										Peso
 									</Button>
 
-									<Button className='bg-patologia hover:bg-patologia/80'>
+									<Button className='bg-pathology hover:bg-pathology/80'>
 										<StethoscopeIcon />
 										Patologia
 									</Button>
 
-									<Button className='bg-documento hover:bg-documento/80'>
+									<Button className='bg-document hover:bg-document/80'>
 										<FileIcon />
 										Documento
 									</Button>
 
-									<Button className='bg-exame hover:bg-exame/80'>
+									<Button className='bg-exam hover:bg-exam/80'>
 										<FlaskConicalIcon /> Exame
 									</Button>
 
-									<Button className='bg-vacina hover:bg-vacina/80'>
+									<Button className='bg-vaccine hover:bg-vaccine/80'>
 										<SyringeIcon />
 										Vacina
 									</Button>
 
-									<Button className='bg-receita hover:bg-receita/80'>
+									<Button className='bg-prescription hover:bg-prescription/80'>
 										<SquarePenIcon />
 										Receita
 									</Button>
 
-									<Button className='bg-obs hover:bg-obs/80'>
+									<Button className='bg-notes hover:bg-notes/80'>
 										<MessageCircleIcon />
 										Observações
 									</Button>

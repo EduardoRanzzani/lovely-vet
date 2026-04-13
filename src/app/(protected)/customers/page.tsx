@@ -28,7 +28,7 @@ const CustomersPage = async ({ searchParams }: CustomersPageProps) => {
 		<PageContainer>
 			<PageHeader>
 				<PageHeaderContent>
-					<PageTitle>Listagem de Clientes</PageTitle>
+					<PageTitle>Clientes</PageTitle>
 				</PageHeaderContent>
 			</PageHeader>
 

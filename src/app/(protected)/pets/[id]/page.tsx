@@ -5,7 +5,6 @@ import { getSpecies } from '@/api/actions/species.actions';
 import {
 	PageContainer,
 	PageContent,
-	PageDescription,
 	PageHeader,
 	PageHeaderContent,
 	PageTitle,
@@ -34,7 +33,7 @@ const PetDetailsPage = async ({ params }: PetDetailsPageProps) => {
 		<PageContainer>
 			<PageHeader>
 				<PageHeaderContent>
-					<PageTitle>Detalhes do Pet</PageTitle>
+					<PageTitle>Detalhes de {pet.name}</PageTitle>
 				</PageHeaderContent>
 			</PageHeader>
 

@@ -31,7 +31,7 @@ const BreedsPage = async ({ searchParams }: BreedsPageProps) => {
 		<PageContainer>
 			<PageHeader>
 				<PageHeaderContent>
-					<PageTitle>Listagem de Raças</PageTitle>
+					<PageTitle>Raças</PageTitle>
 				</PageHeaderContent>
 			</PageHeader>
 

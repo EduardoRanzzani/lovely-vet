@@ -58,9 +58,7 @@ export const PageDescription = ({
 }: {
 	children: React.ReactNode;
 }) => {
-	return (
-		<p className='text-muted-foreground text-sm line-clamp-1'>{children}</p>
-	);
+	return <p className='text-muted-foreground text-sm'>{children}</p>;
 };
 
 export const PageActions = ({ children }: { children: React.ReactNode }) => {
