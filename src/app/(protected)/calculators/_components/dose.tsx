@@ -10,13 +10,15 @@ import { useForm } from 'react-hook-form';
 import z from 'zod';
 
 const formData = z.object({
-	weight: z.string().min(1),
-	dose: z.string().min(1),
-	solute: z.string().min(1),
-	solvent: z.string().min(1),
+	weight: z.string().min(1, { message: 'Peso obrigatório para o cálculo' }),
+	dose: z.string().min(1, { message: 'Dose obrigatória para o cálculo' }),
+	solute: z.string().min(1, { message: 'Solução obrigatória para o cálculo' }),
+	solvent: z
+		.string()
+		.min(1, { message: 'Solvente obrigatório para o cálculo' }),
 });
 
-const DoseCalculationPage = () => {
+const DoseCalculation = () => {
 	const [result, setResult] = useState<string>('');
 
 	const form = useForm<z.infer<typeof formData>>({
@@ -34,11 +36,12 @@ const DoseCalculationPage = () => {
 	};
 
 	return (
-		<div className='flex flex-col gap-2 items-center'>
-			<h1>Calculadora de Doses</h1>
-
-			<form onSubmit={form.handleSubmit(calculateDose)}>
-				<div className='flex flex-col w-full lg:w-100 gap-3 border rounded-lg p-4'>
+		<div className='grid lg:grid-cols-4 gap-2'>
+			<div className='border rounded-lg p-4'>
+				<form
+					onSubmit={form.handleSubmit(calculateDose)}
+					className='flex flex-col gap-3'
+				>
 					<InputForm
 						register={form.register}
 						label='Peso (kg)'
@@ -54,6 +57,7 @@ const DoseCalculationPage = () => {
 						name='dose'
 						type='number'
 						step={0.1}
+						error={form.formState.errors.dose?.message}
 					/>
 
 					<InputForm
@@ -62,6 +66,7 @@ const DoseCalculationPage = () => {
 						name='solute'
 						type='number'
 						step={0.1}
+						error={form.formState.errors.solute?.message}
 					/>
 
 					<InputForm
@@ -70,6 +75,7 @@ const DoseCalculationPage = () => {
 						name='solvent'
 						type='number'
 						step={0.1}
+						error={form.formState.errors.solvent?.message}
 					/>
 
 					<Button type='submit' className='w-full'>
@@ -81,10 +87,10 @@ const DoseCalculationPage = () => {
 					<h1 className='text-center font-semibold'>
 						Resultado: {result} mcg/h
 					</h1>
-				</div>
-			</form>
+				</form>
+			</div>
 		</div>
 	);
 };
 
-export default DoseCalculationPage;
+export default DoseCalculation;

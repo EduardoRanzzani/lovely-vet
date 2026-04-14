@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/sidebar';
 import { useUser } from '@clerk/nextjs';
 import {
+	CalculatorIcon,
 	CalendarIcon,
 	ChevronRightIcon,
 	CogIcon,
@@ -25,10 +26,10 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { NavUser, NavUserType } from './nav-user';
 import { version } from '../../../package.json';
+import { NavUser, NavUserType } from './nav-user';
 
-interface sidebarItems {
+interface SidebarItem {
 	title: string;
 	url: string;
 	icon: LucideIcon;
@@ -48,7 +49,7 @@ const AppSidebar = () => {
 	const userRole = (user?.publicMetadata?.role as string) || 'customer';
 	const pathname = usePathname();
 
-	const items: sidebarItems[] = [
+	const items: SidebarItem[] = [
 		{
 			title: 'Dashboard',
 			url: '/dashboard',
@@ -79,9 +80,15 @@ const AppSidebar = () => {
 			icon: CalendarIcon,
 			roles: ['admin', 'doctor', 'customer'],
 		},
+		{
+			title: 'Calculadoras',
+			url: '/calculators',
+			icon: CalculatorIcon,
+			roles: ['admin', 'doctor'],
+		},
 	];
 
-	const settings: sidebarItems[] = [
+	const settings: SidebarItem[] = [
 		{
 			title: 'Modelos de Receitas',
 			url: '/prescriptions-template',
