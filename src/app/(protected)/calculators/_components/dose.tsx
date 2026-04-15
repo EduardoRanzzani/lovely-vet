@@ -106,7 +106,7 @@ const DoseCalculation = () => {
 
 			<DialogFooter className='mt-6'>
 				<h1 className='font-semibold text-center w-full'>
-					Resultado: {result} mcg/h
+					Resultado: {result} ml/h
 				</h1>
 			</DialogFooter>
 		</DialogContent>
