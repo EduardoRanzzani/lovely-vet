@@ -58,7 +58,7 @@ const DoseCalculation = () => {
 					onSubmit={form.handleSubmit(calculateDose)}
 					className='flex flex-col gap-2'
 				>
-					<div className='flex flex-col items-center justify-center mt-6 gap-2'>
+					<div className='flex flex-col lg:flex-row items-center justify-center gap-2'>
 						<InputForm
 							register={form.register}
 							label='Peso (kg)'
@@ -76,7 +76,8 @@ const DoseCalculation = () => {
 							step={0.1}
 							error={form.formState.errors.dose?.message}
 						/>
-
+					</div>
+					<div className='flex flex-col lg:flex-row items-center justify-center gap-2'>
 						<InputForm
 							register={form.register}
 							label='Solução'
@@ -94,17 +95,19 @@ const DoseCalculation = () => {
 							step={0.1}
 							error={form.formState.errors.solvent?.message}
 						/>
-
-						<Button type='submit' className='mt-6 w-full'>
-							<CalculatorIcon />
-							Calcular
-						</Button>
 					</div>
+
+					<Button type='submit' className='mt-4 w-full'>
+						<CalculatorIcon />
+						Calcular
+					</Button>
 				</form>
 			</Form>
 
 			<DialogFooter className='mt-6'>
-				<h1 className='text-center font-semibold'>Resultado: {result} mcg/h</h1>
+				<h1 className='font-semibold text-center w-full'>
+					Resultado: {result} mcg/h
+				</h1>
 			</DialogFooter>
 		</DialogContent>
 	);

@@ -80,35 +80,38 @@ const AppSidebar = () => {
 			icon: CalendarIcon,
 			roles: ['admin', 'doctor', 'customer'],
 		},
+	];
+
+	const helpers: SidebarItem[] = [
 		{
 			title: 'Calculadoras',
 			url: '/calculators',
 			icon: CalculatorIcon,
 			roles: ['admin', 'doctor'],
 		},
-	];
-
-	const settings: SidebarItem[] = [
 		{
 			title: 'Modelos de Receitas',
 			url: '/prescriptions-template',
 			icon: CogIcon,
 			roles: ['admin', 'doctor'],
 		},
+	];
+
+	const settings: SidebarItem[] = [
 		{
-			title: 'Cadastro de Serviços',
+			title: 'Serviços',
 			url: '/services',
 			icon: CogIcon,
 			roles: ['admin', 'doctor'],
 		},
 		{
-			title: 'Cadastro de Espécies',
+			title: 'Espécies',
 			url: '/species',
 			icon: CogIcon,
 			roles: ['admin', 'doctor'],
 		},
 		{
-			title: 'Cadastro de Raças',
+			title: 'Raças',
 			url: '/breeds',
 			icon: CogIcon,
 			roles: ['admin', 'doctor'],
@@ -164,35 +167,66 @@ const AppSidebar = () => {
 					</SidebarMenu>
 				</SidebarGroup>
 				{['admin', 'doctor'].includes(userRole) && (
-					<SidebarGroup>
-						<SidebarGroupLabel>Configurações</SidebarGroupLabel>
-						<SidebarMenu>
-							{settings.map((item) => (
-								<SidebarMenuItem key={item.title}>
-									<SidebarMenuButton
-										asChild
-										isActive={pathname.includes(item.url)}
-									>
-										<Link
-											href={item.url}
-											className='flex justify-between'
-											onClick={() => setOpenMobile(false)}
+					<>
+						<SidebarGroup>
+							<SidebarGroupLabel>Helpers</SidebarGroupLabel>
+							<SidebarMenu>
+								{helpers.map((item) => (
+									<SidebarMenuItem key={item.title}>
+										<SidebarMenuButton
+											asChild
+											isActive={pathname.includes(item.url)}
 										>
-											<span className='flex items-center gap-2'>
-												<item.icon className='h-5 w-5' />
-												<p
-													className={`${pathname.includes(item.url) && 'font-semibold'}`}
-												>
-													{item.title}
-												</p>
-											</span>
-											{pathname.includes(item.url) && <ChevronRightIcon />}
-										</Link>
-									</SidebarMenuButton>
-								</SidebarMenuItem>
-							))}
-						</SidebarMenu>
-					</SidebarGroup>
+											<Link
+												href={item.url}
+												className='flex justify-between'
+												onClick={() => setOpenMobile(false)}
+											>
+												<span className='flex items-center gap-2'>
+													<item.icon className='h-5 w-5' />
+													<p
+														className={`${pathname.includes(item.url) && 'font-semibold'}`}
+													>
+														{item.title}
+													</p>
+												</span>
+												{pathname.includes(item.url) && <ChevronRightIcon />}
+											</Link>
+										</SidebarMenuButton>
+									</SidebarMenuItem>
+								))}
+							</SidebarMenu>
+						</SidebarGroup>
+						<SidebarGroup>
+							<SidebarGroupLabel>Configurações</SidebarGroupLabel>
+							<SidebarMenu>
+								{settings.map((item) => (
+									<SidebarMenuItem key={item.title}>
+										<SidebarMenuButton
+											asChild
+											isActive={pathname.includes(item.url)}
+										>
+											<Link
+												href={item.url}
+												className='flex justify-between'
+												onClick={() => setOpenMobile(false)}
+											>
+												<span className='flex items-center gap-2'>
+													<item.icon className='h-5 w-5' />
+													<p
+														className={`${pathname.includes(item.url) && 'font-semibold'}`}
+													>
+														{item.title}
+													</p>
+												</span>
+												{pathname.includes(item.url) && <ChevronRightIcon />}
+											</Link>
+										</SidebarMenuButton>
+									</SidebarMenuItem>
+								))}
+							</SidebarMenu>
+						</SidebarGroup>
+					</>
 				)}
 				<SidebarGroup />
 			</SidebarContent>
