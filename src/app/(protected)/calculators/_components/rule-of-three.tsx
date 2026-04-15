@@ -3,6 +3,7 @@
 import {
 	DialogContent,
 	DialogDescription,
+	DialogFooter,
 	DialogHeader,
 	DialogTitle,
 } from '@/components/ui/dialog';
@@ -62,26 +63,22 @@ const RuleOfThree = () => {
 		setResult(calculatedValue.toFixed(2).replace('.', ','));
 	}, []);
 
-	// Função de Blur personalizada que respeita o register
 	const handleBlur = () => {
 		const values = form.getValues();
 		performCalculation(values);
 	};
 
 	return (
-		<DialogContent
-			onInteractOutside={(e) => e.preventDefault()}
-			className='max-w-lg'
-		>
+		<DialogContent onInteractOutside={(e) => e.preventDefault()}>
+			<DialogHeader>
+				<DialogTitle>Regra de Três Simples</DialogTitle>
+				<DialogDescription>
+					Preencha os campos abaixo para calcular automaticamente.
+				</DialogDescription>
+			</DialogHeader>
+
 			<Form {...form}>
 				<form className='flex flex-col gap-2'>
-					<DialogHeader>
-						<DialogTitle>Regra de Três Simples</DialogTitle>
-					</DialogHeader>
-					<DialogDescription>
-						Preencha os campos abaixo para calcular automaticamente.
-					</DialogDescription>
-
 					<div className='flex items-center justify-center mt-6'>
 						<Input
 							{...form.register('itemOne')}
@@ -89,6 +86,7 @@ const RuleOfThree = () => {
 								form.register('itemOne').onBlur(e); // Chama o blur do hook-form
 								handleBlur(); // Chama o seu cálculo
 							}}
+							type='number'
 							placeholder='A'
 							className='w-2/5 text-center z-2'
 						/>
@@ -103,6 +101,7 @@ const RuleOfThree = () => {
 								form.register('itemTwo').onBlur(e);
 								handleBlur();
 							}}
+							type='number'
 							placeholder='B'
 							className='w-2/5 text-center z-2'
 						/>
@@ -119,6 +118,7 @@ const RuleOfThree = () => {
 								form.register('itemThree').onBlur(e);
 								handleBlur();
 							}}
+							type='number'
 							placeholder='C'
 							className='w-2/5 text-center z-2'
 						/>
@@ -134,6 +134,7 @@ const RuleOfThree = () => {
 					</div>
 				</form>
 			</Form>
+			<DialogFooter className='mt-6'></DialogFooter>
 		</DialogContent>
 	);
 };

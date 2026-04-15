@@ -2,7 +2,14 @@
 
 import InputForm from '@/components/form/input-form';
 import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
+import {
+	DialogContent,
+	DialogDescription,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
+} from '@/components/ui/dialog';
+import { Form } from '@/components/ui/form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { CalculatorIcon } from 'lucide-react';
 import { useState } from 'react';
@@ -19,10 +26,11 @@ const formData = z.object({
 });
 
 const DoseCalculation = () => {
-	const [result, setResult] = useState<string>('');
+	const [result, setResult] = useState<string>('0');
 
 	const form = useForm<z.infer<typeof formData>>({
 		resolver: zodResolver(formData),
+		shouldUnregister: true,
 	});
 
 	const calculateDose = (data: z.infer<typeof formData>) => {
@@ -36,60 +44,69 @@ const DoseCalculation = () => {
 	};
 
 	return (
-		<div className='grid lg:grid-cols-4 gap-2'>
-			<div className='border rounded-lg p-4'>
+		<DialogContent onInteractOutside={(e) => e.preventDefault()}>
+			<DialogHeader>
+				<DialogTitle>Dosagem Noradrenalina</DialogTitle>
+				<DialogDescription>
+					Preencha os campos abaixo para saber a dosagem necessária para a bomba
+					de infusão
+				</DialogDescription>
+			</DialogHeader>
+
+			<Form {...form}>
 				<form
 					onSubmit={form.handleSubmit(calculateDose)}
-					className='flex flex-col gap-3'
+					className='flex flex-col gap-2'
 				>
-					<InputForm
-						register={form.register}
-						label='Peso (kg)'
-						name='weight'
-						type='number'
-						step={0.1}
-						error={form.formState.errors.weight?.message}
-					/>
+					<div className='flex flex-col items-center justify-center mt-6 gap-2'>
+						<InputForm
+							register={form.register}
+							label='Peso (kg)'
+							name='weight'
+							type='number'
+							step={0.1}
+							error={form.formState.errors.weight?.message}
+						/>
 
-					<InputForm
-						register={form.register}
-						label='Dose (mg)'
-						name='dose'
-						type='number'
-						step={0.1}
-						error={form.formState.errors.dose?.message}
-					/>
+						<InputForm
+							register={form.register}
+							label='Dose (mg)'
+							name='dose'
+							type='number'
+							step={0.1}
+							error={form.formState.errors.dose?.message}
+						/>
 
-					<InputForm
-						register={form.register}
-						label='Solução'
-						name='solute'
-						type='number'
-						step={0.1}
-						error={form.formState.errors.solute?.message}
-					/>
+						<InputForm
+							register={form.register}
+							label='Solução'
+							name='solute'
+							type='number'
+							step={0.1}
+							error={form.formState.errors.solute?.message}
+						/>
 
-					<InputForm
-						register={form.register}
-						label='Solvente'
-						name='solvent'
-						type='number'
-						step={0.1}
-						error={form.formState.errors.solvent?.message}
-					/>
+						<InputForm
+							register={form.register}
+							label='Solvente'
+							name='solvent'
+							type='number'
+							step={0.1}
+							error={form.formState.errors.solvent?.message}
+						/>
 
-					<Button type='submit' className='w-full'>
-						<CalculatorIcon />
-						Calcular
-					</Button>
-
-					<Separator className='my-6' />
-					<h1 className='text-center font-semibold'>
-						Resultado: {result} mcg/h
-					</h1>
+						<Button type='submit' className='mt-6 w-full'>
+							<CalculatorIcon />
+							Calcular
+						</Button>
+					</div>
 				</form>
-			</div>
-		</div>
+			</Form>
+
+			<DialogFooter className='mt-6'>
+				<h1 className='text-center font-semibold'>Resultado: {result} mcg/h</h1>
+			</DialogFooter>
+		</DialogContent>
 	);
 };
 
