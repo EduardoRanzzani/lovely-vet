@@ -87,7 +87,6 @@ const PetsListClient = ({
 	const columns = [
 		{ header: 'Nome', accessorKey: 'name' },
 		{ header: 'Idade', accessorKey: 'age' },
-		{ header: 'Peso', accessorKey: 'weight' },
 		{ header: 'Tutor', accessorKey: 'tutor' },
 		{
 			header: 'Ações',
@@ -137,8 +136,6 @@ const PetsListClient = ({
 				</TableCell>
 
 				<TableCell>{calculateAge(new Date(pet.birthDate))}</TableCell>
-
-				<TableCell>{formatWeight(pet.weightInGrams)}</TableCell>
 
 				<TableCell>
 					<div className='flex gap-4 items-center'>
@@ -259,7 +256,9 @@ const PetsListClient = ({
 						<span className='text-sm font-semibold'>
 							<WeightIcon className='w-4 h-4' />
 						</span>
-						<span className='text-sm'>{formatWeight(pet.weightInGrams)}</span>
+						<span className='text-sm'>
+							{formatWeight(pet?.weightHistory?.[0]?.weightInGrams ?? 0)}
+						</span>
 					</p>
 				</div>
 

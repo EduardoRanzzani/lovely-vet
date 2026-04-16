@@ -133,13 +133,22 @@ export const petsTable = pgTable('pets', {
 	gender: sexEnum('gender').notNull(),
 	sterile: boolean('sterile').default(false).notNull(),
 	status: petStatusEnum('status').default('alive').notNull(),
-	weightInGrams: integer('weight_in_grams'),
 	photo: text('photo'),
 	createdAt: timestamp('created_at').defaultNow().notNull(),
 	updatedAt: timestamp('updated_at')
 		.defaultNow()
 		.$onUpdate(() => new Date())
 		.notNull(),
+});
+
+export const petWeightsTable = pgTable('pet_weights', {
+	id: uuid('id').primaryKey().defaultRandom(),
+	petId: uuid('pet_id')
+		.notNull()
+		.references(() => petsTable.id, { onDelete: 'cascade' }),
+	weightInGrams: integer('weight_in_grams').notNull(),
+	measuredAt: timestamp('measured_at').defaultNow().notNull(),
+	createdAt: timestamp('created_at').defaultNow().notNull(),
 });
 
 export const servicesTable = pgTable('services', {
@@ -318,6 +327,15 @@ export const petsRelations = relations(petsTable, ({ one, many }) => ({
 	}),
 	medicalRecords: many(medicalRecordsTable),
 	appointments: many(appointmentsTable),
+	// Adicione esta linha:
+	weightHistory: many(petWeightsTable),
+}));
+
+export const petWeightsRelations = relations(petWeightsTable, ({ one }) => ({
+	pet: one(petsTable, {
+		fields: [petWeightsTable.petId],
+		references: [petsTable.id],
+	}),
 }));
 
 export const appointmentsRelations = relations(

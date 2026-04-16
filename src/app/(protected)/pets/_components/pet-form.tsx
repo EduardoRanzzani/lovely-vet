@@ -60,7 +60,7 @@ const PetFormClient = ({
 			gender: pet?.gender ?? 'female',
 			sterile: pet?.sterile ?? false,
 			status: pet?.status ?? 'alive',
-			weightInGrams: pet?.weightInGrams ? pet.weightInGrams / 1000 : 0,
+			weightInGrams: pet?.weightInGrams ?? 0,
 			photo: pet?.photo ?? '',
 		},
 	});

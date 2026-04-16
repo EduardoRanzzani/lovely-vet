@@ -14,6 +14,8 @@ export type PetWithTutorAndBreed = typeof petsTable.$inferSelect & {
 	tutor: typeof customersTable.$inferSelect & {
 		user: typeof usersTable.$inferSelect;
 	};
+	weightHistory?: { weightInGrams: number; measuredAt: Date }[];
+	weightInGrams?: number;
 };
 
 export const createPetWithTutorAndBreedSchema = z.object({

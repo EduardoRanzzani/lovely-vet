@@ -5,6 +5,7 @@ import {
 	breedsTable,
 	customersTable,
 	petsTable,
+	petWeightsTable,
 	speciesTable,
 	usersTable,
 } from '@/db/schema';
@@ -36,6 +37,10 @@ export const getPetById = async (id: string): Promise<PetWithTutorAndBreed> => {
 				with: {
 					specie: true,
 				},
+			},
+			weightHistory: {
+				orderBy: (weights, { desc }) => [desc(weights.measuredAt)],
+				limit: 1,
 			},
 		},
 	});
@@ -160,26 +165,14 @@ export const upsertPet = actionClient
 		const authenticatedUser = await currentUser();
 		if (!authenticatedUser) throw new Error('Usuário não autenticado');
 
-		await db
-			.insert(petsTable)
-			.values({
-				id: parsedInput.id ?? undefined,
-				name: parsedInput.name,
-				birthDate: format(parsedInput.birthDate, 'yyyy-MM-dd'),
-				breedId: parsedInput.breedId,
-				customerId: parsedInput.customerId,
-				sterile: parsedInput.sterile ?? false,
-				status: parsedInput.status ?? 'alive',
-				photo: parsedInput.photo,
-				color: parsedInput.color,
-				gender: parsedInput.gender,
-				weightInGrams: parsedInput.weightInGrams * 1000,
-			})
-			.onConflictDoUpdate({
-				target: petsTable.id,
-				set: {
+		// Iniciamos uma transação para garantir atomicidade
+		const result = await db.transaction(async (tx) => {
+			const [insertedPet] = await tx // Desestruturação para pegar o primeiro item
+				.insert(petsTable)
+				.values({
+					id: parsedInput.id ?? undefined,
 					name: parsedInput.name,
-					birthDate: parsedInput.birthDate.toISOString(),
+					birthDate: format(parsedInput.birthDate, 'yyyy-MM-dd'),
 					breedId: parsedInput.breedId,
 					customerId: parsedInput.customerId,
 					sterile: parsedInput.sterile ?? false,
@@ -187,13 +180,40 @@ export const upsertPet = actionClient
 					photo: parsedInput.photo,
 					color: parsedInput.color,
 					gender: parsedInput.gender,
-					weightInGrams: parsedInput.weightInGrams * 1000,
-					updatedAt: new Date(),
-				},
-			})
-			.returning();
+				})
+				.onConflictDoUpdate({
+					target: petsTable.id,
+					set: {
+						name: parsedInput.name,
+						birthDate: format(parsedInput.birthDate, 'yyyy-MM-dd'),
+						breedId: parsedInput.breedId,
+						customerId: parsedInput.customerId,
+						sterile: parsedInput.sterile ?? false,
+						status: parsedInput.status ?? 'alive',
+						photo: parsedInput.photo,
+						color: parsedInput.color,
+						gender: parsedInput.gender,
+						updatedAt: new Date(),
+					},
+				})
+				.returning();
+
+			if (!insertedPet) throw new Error('Erro ao salvar o pet');
+
+			// Só inserimos o peso se ele foi fornecido no input
+			if (parsedInput.weightInGrams) {
+				await tx.insert(petWeightsTable).values({
+					petId: insertedPet.id,
+					weightInGrams: Math.round(parsedInput.weightInGrams * 1000),
+					measuredAt: new Date(),
+				});
+			}
+
+			return insertedPet;
+		});
 
 		revalidatePath('/pets');
+		return result;
 	});
 
 export const deletePet = actionClient

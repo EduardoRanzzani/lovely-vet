@@ -59,6 +59,10 @@ const PetDetailsClient = ({
 	const age = calculateAge(new Date(pet.birthDate));
 	const fullAddress = `${pet.tutor.address}, ${pet.tutor.addressNumber} - ${pet.tutor.neighborhood}, ${pet.tutor.city} - ${pet.tutor.state}`;
 
+	// 1. Extrair o peso mais recente (convertendo para Kg para o form)
+	const lastWeightGrams = pet.weightHistory?.[0]?.weightInGrams ?? 0;
+	const lastWeightKg = lastWeightGrams / 1000;
+
 	// CORREÇÃO: URL correta para busca no Google Maps
 	const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(fullAddress)}`;
 
@@ -108,7 +112,10 @@ const PetDetailsClient = ({
 							tooltip={`Editar ${pet.name}`}
 							renderForm={(close) => (
 								<PetFormClient
-									pet={pet}
+									pet={{
+										...pet,
+										weightInGrams: lastWeightKg,
+									}}
 									breeds={breeds}
 									customers={customers}
 									species={species}
