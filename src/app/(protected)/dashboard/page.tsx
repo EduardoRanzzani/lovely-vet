@@ -11,7 +11,6 @@ import { customersTable, usersTable } from '@/db/schema';
 import { auth } from '@clerk/nextjs/server';
 import { eq } from 'drizzle-orm';
 import OnboardingCustomerFormDialog from '../customers/_component/onboarding-customer-form';
-import LoadingDialog from '@/components/ui/loading';
 
 const DashboardPage = async () => {
 	const { userId, isAuthenticated } = await auth();
@@ -25,11 +24,11 @@ const DashboardPage = async () => {
 		return <h1 className='text-center'>Usuário não encontrado</h1>;
 	}
 
-	const existingClient = await db.query.customersTable.findFirst({
+	const existingCustomer = await db.query.customersTable.findFirst({
 		where: eq(customersTable.userId, existingUser.id),
 	});
 
-	const needsToCreateCustomer = existingUser && !existingClient;
+	const needsToCreateCustomer = existingUser && !existingCustomer;
 
 	return (
 		<PageContainer>

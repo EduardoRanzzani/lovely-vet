@@ -225,6 +225,29 @@ export const deleteAppointment = actionClient
 		revalidatePath('/appointments');
 	});
 
+export const markAsConfirmed = actionClient
+	.schema(z.object({ id: z.uuid() }))
+	.action(async ({ parsedInput }) => {
+		const authenticatedUser = await currentUser();
+		if (!authenticatedUser) throw new Error('Usuário não autenticado');
+
+		const appointment = await db.query.appointmentsTable.findFirst({
+			where: eq(appointmentsTable.id, parsedInput.id),
+		});
+
+		if (!appointment) throw new Error('Agendamento não encontrado');
+
+		await db
+			.update(appointmentsTable)
+			.set({
+				status: 'confirmed',
+				updatedAt: new Date(),
+			})
+			.where(eq(appointmentsTable.id, parsedInput.id));
+
+		revalidatePath('/appointments');
+	});
+
 export const markAppointmentAsCompleted = actionClient
 	.schema(z.object({ id: z.uuid() }))
 	.action(async ({ parsedInput }) => {

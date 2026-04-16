@@ -46,46 +46,51 @@ const DatePickerForm = <T extends FieldValues>({
 			<Controller
 				name={name}
 				control={control}
-				render={({ field }) => (
-					<Popover open={isOpen} onOpenChange={setIsOpen}>
-						<PopoverTrigger asChild>
-							<Button
-								variant='outline'
-								disabled={disabled}
-								className={cn(
-									'w-full justify-start text-left font-normal h-9 px-3',
-									!field.value && 'text-muted-foreground',
-									error && 'border-destructive',
-								)}
-							>
-								<CalendarIcon className='mr-2 h-4 w-4' />
-								{field.value ? (
-									format(field.value, 'dd/MM/yyyy')
-								) : (
-									<span>{placeholder}</span>
-								)}
-							</Button>
-						</PopoverTrigger>
-						<PopoverContent className='w-auto p-0' align='start'>
-							<Calendar
-								mode='single'
-								selected={field.value}
-								onSelect={(date) => {
-									field.onChange(date);
-									setIsOpen(false);
-								}}
-								// CONFIGURAÇÃO PARA DROPDOWNS
-								captionLayout='dropdown' // O seu calendar.tsx usa dropdown_root para estilizar isso
-								fromYear={1900}
-								toYear={new Date().getFullYear() + 10}
-								// Bloqueia datas futuras se for para nascimento
-								disabled={(date) => date > new Date()}
-								locale={ptBR}
-								initialFocus
-							/>
-						</PopoverContent>
-					</Popover>
-				)}
+				render={({ field }) => {
+					const displayMonth = field.value ? new Date(field.value) : new Date();
+
+					return (
+						<Popover open={isOpen} onOpenChange={setIsOpen}>
+							<PopoverTrigger asChild>
+								<Button
+									variant='outline'
+									disabled={disabled}
+									className={cn(
+										'w-full justify-start text-left font-normal h-9 px-3',
+										!field.value && 'text-muted-foreground',
+										error && 'border-destructive',
+									)}
+								>
+									<CalendarIcon className='mr-2 h-4 w-4' />
+									{field.value ? (
+										format(field.value, 'dd/MM/yyyy')
+									) : (
+										<span>{placeholder}</span>
+									)}
+								</Button>
+							</PopoverTrigger>
+							<PopoverContent className='w-auto p-0' align='start'>
+								<Calendar
+									mode='single'
+									selected={field.value}
+									onSelect={(date) => {
+										field.onChange(date);
+										setIsOpen(false);
+									}}
+									defaultMonth={displayMonth}
+									// CONFIGURAÇÃO PARA DROPDOWNS
+									captionLayout='dropdown' // O seu calendar.tsx usa dropdown_root para estilizar isso
+									fromYear={1900}
+									toYear={new Date().getFullYear() + 10}
+									// Bloqueia datas futuras se for para nascimento
+									disabled={(date) => date > new Date()}
+									locale={ptBR}
+									initialFocus
+								/>
+							</PopoverContent>
+						</Popover>
+					);
+				}}
 			/>
 
 			{error && <p className='text-xs text-destructive mt-1'>{error}</p>}

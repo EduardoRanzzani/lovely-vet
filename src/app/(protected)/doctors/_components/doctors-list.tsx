@@ -49,7 +49,12 @@ const DoctorsListClient = ({ doctors }: DoctorsListClientProps) => {
 						<div className='flex gap-4'>
 							<Avatar className='h-10 w-10 rounded-full' draggable={false}>
 								{doctor.user.image ? (
-									<AvatarImage src={doctor.user.image} alt={doctor.user.name} />
+									<AvatarImage
+										src={doctor.user.image}
+										alt={doctor.user.name}
+										draggable={false}
+										className='object-cover'
+									/>
 								) : (
 									<AvatarImage
 										src={'/avatar-placeholder.png'}

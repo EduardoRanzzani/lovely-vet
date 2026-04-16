@@ -97,7 +97,6 @@ const OnboardingCustomerFormDialog = ({ isOpen }: { isOpen: boolean }) => {
 								format='(##) #####-####'
 								mask='x'
 								name='phone'
-								className='w-full lg:w-[33%]'
 							/>
 
 							<InputFormMask
@@ -107,7 +106,6 @@ const OnboardingCustomerFormDialog = ({ isOpen }: { isOpen: boolean }) => {
 								format='###.###.###-##'
 								mask='x'
 								name='cpf'
-								className='w-full lg:w-[33%]'
 							/>
 
 							<SelectForm
@@ -127,7 +125,6 @@ const OnboardingCustomerFormDialog = ({ isOpen }: { isOpen: boolean }) => {
 										key: 'female',
 									},
 								]}
-								className='w-full lg:w-[33%]'
 							/>
 						</span>
 

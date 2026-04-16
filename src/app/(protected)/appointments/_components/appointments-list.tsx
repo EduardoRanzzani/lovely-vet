@@ -4,6 +4,7 @@ import {
 	deleteAppointment,
 	markAppointmentAsCancelled,
 	markAppointmentAsCompleted,
+	markAsConfirmed,
 } from '@/api/actions/appointments.actions';
 import { MAX_PAGE_SIZE, PaginatedData } from '@/api/config/consts';
 import { AppointmentsWithRelations } from '@/api/schema/appointments.schema';
@@ -81,11 +82,29 @@ const AppointmentsListClient = ({
 		},
 	});
 
+	const handleConfirmAppointment = (appointmentId: string) => {
+		markAsConfirmedAction.execute({
+			id: appointmentId,
+		});
+	};
+
 	const handleCompleteAppointment = (appointmentId: string) => {
 		markAppointmentAsCompletedAction.execute({
 			id: appointmentId,
 		});
 	};
+
+	const markAsConfirmedAction = useAction(markAsConfirmed, {
+		onSuccess: () => {
+			toast.success('Agendamento confirmado com sucesso!');
+		},
+		onError: (err) => {
+			console.error('Erro confirmar agendamento:', err);
+			toast.error(
+				'Ocorreu um erro ao tentar confirmar o agendamento. Tente novamente mais tarde.',
+			);
+		},
+	});
 
 	const markAppointmentAsCompletedAction = useAction(
 		markAppointmentAsCompleted,
@@ -169,9 +188,9 @@ const AppointmentsListClient = ({
 						<>
 							<ConfirmAlertButton
 								size='icon'
-								tooltip='Marcar como concluído'
+								tooltip='Confirmar agendamento'
 								disabled={appointment.status !== 'pending'}
-								action={() => handleCompleteAppointment(appointment.id)}
+								action={() => handleConfirmAppointment(appointment.id)}
 							/>
 
 							<DeleteAlertButton
@@ -218,6 +237,22 @@ const AppointmentsListClient = ({
 					</span>
 
 					<span className='flex flex-col gap-2'>
+						{(profile === 'admin' || profile === 'doctor') && (
+							<>
+								<ConfirmAlertButton
+									size='icon'
+									tooltip='Confirmar agendamento'
+									disabled={appointment.status !== 'pending'}
+									action={() => handleConfirmAppointment(appointment.id)}
+								/>
+
+								<DeleteAlertButton
+									action={() => handleDelete(appointment.id)}
+									tooltip='Deletar agendamento'
+								/>
+							</>
+						)}
+
 						<EditButton
 							tooltip={'Editar agendamento'}
 							renderForm={(close) => (

@@ -105,7 +105,12 @@ const PetsListClient = ({
 				<TableCell className='flex gap-4 items-center'>
 					<Avatar className='h-10 w-10 rounded-full' draggable={false}>
 						{pet.photo ? (
-							<AvatarImage src={pet.photo} alt={pet.name} />
+							<AvatarImage
+								src={pet.photo}
+								alt={pet.name}
+								draggable={false}
+								className='object-cover'
+							/>
 						) : (
 							<AvatarImage
 								src={
@@ -285,17 +290,19 @@ const PetsListClient = ({
 			<div className='flex flex-col lg:flex-row items-center justify-between gap-4'>
 				<SearchInput />
 
-				<AddButton
-					text='Adicionar Pet'
-					renderForm={(close) => (
-						<PetFormClient
-							breeds={breeds}
-							customers={customers}
-							species={species}
-							onSuccess={close}
-						/>
-					)}
-				/>
+				{canDoActions && (
+					<AddButton
+						text='Adicionar Pet'
+						renderForm={(close) => (
+							<PetFormClient
+								breeds={breeds}
+								customers={customers}
+								species={species}
+								onSuccess={close}
+							/>
+						)}
+					/>
+				)}
 			</div>
 
 			<TableComponent

@@ -82,7 +82,12 @@ const CustomersListClient = ({ customers }: CustomersListClientProps) => {
 				<TableCell className='flex gap-4 items-center'>
 					<Avatar className='h-10 w-10 rounded-full' draggable={false}>
 						{customer.user.image ? (
-							<AvatarImage src={customer.user.image} alt={customer.user.name} />
+							<AvatarImage
+								src={customer.user.image}
+								alt={customer.user.name}
+								draggable={false}
+								className='object-cover'
+							/>
 						) : (
 							<AvatarImage
 								src={'/avatar-placeholder.png'}

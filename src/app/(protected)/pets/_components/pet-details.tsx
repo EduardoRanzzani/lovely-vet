@@ -87,6 +87,7 @@ const PetDetailsClient = ({
 							}
 							alt='Foto do pet'
 							fill
+							draggable={false}
 							className='rounded-full border border-zinc-300 object-cover select-none'
 						/>
 					</div>

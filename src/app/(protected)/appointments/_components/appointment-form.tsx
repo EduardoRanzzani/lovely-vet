@@ -24,6 +24,7 @@ import {
 } from '@/components/ui/dialog';
 import { Form } from '@/components/ui/form';
 import LoadingDialog from '@/components/ui/loading';
+import { useUser } from '@clerk/nextjs';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { BanIcon, Loader2Icon, SaveIcon } from 'lucide-react';
 import { useAction } from 'next-safe-action/hooks';
@@ -46,6 +47,9 @@ const AppointmentFormClient = ({
 	services,
 	onSuccess,
 }: AppointmentFormClientProps) => {
+	const { user } = useUser();
+	const isCustomer = user?.publicMetadata?.role === 'customer';
+
 	const form = useForm<CreateAppointmentSchema>({
 		resolver: zodResolver(createAppointmentSchema),
 		shouldUnregister: true,
@@ -169,7 +173,7 @@ const AppointmentFormClient = ({
 						error={form.formState.errors.petId?.message}
 						options={pets.map((pet) => ({
 							value: pet.id,
-							label: `${pet.name} (${pet.tutor.user.name})`,
+							label: `${pet.name} ${!isCustomer ? `(${pet.tutor.user.name})` : ''}`,
 						}))}
 					/>
 
@@ -205,9 +209,10 @@ const AppointmentFormClient = ({
 						/>
 
 						<MoneyInputForm
-							label='Valor Total (Editável):'
+							label={`Valor Total: ${!isCustomer ? '(Editável)' : ''}`}
 							control={form.control}
 							name='totalPriceInCents'
+							disabled={isCustomer}
 							error={form.formState.errors.totalPriceInCents?.message}
 						/>
 					</div>

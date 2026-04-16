@@ -75,6 +75,7 @@ export async function POST(req: Request) {
 						email: email,
 						image: data.image_url,
 						clerkUserId: data.id,
+						isRegistrationComplete: false,
 						role: role,
 					})
 					.onConflictDoUpdate({
@@ -83,6 +84,7 @@ export async function POST(req: Request) {
 							name: `${data.first_name} ${data.last_name}`.trim(),
 							image: data.image_url,
 							clerkUserId: data.id,
+							isRegistrationComplete: false,
 							role,
 							updatedAt: new Date(),
 						},
