@@ -23,6 +23,7 @@ interface DatePickerFormProps<T extends FieldValues> {
 	disabled?: boolean;
 	placeholder?: string;
 	className?: string;
+	showFuture?: boolean;
 }
 
 const DatePickerForm = <T extends FieldValues>({
@@ -34,6 +35,7 @@ const DatePickerForm = <T extends FieldValues>({
 	disabled,
 	placeholder = 'Selecione uma data',
 	className,
+	showFuture = false,
 }: DatePickerFormProps<T>) => {
 	const [isOpen, setIsOpen] = useState(false);
 
@@ -83,7 +85,7 @@ const DatePickerForm = <T extends FieldValues>({
 									fromYear={1900}
 									toYear={new Date().getFullYear() + 10}
 									// Bloqueia datas futuras se for para nascimento
-									disabled={(date) => date > new Date()}
+									disabled={(date) => !showFuture && date > new Date()}
 									locale={ptBR}
 									initialFocus
 								/>

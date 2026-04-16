@@ -18,6 +18,7 @@ import {
 	CalendarIcon,
 	ChevronRightIcon,
 	CogIcon,
+	HospitalIcon,
 	LayoutDashboardIcon,
 	LucideIcon,
 	PawPrintIcon,
@@ -79,6 +80,12 @@ const AppSidebar = () => {
 			url: '/appointments',
 			icon: CalendarIcon,
 			roles: ['admin', 'doctor', 'customer'],
+		},
+		{
+			title: 'Plantões',
+			url: '/shifts',
+			icon: HospitalIcon,
+			roles: ['admin', 'doctor'],
 		},
 	];
 

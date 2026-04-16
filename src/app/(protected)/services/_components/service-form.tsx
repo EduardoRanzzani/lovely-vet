@@ -51,7 +51,6 @@ const ServiceFormClient = ({
 		upsertServiceAction.execute({
 			...data,
 			id: service?.id,
-			specieId: service?.specieId || undefined,
 		});
 	};
 

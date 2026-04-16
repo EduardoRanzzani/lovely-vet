@@ -9,6 +9,7 @@ import {
 import { ListSkeleton } from '@/components/ui/list-skeleton';
 import LoadingDialog from '@/components/ui/loading';
 import React, { Suspense } from 'react';
+import ShiftsListClient from './_components/shifts-list';
 
 const ShiftsPage = () => {
 	return (
@@ -32,7 +33,7 @@ const ShiftsPage = () => {
 						</>
 					}
 				>
-					{/* <ServicesListClient services={dataPromise} species={species} /> */}
+					<ShiftsListClient />
 				</Suspense>
 			</PageContent>
 		</PageContainer>

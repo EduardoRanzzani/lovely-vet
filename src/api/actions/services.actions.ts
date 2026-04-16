@@ -74,6 +74,8 @@ export const upsertService = actionClient
 		const authenticatedUser = await currentUser();
 		if (!authenticatedUser) throw new Error('Usuário não autenticado');
 
+		console.log({ parsedInput });
+
 		await db
 			.insert(servicesTable)
 			.values({

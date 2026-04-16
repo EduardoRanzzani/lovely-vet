@@ -1,65 +1,20 @@
 'use client';
 
-import { Calendar } from '@/components/ui/calendar';
-import { endOfDay, isSameDay, isWithinInterval, startOfDay } from 'date-fns';
-import { useState } from 'react';
-
-// Exemplo de dados vindos do banco
-const shifts = [
-	{
-		id: '1',
-		start: new Date(2026, 3, 16, 19, 0), // 16/04 19:00
-		end: new Date(2026, 3, 17, 7, 0), // 17/04 07:00
-		range: 12, // 12 horas de duração
-	},
-];
+import { CustomCalendar } from '@/components/ui/custom-calendar';
 
 const ShiftsListClient = () => {
-	const [selectedDate, setSelectedDate] = useState<Date | undefined>(
-		new Date(),
-	);
-	const [isDialogOpen, setIsDialogOpen] = useState(false);
+	const events = [
+		{
+			id: '1',
+			title: 'Plantão Noturno',
+			start: '2026-04-16T19:00:00',
+			end: '2026-04-17T07:00:00',
+			// Usamos a cor primária do Shadcn via CSS ou passamos a cor aqui
+			className: 'bg-primary text-primary-foreground border-primary',
+		},
+	];
 
-	const getShiftsForDay = (day: Date) => {
-		return shifts.filter(
-			(shift) =>
-				isWithinInterval(startOfDay(day), {
-					start: startOfDay(shift.start),
-					end: endOfDay(shift.end),
-				}) ||
-				isSameDay(day, shift.start) ||
-				isSameDay(day, shift.end),
-		);
-	};
-
-	const handleDayClick = (day: Date) => {
-		setSelectedDate(day);
-		setIsDialogOpen(true);
-	};
-
-	const handleCloseDialog = () => {
-		setIsDialogOpen(false);
-	};
-
-	return (
-		<div className='flex flex-col md:flex-row gap-8 p-4'>
-			<Calendar
-				mode='single'
-				selected={selectedDate}
-				onDayClick={handleDayClick}
-				className='rounded-md border shadow'
-				modifiers={{ hasShift: (date) => getShiftsForDay(date).length > 0 }}
-				modifiersStyles={{
-					hasShift: { backgroundColor: '#e2e8f0', fontWeight: 'bold' },
-				}}
-				components={
-					{
-						// DayContent: { date },
-					}
-				}
-			/>
-		</div>
-	);
+	return <CustomCalendar></CustomCalendar>;
 };
 
 export default ShiftsListClient;

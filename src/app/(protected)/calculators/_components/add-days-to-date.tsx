@@ -9,9 +9,9 @@ import {
 	DialogTitle,
 } from '@/components/ui/dialog';
 import { Form } from '@/components/ui/form';
-import { Separator } from '@/components/ui/separator';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { PlusIcon } from 'lucide-react';
+import { sub } from 'date-fns';
+import { MinusIcon, PlusIcon } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import z from 'zod';
 
@@ -39,12 +39,23 @@ const AddDaysToDate = () => {
 		form.setValue('result', newDate);
 	};
 
+	const substractDays = (data: z.infer<typeof formData>) => {
+		const initialDate = data.initialDate;
+		const days = Number(data.days);
+
+		const newDate = new Date(initialDate);
+		newDate.setDate(newDate.getDate() - days);
+
+		form.setValue('result', newDate);
+	};
+
 	return (
 		<DialogContent>
 			<DialogHeader>
-				<DialogTitle>Adicionar dias a uma Data</DialogTitle>
+				<DialogTitle>Somar/Subtrair dias a uma Data</DialogTitle>
 				<DialogDescription>
-					Saiba exatamente o dia resultante da soma a partir da data atual
+					Saiba exatamente o dia resultante da soma/subtração a partir da data
+					atual
 				</DialogDescription>
 			</DialogHeader>
 
@@ -55,6 +66,7 @@ const AddDaysToDate = () => {
 							control={form.control}
 							name='initialDate'
 							label='Data Inicial'
+							showFuture={true}
 							error={form.formState.errors.initialDate?.message}
 						/>
 
@@ -75,12 +87,22 @@ const AddDaysToDate = () => {
 							name='result'
 							placeholder='Preencha os dados para calcular'
 							disabled
+							showFuture={true}
 							error={form.formState.errors.result?.message}
 						/>
 					</div>
 
 					<DialogFooter className='mt-6'>
-						<Button type='submit' className='w-full'>
+						<Button
+							type='button'
+							className='w-1/2'
+							onClick={() => substractDays(form.getValues())}
+						>
+							<MinusIcon />
+							Subtrair
+						</Button>
+
+						<Button type='submit' className='w-1/2'>
 							<PlusIcon />
 							Somar
 						</Button>

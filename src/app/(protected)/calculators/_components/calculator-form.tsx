@@ -22,7 +22,7 @@ const CalculatorPageForm = () => {
 			/>
 
 			<DialogButton
-				text='Somar dias em data'
+				text='Calcular dias em data'
 				icon={CalendarIcon}
 				renderForm={() => <AddDaysToDate />}
 			/>

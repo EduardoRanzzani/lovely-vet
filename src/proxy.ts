@@ -18,6 +18,7 @@ const rolePermissions = {
 		'/appointments',
 		'/prescriptions-template',
 		'/calculators',
+		'/shifts',
 	],
 	doctor: [
 		'/dashboard',
@@ -29,6 +30,7 @@ const rolePermissions = {
 		'/appointments',
 		'/prescriptions-template',
 		'/calculators',
+		'/shifts',
 	],
 	customer: ['/dashboard', '/pets', '/appointments'],
 };
