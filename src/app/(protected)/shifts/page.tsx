@@ -1,3 +1,4 @@
+import { getShifts } from '@/api/actions/shifts.actions';
 import {
 	PageContainer,
 	PageContent,
@@ -8,22 +9,33 @@ import {
 } from '@/components/shared/page-container';
 import { ListSkeleton } from '@/components/ui/list-skeleton';
 import LoadingDialog from '@/components/ui/loading';
-import React, { Suspense } from 'react';
-import ShiftsListClient from './_components/shifts-list';
+import { Suspense } from 'react';
+import ShiftsCalendarClient from './_components/shifts-calendar';
 
-const ShiftsPage = () => {
+interface ShiftsPageProps {
+	searchParams: Promise<{ month?: string }>;
+}
+
+const ShiftsPage = async ({ searchParams }: ShiftsPageProps) => {
+	const params = await searchParams;
+
+	// Captura o mês da URL ou define o mês atual como fallback
+	const currentMonth = params.month;
+
+	// Busca os dados
+	const shiftsPromise = getShifts(currentMonth);
+
 	return (
 		<PageContainer>
 			<PageHeader>
 				<PageHeaderContent>
-					<PageTitle>Plantões</PageTitle>
+					<PageTitle>Agenda de Plantões</PageTitle>
 				</PageHeaderContent>
 			</PageHeader>
 
 			<PageContent>
 				<PageDescription>
-					Listagem de todos os plantões do mês selecionado e clínica em que será
-					feito
+					Visualize e gerencie os plantões do mês selecionado.
 				</PageDescription>
 				<Suspense
 					fallback={
@@ -33,7 +45,7 @@ const ShiftsPage = () => {
 						</>
 					}
 				>
-					<ShiftsListClient />
+					<ShiftsCalendarClient shiftsPromise={shiftsPromise} />
 				</Suspense>
 			</PageContent>
 		</PageContainer>

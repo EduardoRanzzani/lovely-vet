@@ -41,7 +41,7 @@ const DashboardPage = async () => {
 			<PageContent>
 				<PageDescription>
 					Olá, {existingUser.name}! Aqui você vai encontrar as métricas de todos
-					os atendimentos e agendamentos próximos.
+					os atendimentos e próximos agendamentos.
 				</PageDescription>
 				{needsToCreateCustomer && (
 					<OnboardingCustomerFormDialog isOpen={needsToCreateCustomer} />

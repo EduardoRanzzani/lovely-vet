@@ -384,3 +384,23 @@ export const convertAppointmentStatus = (status: string) => {
 			return 'Cliente não encontrado';
 	}
 };
+
+export const monthNames = [
+	'january',
+	'february',
+	'march',
+	'april',
+	'may',
+	'june',
+	'july',
+	'august',
+	'september',
+	'october',
+	'november',
+	'december',
+];
+
+export const getMonthIndex = (name: string) => {
+	const index = monthNames.indexOf(name.toLowerCase());
+	return index === 1 ? new Date().getMonth() : index;
+};

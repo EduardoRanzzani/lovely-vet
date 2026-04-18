@@ -99,6 +99,13 @@
       "when": 1776344151920,
       "tag": "0013_secret_lethal_legion",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1776446707347,
+      "tag": "0014_aspiring_black_tarantula",
+      "breakpoints": true
     }
   ]
 }

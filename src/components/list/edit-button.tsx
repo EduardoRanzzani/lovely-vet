@@ -23,6 +23,7 @@ const EditButton = ({
 	renderForm,
 	variant = 'default',
 	size = 'icon',
+	text,
 	tooltip = 'Editar',
 	disabled = false,
 }: EditButtonProps) => {
@@ -37,6 +38,7 @@ const EditButton = ({
 					<DialogTrigger asChild>
 						<Button size={size} variant={variant} disabled={disabled}>
 							<PencilIcon className='h-4 w-4' />
+							<span className='text-xs'>{size !== 'icon' && text}</span>
 						</Button>
 					</DialogTrigger>
 				</TooltipTrigger>

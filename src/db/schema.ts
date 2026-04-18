@@ -32,7 +32,7 @@ export const appointmentStatusEnum = pgEnum('appointment_status', [
 ]);
 
 // --- TABLES ---
-
+// Usuários
 export const usersTable = pgTable('users', {
 	id: uuid('id').defaultRandom().primaryKey(),
 	name: text('name').notNull(),
@@ -52,6 +52,7 @@ export const usersTable = pgTable('users', {
 		.notNull(),
 });
 
+// Veterinários
 export const doctorsTable = pgTable('doctors', {
 	id: uuid('id').primaryKey().defaultRandom(),
 	userId: uuid('user_id')
@@ -75,6 +76,7 @@ export const doctorsTable = pgTable('doctors', {
 		.notNull(),
 });
 
+// Clientes
 export const customersTable = pgTable('customers', {
 	id: uuid('id').primaryKey().defaultRandom(),
 	userId: uuid('user_id')
@@ -96,6 +98,7 @@ export const customersTable = pgTable('customers', {
 		.notNull(),
 });
 
+// Espécies
 export const speciesTable = pgTable('species', {
 	id: uuid('id').primaryKey().defaultRandom(),
 	name: text('name').notNull().unique(),
@@ -106,6 +109,7 @@ export const speciesTable = pgTable('species', {
 		.notNull(),
 });
 
+// Raças
 export const breedsTable = pgTable('breeds', {
 	id: uuid('id').primaryKey().defaultRandom(),
 	name: text('name').notNull(),
@@ -119,6 +123,7 @@ export const breedsTable = pgTable('breeds', {
 		.notNull(),
 });
 
+// Pets
 export const petsTable = pgTable('pets', {
 	id: uuid('id').primaryKey().defaultRandom(),
 	name: text('name').notNull(),
@@ -141,6 +146,7 @@ export const petsTable = pgTable('pets', {
 		.notNull(),
 });
 
+// Histórico de pesos
 export const petWeightsTable = pgTable('pet_weights', {
 	id: uuid('id').primaryKey().defaultRandom(),
 	petId: uuid('pet_id')
@@ -151,6 +157,7 @@ export const petWeightsTable = pgTable('pet_weights', {
 	createdAt: timestamp('created_at').defaultNow().notNull(),
 });
 
+// Serviços prestados
 export const servicesTable = pgTable('services', {
 	id: uuid('id').primaryKey().defaultRandom(),
 	name: text('name').notNull(),
@@ -167,6 +174,7 @@ export const servicesTable = pgTable('services', {
 		.notNull(),
 });
 
+// Agendamentos
 export const appointmentsTable = pgTable(
 	'appointments',
 	{
@@ -264,6 +272,22 @@ export const prescriptionsTable = pgTable('prescriptions', {
 		.notNull(),
 });
 
+// Plantões
+export const shiftsTable = pgTable('shifts', {
+	id: uuid('id').primaryKey().defaultRandom(),
+	doctorId: uuid('doctor_id')
+		.notNull()
+		.references(() => doctorsTable.id, { onDelete: 'cascade' }),
+	clinicName: text('clinic_name').notNull(),
+	startTime: timestamp('start_time').notNull(),
+	endTime: timestamp('end_time').notNull(),
+	createdAt: timestamp('created_at').defaultNow().notNull(),
+	updatedAt: timestamp('updated_at')
+		.defaultNow()
+		.$onUpdate(() => new Date())
+		.notNull(),
+});
+
 // --- RELATIONS ---
 
 export const usersRelations = relations(usersTable, ({ one }) => ({
@@ -283,6 +307,7 @@ export const doctorsRelations = relations(doctorsTable, ({ one, many }) => ({
 		references: [usersTable.id],
 	}),
 	appointments: many(appointmentsTable),
+	shifts: many(shiftsTable),
 }));
 
 export const customersRelations = relations(
@@ -398,3 +423,28 @@ export const prescriptionsRelations = relations(
 		}),
 	}),
 );
+
+export const medicalRecordsRelations = relations(
+	medicalRecordsTable,
+	({ one }) => ({
+		appointment: one(appointmentsTable, {
+			fields: [medicalRecordsTable.appointmentId],
+			references: [appointmentsTable.id],
+		}),
+		pet: one(petsTable, {
+			fields: [medicalRecordsTable.petId],
+			references: [petsTable.id],
+		}),
+		doctor: one(doctorsTable, {
+			fields: [medicalRecordsTable.doctorId],
+			references: [doctorsTable.id],
+		}),
+	}),
+);
+
+export const shiftsRelations = relations(shiftsTable, ({ one }) => ({
+	doctor: one(doctorsTable, {
+		fields: [shiftsTable.doctorId],
+		references: [doctorsTable.id],
+	}),
+}));
