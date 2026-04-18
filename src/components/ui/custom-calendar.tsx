@@ -34,6 +34,7 @@ interface CustomCalendarProps {
 	) => ReactNode;
 	onDayClick?: (date: Date) => void;
 	onDutyDates?: Date[]; // Lista de dias que têm plantão
+	className?: string;
 }
 
 export function CustomCalendar({
@@ -43,6 +44,7 @@ export function CustomCalendar({
 	renderDay,
 	onDayClick,
 	onDutyDates = [],
+	className,
 }: CustomCalendarProps) {
 	// 1. Corrigido: Inicializar isMobile como false e só mudar no useEffect
 	// Isso evita o erro de "Hydration failed"
@@ -84,7 +86,12 @@ export function CustomCalendar({
 		: ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 
 	return (
-		<div className='w-full bg-card border rounded-xl overflow-hidden shadow-sm flex flex-col'>
+		<div
+			className={cn(
+				'w-full bg-card border rounded-xl overflow-hidden shadow-sm flex flex-col',
+				className,
+			)}
+		>
 			{/* Header */}
 			<div className='flex items-center justify-between p-4 border-b bg-muted/10'>
 				<h2 className='text-lg font-bold capitalize'>
