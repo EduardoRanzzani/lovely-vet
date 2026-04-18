@@ -8,9 +8,9 @@ import {
 } from '@/api/actions/appointments.actions';
 import { MAX_PAGE_SIZE, PaginatedData } from '@/api/config/consts';
 import { AppointmentsWithRelations } from '@/api/schema/appointments.schema';
-import { DoctorsWithUser } from '@/api/schema/doctors.schema';
-import { PetWithTutorAndBreed } from '@/api/schema/pets.schema';
-import { ServiceWithSpecie } from '@/api/schema/services.schema';
+import { DoctorsWithRelations } from '@/api/schema/doctors.schema';
+import { PetsWithRelations } from '@/api/schema/pets.schema';
+import { ServicesWithRelations } from '@/api/schema/services.schema';
 import AddButton from '@/components/list/add-button';
 import ConfirmAlertButton from '@/components/list/confirm-alert-dialog';
 import DeleteAlertButton from '@/components/list/delete-alert-dialog';
@@ -42,9 +42,9 @@ import BadgeStatus from './badge-status';
 
 interface AppointmentsListClientProps {
 	appointments: Promise<PaginatedData<AppointmentsWithRelations>>;
-	pets: PetWithTutorAndBreed[];
-	doctors: DoctorsWithUser[];
-	services: ServiceWithSpecie[];
+	pets: PetsWithRelations[];
+	doctors: DoctorsWithRelations[];
+	services: ServicesWithRelations[];
 }
 
 const AppointmentsListClient = ({

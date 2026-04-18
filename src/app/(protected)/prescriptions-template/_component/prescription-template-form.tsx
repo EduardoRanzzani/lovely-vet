@@ -1,9 +1,9 @@
 import { upsertPrescriptionsTemplate } from '@/api/actions/prescriptions-template.actions';
-import { DoctorsWithUser } from '@/api/schema/doctors.schema';
+import { DoctorsWithRelations } from '@/api/schema/doctors.schema';
 import {
 	createPrescriptionTemplateSchema,
 	CreatePrescriptionTemplateSchema,
-	PrescriptionTemplateWithRelations,
+	PrescriptionTemplatesWithRelations,
 } from '@/api/schema/prescriptions-template.schema.';
 import InputForm from '@/components/form/input-form';
 import SelectForm from '@/components/form/select-form';
@@ -26,8 +26,8 @@ import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 
 interface PrescriptionTemplateFormClientProps {
-	prescriptionTemplate?: PrescriptionTemplateWithRelations;
-	doctors: DoctorsWithUser[];
+	prescriptionTemplate?: PrescriptionTemplatesWithRelations;
+	doctors: DoctorsWithRelations[];
 	onSuccess: () => void;
 }
 

@@ -7,7 +7,7 @@ import {
 } from '@/db/schema';
 import z from 'zod';
 
-export type PetWithTutorAndBreed = typeof petsTable.$inferSelect & {
+export type PetsWithRelations = typeof petsTable.$inferSelect & {
 	breed: typeof breedsTable.$inferSelect & {
 		specie: typeof speciesTable.$inferSelect;
 	};

@@ -2,7 +2,7 @@
 
 import { deleteSpecie } from '@/api/actions/species.actions';
 import { MAX_PAGE_SIZE, PaginatedData } from '@/api/config/consts';
-import { Specie } from '@/api/schema/species.schema';
+import { Species } from '@/api/schema/species.schema';
 import AddButton from '@/components/list/add-button';
 import DeleteAlertButton from '@/components/list/delete-alert-dialog';
 import EditButton from '@/components/list/edit-button';
@@ -18,7 +18,7 @@ import { toast } from 'sonner';
 import SpecieFormClient from './specie-form';
 
 interface SpeciesListClientProps {
-	species: Promise<PaginatedData<Specie>>;
+	species: Promise<PaginatedData<Species>>;
 }
 
 const SpeciesListClient = ({ species }: SpeciesListClientProps) => {
@@ -54,7 +54,7 @@ const SpeciesListClient = ({ species }: SpeciesListClientProps) => {
 		{ header: 'Ações', accessorKey: 'actions' },
 	];
 
-	const renderRow = (specie: Specie) => {
+	const renderRow = (specie: Species) => {
 		return (
 			<TableRow key={specie.id}>
 				<TableCell>{specie.name}</TableCell>
@@ -75,7 +75,7 @@ const SpeciesListClient = ({ species }: SpeciesListClientProps) => {
 		);
 	};
 
-	const renderMobile = (specie: Specie) => {
+	const renderMobile = (specie: Species) => {
 		return (
 			<div key={specie.id} className='flex flex-col gap-4'>
 				<div className='flex items-center justify-between'>

@@ -1,3 +1,5 @@
+import { getAppointments } from '@/api/actions/appointments.actions';
+import { getShifts } from '@/api/actions/shifts.actions';
 import {
 	PageContainer,
 	PageContent,
@@ -9,15 +11,17 @@ import {
 import { db } from '@/db';
 import { customersTable, usersTable } from '@/db/schema';
 import { auth } from '@clerk/nextjs/server';
+import { format } from 'date-fns';
 import { eq } from 'drizzle-orm';
 import OnboardingCustomerFormDialog from '../customers/_component/onboarding-customer-form';
+import DashboardCalendarClient from './_components/dashboard-calendar';
 
-const DashboardPage = async ({
-	searchParams,
-}: {
-	searchParams: { month?: string };
-}) => {
-	console.log(searchParams);
+interface DashboardPageProps {
+	searchParams: Promise<{ month?: string }>;
+}
+
+const DashboardPage = async ({ searchParams }: DashboardPageProps) => {
+	const params = await searchParams;
 
 	const { userId, isAuthenticated } = await auth();
 	if (!isAuthenticated) return <div>Redirecinando para login...</div>;
@@ -36,13 +40,11 @@ const DashboardPage = async ({
 
 	const needsToCreateCustomer = existingUser && !existingCustomer;
 
-	// const monthName =
-	// 	searchParams.month || format(new Date(), 'MMMM').toLowerCase();
-
-	// const [shifts, appointments] = await Promise.all([
-	// 	getShifts(monthName),
-	// 	getAppointments(monthName),
-	// ]);
+	const monthName = params.month || format(new Date(), 'MMMM').toLowerCase();
+	const [shifts, appointments] = await Promise.all([
+		getShifts(monthName, true),
+		getAppointments(monthName),
+	]);
 
 	return (
 		<PageContainer>
@@ -58,7 +60,7 @@ const DashboardPage = async ({
 					os atendimentos e próximos agendamentos.
 				</PageDescription>
 
-				{/* <DashboardCalendarClient shifts={shifts} appointments={appointments} /> */}
+				<DashboardCalendarClient shifts={shifts} appointments={appointments} />
 
 				{needsToCreateCustomer && (
 					<OnboardingCustomerFormDialog isOpen={needsToCreateCustomer} />

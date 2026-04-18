@@ -14,7 +14,7 @@ import z from 'zod';
 import { MAX_PAGE_SIZE, PaginatedData } from '../config/consts';
 import {
 	createPrescriptionTemplateSchema,
-	PrescriptionTemplateWithRelations,
+	PrescriptionTemplatesWithRelations,
 } from '../schema/prescriptions-template.schema.';
 
 const getPrescriptionTemplateWithRelationsQuery = () => {
@@ -42,7 +42,7 @@ export const getPrescriptionsTemplatePaginated = async (
 	page: number = 1,
 	limit: number = MAX_PAGE_SIZE,
 	search?: string,
-): Promise<PaginatedData<PrescriptionTemplateWithRelations>> => {
+): Promise<PaginatedData<PrescriptionTemplatesWithRelations>> => {
 	const authenticatedUser = await currentUser();
 	if (!authenticatedUser) throw new Error('Usuário não autenticado');
 

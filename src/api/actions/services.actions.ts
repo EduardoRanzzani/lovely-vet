@@ -10,24 +10,24 @@ import z from 'zod';
 import { MAX_PAGE_SIZE, PaginatedData } from '../config/consts';
 import {
 	createServiceSchema,
-	ServiceWithSpecie,
+	ServicesWithRelations,
 } from '../schema/services.schema';
 
-export const getServices = async (): Promise<ServiceWithSpecie[]> => {
+export const getServices = async (): Promise<ServicesWithRelations[]> => {
 	const authenticatedUser = await currentUser();
 	if (!authenticatedUser) throw new Error('Usuário não autenticado');
 
 	const data = await db.query.servicesTable.findMany({
 		with: { specie: true },
 	});
-	return data as ServiceWithSpecie[];
+	return data as ServicesWithRelations[];
 };
 
 export const getServicesPaginated = async (
 	page: number = 1,
 	limit: number = MAX_PAGE_SIZE,
 	search?: string,
-): Promise<PaginatedData<ServiceWithSpecie>> => {
+): Promise<PaginatedData<ServicesWithRelations>> => {
 	const authenticatedUser = await currentUser();
 	if (!authenticatedUser) throw new Error('Usuário não autenticado');
 
@@ -58,7 +58,7 @@ export const getServicesPaginated = async (
 	const pageCount = Math.ceil(totalCount / limit);
 
 	return {
-		data: data as ServiceWithSpecie[],
+		data: data as ServicesWithRelations[],
 		metadata: {
 			totalCount,
 			pageCount,

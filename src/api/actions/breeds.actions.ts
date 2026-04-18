@@ -8,9 +8,12 @@ import { asc, count, eq, ilike, or } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 import z from 'zod';
 import { PaginatedData } from '../config/consts';
-import { BreedsWithSpecies, createBreedSchema } from '../schema/breeds.schema';
+import {
+	BreedsWithRelations,
+	createBreedSchema,
+} from '../schema/breeds.schema';
 
-export const getBreeds = async (): Promise<BreedsWithSpecies[]> => {
+export const getBreeds = async (): Promise<BreedsWithRelations[]> => {
 	const breeds = await db.query.breedsTable.findMany({
 		with: {
 			specie: true,
@@ -25,7 +28,7 @@ export const getBreedsPaginated = async (
 	page: number,
 	limit: number,
 	search?: string,
-): Promise<PaginatedData<BreedsWithSpecies>> => {
+): Promise<PaginatedData<BreedsWithRelations>> => {
 	const authenticatedUser = await currentUser();
 	if (!authenticatedUser) throw new Error('Usuário não autenticado');
 

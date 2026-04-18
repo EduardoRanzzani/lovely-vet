@@ -5,7 +5,7 @@ import { searchAddressByPostalCode } from '@/api/config/consts';
 import {
 	createCustomerWithUserSchema,
 	CreateCustomerWithUserSchema,
-	CustomerWithUser,
+	CustomersWithRelations,
 } from '@/api/schema/customers.schema';
 import InputForm from '@/components/form/input-form';
 import InputFormMask from '@/components/form/input-mask-form';
@@ -28,7 +28,7 @@ import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 
 interface CustomerFormClientProps {
-	customer?: CustomerWithUser;
+	customer?: CustomersWithRelations;
 	onSuccess?: () => void;
 }
 

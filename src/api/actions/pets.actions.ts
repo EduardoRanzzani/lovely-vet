@@ -18,10 +18,10 @@ import z from 'zod';
 import { PaginatedData } from '../config/consts';
 import {
 	createPetWithTutorAndBreedSchema,
-	PetWithTutorAndBreed,
+	PetsWithRelations,
 } from '../schema/pets.schema';
 
-export const getPetById = async (id: string): Promise<PetWithTutorAndBreed> => {
+export const getPetById = async (id: string): Promise<PetsWithRelations> => {
 	const authUser = await currentUser();
 	if (!authUser) throw new Error('Usuário não autenticado');
 
@@ -46,7 +46,7 @@ export const getPetById = async (id: string): Promise<PetWithTutorAndBreed> => {
 	});
 
 	if (!pet) throw new Error('Pet não encontrado');
-	return pet as PetWithTutorAndBreed;
+	return pet as PetsWithRelations;
 };
 
 // Helper para evitar repetição da base da query de listagem
@@ -66,7 +66,7 @@ const getPetWithRelationsQuery = () => {
 		.innerJoin(usersTable, eq(customersTable.userId, usersTable.id));
 };
 
-export const getPets = async (): Promise<PetWithTutorAndBreed[]> => {
+export const getPets = async (): Promise<PetsWithRelations[]> => {
 	const authUser = await currentUser();
 	if (!authUser) throw new Error('Usuário não autenticado');
 
@@ -97,7 +97,7 @@ export const getPetsPaginated = async (
 	page: number,
 	limit: number,
 	search?: string,
-): Promise<PaginatedData<PetWithTutorAndBreed>> => {
+): Promise<PaginatedData<PetsWithRelations>> => {
 	const authUser = await currentUser();
 	if (!authUser) throw new Error('Usuário não autenticado');
 

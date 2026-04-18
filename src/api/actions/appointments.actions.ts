@@ -117,6 +117,7 @@ export const getAppointmentsPaginated = async (
 
 export const getAppointments = async (
 	monthName?: string,
+	extraMonths?: boolean,
 ): Promise<AppointmentsWithRelations[]> => {
 	const authenticatedUser = await currentUser();
 	if (!authenticatedUser) throw new Error('Usuário não autenticado');
@@ -130,9 +131,13 @@ export const getAppointments = async (
 	const safeMonthIndex = monthIndex === -1 ? now.getMonth() : monthIndex;
 
 	const referenceDate = new Date(year, safeMonthIndex, 1);
+	let startRange = startOfMonth(referenceDate);
+	let endRange = endOfMonth(referenceDate);
 
-	const startRange = startOfMonth(subMonths(referenceDate, 1));
-	const endRange = endOfMonth(addMonths(referenceDate, 1));
+	if (extraMonths) {
+		startRange = startOfMonth(subMonths(referenceDate, 1));
+		endRange = endOfMonth(addMonths(referenceDate, 1));
+	}
 
 	const appointments = await db.query.appointmentsTable.findMany({
 		where: and(

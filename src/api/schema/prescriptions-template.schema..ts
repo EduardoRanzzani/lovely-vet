@@ -5,7 +5,7 @@ import {
 } from '@/db/schema';
 import z from 'zod';
 
-export type PrescriptionTemplateWithRelations =
+export type PrescriptionTemplatesWithRelations =
 	typeof prescriptionTemplatesTable.$inferSelect & {
 		doctor: typeof doctorsTable.$inferSelect & {
 			user: typeof usersTable.$inferSelect;

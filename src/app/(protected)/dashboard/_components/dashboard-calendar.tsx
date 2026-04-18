@@ -1,8 +1,9 @@
 // _components/dashboard-calendar-client.tsx
 'use client';
 
+import { monthNames } from '@/api/config/consts';
 import { AppointmentsWithRelations } from '@/api/schema/appointments.schema';
-import { ShiftWithDoctor } from '@/api/schema/shifts.schema';
+import { ShiftsWithRelations } from '@/api/schema/shifts.schema';
 import { CustomCalendar } from '@/components/ui/custom-calendar';
 import { cn } from '@/lib/utils';
 import {
@@ -10,10 +11,10 @@ import {
 	format,
 	isSameDay,
 	isWithinInterval,
+	setMonth,
 	startOfDay,
 } from 'date-fns';
 import {
-	Clock2Icon,
 	ClockIcon,
 	HospitalIcon,
 	MoonIcon,
@@ -21,10 +22,11 @@ import {
 	SunIcon,
 	UserIcon,
 } from 'lucide-react';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useState } from 'react';
 
 interface DashboardCalendarProps {
-	shifts: ShiftWithDoctor[];
+	shifts: ShiftsWithRelations[];
 	appointments: AppointmentsWithRelations[];
 }
 
@@ -32,7 +34,24 @@ const DashboardCalendarClient = ({
 	shifts,
 	appointments,
 }: DashboardCalendarProps) => {
-	const [currentMonth, setCurrentMonth] = useState(new Date());
+	const searchParams = useSearchParams();
+	const router = useRouter();
+	const pathname = usePathname();
+
+	const monthParam = searchParams.get('month');
+	const currentMonth = monthParam
+		? setMonth(new Date(), monthNames.indexOf(monthParam.toLowerCase()))
+		: new Date();
+
+	const handleMonthChange = (newDate: Date) => {
+		const monthIndex = newDate.getMonth();
+		const monthName = monthNames[monthIndex];
+
+		const params = new URLSearchParams(searchParams);
+		params.set('month', monthName);
+
+		router.push(`${pathname}?${params.toString()}`);
+	};
 
 	const renderDayContent = (
 		date: Date,
@@ -228,7 +247,7 @@ const DashboardCalendarClient = ({
 	return (
 		<CustomCalendar
 			currentMonth={currentMonth}
-			onMonthChange={setCurrentMonth}
+			onMonthChange={handleMonthChange}
 			renderDay={renderDayContent}
 			renderMobileHeader={renderMobileContent}
 			onDayClick={(date) => console.log('Clicou:', date)}

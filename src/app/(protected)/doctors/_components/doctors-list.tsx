@@ -1,7 +1,7 @@
 'use client';
 
 import { MAX_PAGE_SIZE, PaginatedData } from '@/api/config/consts';
-import { DoctorsWithUser } from '@/api/schema/doctors.schema';
+import { DoctorsWithRelations } from '@/api/schema/doctors.schema';
 import { getInitials } from '@/api/util';
 import AddButton from '@/components/list/add-button';
 import EditButton from '@/components/list/edit-button';
@@ -19,7 +19,7 @@ import { use } from 'react';
 import DoctorFormClient from './doctor-form';
 
 interface DoctorsListClientProps {
-	doctors: Promise<PaginatedData<DoctorsWithUser>>;
+	doctors: Promise<PaginatedData<DoctorsWithRelations>>;
 }
 
 const DoctorsListClient = ({ doctors }: DoctorsListClientProps) => {
@@ -41,7 +41,7 @@ const DoctorsListClient = ({ doctors }: DoctorsListClientProps) => {
 		{ header: 'Ações', accessorKey: 'actions' },
 	];
 
-	const renderRow = (doctor: DoctorsWithUser) => {
+	const renderRow = (doctor: DoctorsWithRelations) => {
 		return (
 			<TableRow key={doctor.id}>
 				<TableCell>
@@ -92,7 +92,7 @@ const DoctorsListClient = ({ doctors }: DoctorsListClientProps) => {
 		);
 	};
 
-	const renderMobile = (doctor: DoctorsWithUser) => {
+	const renderMobile = (doctor: DoctorsWithRelations) => {
 		return (
 			<div key={doctor.id} className='flex flex-col gap-4'>
 				<div className='flex items-center justify-between'>

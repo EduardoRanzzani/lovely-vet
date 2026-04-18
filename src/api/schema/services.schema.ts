@@ -1,7 +1,7 @@
 import { servicesTable, speciesTable } from '@/db/schema';
 import z from 'zod';
 
-export type ServiceWithSpecie = typeof servicesTable.$inferSelect & {
+export type ServicesWithRelations = typeof servicesTable.$inferSelect & {
 	specie: typeof speciesTable.$inferSelect;
 };
 

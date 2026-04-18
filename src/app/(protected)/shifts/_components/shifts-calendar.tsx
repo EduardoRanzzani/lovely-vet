@@ -1,10 +1,10 @@
 'use client';
 
 import { monthNames } from '@/api/config/consts';
-import { DoctorsWithUser } from '@/api/schema/doctors.schema';
-import { ShiftWithDoctor } from '@/api/schema/shifts.schema';
-import AddButton from '@/components/list/add-button';
+import { DoctorsWithRelations } from '@/api/schema/doctors.schema';
+import { ShiftsWithRelations } from '@/api/schema/shifts.schema';
 import { CustomCalendar } from '@/components/ui/custom-calendar';
+import { Dialog } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
 import {
 	endOfDay,
@@ -18,11 +18,10 @@ import { ClockIcon, HospitalIcon, MoonIcon, SunIcon } from 'lucide-react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { use, useMemo, useState } from 'react';
 import ShiftFormClient from './shift-form';
-import { Dialog } from '@/components/ui/dialog';
 
 interface ShiftsCalendarClientProps {
-	shiftsPromise: Promise<ShiftWithDoctor[]>;
-	doctors: DoctorsWithUser[];
+	shiftsPromise: Promise<ShiftsWithRelations[]>;
+	doctors: DoctorsWithRelations[];
 }
 
 const ShiftsCalendarClient = ({
@@ -37,7 +36,7 @@ const ShiftsCalendarClient = ({
 	const [isFormOpen, setIsFormOpen] = useState<boolean>(false);
 	const [selectedDate, setSelectedDate] = useState<Date | null>(null);
 	const [selectedShift, setSelectedShift] = useState<
-		ShiftWithDoctor | undefined
+		ShiftsWithRelations | undefined
 	>(undefined);
 
 	const monthParam = searchParams.get('month');
@@ -55,7 +54,7 @@ const ShiftsCalendarClient = ({
 		router.push(`${pathname}?${params.toString()}`);
 	};
 
-	const handleEditShift = (shift: ShiftWithDoctor) => {
+	const handleEditShift = (shift: ShiftsWithRelations) => {
 		setSelectedShift(shift);
 		setSelectedDate(null); // Limpa a data selecionada da grid para não confundir
 		setIsFormOpen(true);
@@ -117,7 +116,7 @@ const ShiftsCalendarClient = ({
 		date: Date,
 		isMobile: boolean,
 		isCurrentMonth: boolean,
-		onEdit: (shift: ShiftWithDoctor) => void,
+		onEdit: (shift: ShiftsWithRelations) => void,
 	) => {
 		const dayShifts = shifts.filter((shift) => {
 			const start = new Date(shift.startTime);

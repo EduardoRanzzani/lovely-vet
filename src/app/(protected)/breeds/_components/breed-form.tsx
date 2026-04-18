@@ -1,10 +1,10 @@
 import { upsertBreed } from '@/api/actions/breeds.actions';
 import {
-	BreedsWithSpecies,
+	BreedsWithRelations,
 	createBreedSchema,
 	CreateBreedSchema,
 } from '@/api/schema/breeds.schema';
-import { Specie } from '@/api/schema/species.schema';
+import { Species } from '@/api/schema/species.schema';
 import InputForm from '@/components/form/input-form';
 import SelectForm from '@/components/form/select-form';
 import { Button } from '@/components/ui/button';
@@ -25,8 +25,8 @@ import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 
 interface BreedFormClientProps {
-	breed?: BreedsWithSpecies;
-	species: Specie[];
+	breed?: BreedsWithRelations;
+	species: Species[];
 	onSuccess?: () => void;
 }
 

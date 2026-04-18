@@ -1,9 +1,9 @@
 import { upsertShift } from '@/api/actions/shifts.actions';
-import { DoctorsWithUser } from '@/api/schema/doctors.schema';
+import { DoctorsWithRelations } from '@/api/schema/doctors.schema';
 import {
 	createShiftSchema,
 	CreateShiftSchema,
-	ShiftWithDoctor,
+	ShiftsWithRelations,
 } from '@/api/schema/shifts.schema';
 import DateTimePickerForm from '@/components/form/datetimepicker-form';
 import InputForm from '@/components/form/input-form';
@@ -26,8 +26,8 @@ import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 
 interface ShiftFormProps {
-	shift?: ShiftWithDoctor;
-	doctors: DoctorsWithUser[];
+	shift?: ShiftsWithRelations;
+	doctors: DoctorsWithRelations[];
 	selectedDate?: Date | null;
 	onSuccess?: () => void;
 }
@@ -45,9 +45,9 @@ const ShiftFormClient = ({
 	const shiftEnd = shift?.endTime ? new Date(shift.endTime) : null;
 
 	// Calcula a duração se o shift existir, senão usa o padrão
-	const calculatedDuration: number = shiftEnd
-		? differenceInHours(shiftEnd, shiftStart)
-		: 12; // fallback padrão
+	const calculatedDuration: string = shiftEnd
+		? differenceInHours(shiftEnd, shiftStart).toString()
+		: '12'; // fallback padrão
 
 	const form = useForm<CreateShiftSchema>({
 		resolver: zodResolver(createShiftSchema),

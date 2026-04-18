@@ -2,7 +2,7 @@ import { upsertSpecie } from '@/api/actions/species.actions';
 import {
 	createSpecieSchema,
 	CreateSpecieSchema,
-	Specie,
+	Species,
 } from '@/api/schema/species.schema';
 import InputForm from '@/components/form/input-form';
 import { Button } from '@/components/ui/button';
@@ -23,7 +23,7 @@ import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 
 interface SpecieFormClientProps {
-	specie?: Specie;
+	specie?: Species;
 	onSuccess?: () => void;
 }
 

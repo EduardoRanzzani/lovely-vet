@@ -11,10 +11,10 @@ import { PaginatedData } from '../config/consts';
 import {
 	createSpecieSchema,
 	CreateSpecieSchema,
-	Specie,
+	Species,
 } from '../schema/species.schema';
 
-export const getSpecies = async (): Promise<Specie[]> => {
+export const getSpecies = async (): Promise<Species[]> => {
 	const species = await db.query.speciesTable.findMany({
 		orderBy: asc(speciesTable.name),
 	});
@@ -25,7 +25,7 @@ export const getSpeciesPaginated = async (
 	page: number,
 	limit: number,
 	search?: string,
-): Promise<PaginatedData<Specie>> => {
+): Promise<PaginatedData<Species>> => {
 	const authenticatedUser = await currentUser();
 	if (!authenticatedUser) throw new Error('Usuário não autenticado');
 

@@ -2,8 +2,8 @@
 
 import { deleteService } from '@/api/actions/services.actions';
 import { MAX_PAGE_SIZE, PaginatedData } from '@/api/config/consts';
-import { ServiceWithSpecie } from '@/api/schema/services.schema';
-import { Specie } from '@/api/schema/species.schema';
+import { ServicesWithRelations } from '@/api/schema/services.schema';
+import { Species } from '@/api/schema/species.schema';
 import AddButton from '@/components/list/add-button';
 import DeleteAlertButton from '@/components/list/delete-alert-dialog';
 import EditButton from '@/components/list/edit-button';
@@ -28,8 +28,8 @@ import { toast } from 'sonner';
 import ServiceFormClient from './service-form';
 
 interface ServicesListClientProps {
-	services: Promise<PaginatedData<ServiceWithSpecie>>;
-	species: Specie[];
+	services: Promise<PaginatedData<ServicesWithRelations>>;
+	species: Species[];
 }
 
 const ServicesListClient = ({ services, species }: ServicesListClientProps) => {
@@ -68,7 +68,7 @@ const ServicesListClient = ({ services, species }: ServicesListClientProps) => {
 		},
 	});
 
-	const renderRow = (service: ServiceWithSpecie) => {
+	const renderRow = (service: ServicesWithRelations) => {
 		return (
 			<TableRow key={service.id}>
 				<TableCell>{service.name}</TableCell>
@@ -102,7 +102,7 @@ const ServicesListClient = ({ services, species }: ServicesListClientProps) => {
 		);
 	};
 
-	const renderMobile = (service: ServiceWithSpecie) => {
+	const renderMobile = (service: ServicesWithRelations) => {
 		return (
 			<div key={service.id} className='flex flex-col gap-4'>
 				<div className='flex items-center justify-between'>

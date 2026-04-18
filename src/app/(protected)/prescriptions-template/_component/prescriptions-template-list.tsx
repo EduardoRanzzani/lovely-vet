@@ -1,8 +1,8 @@
 'use client';
 import { deletePrescriptionTemplate } from '@/api/actions/prescriptions-template.actions';
 import { MAX_PAGE_SIZE, PaginatedData } from '@/api/config/consts';
-import { DoctorsWithUser } from '@/api/schema/doctors.schema';
-import { PrescriptionTemplateWithRelations } from '@/api/schema/prescriptions-template.schema.';
+import { DoctorsWithRelations } from '@/api/schema/doctors.schema';
+import { PrescriptionTemplatesWithRelations } from '@/api/schema/prescriptions-template.schema.';
 import AddButton from '@/components/list/add-button';
 import DeleteAlertButton from '@/components/list/delete-alert-dialog';
 import EditButton from '@/components/list/edit-button';
@@ -19,9 +19,9 @@ import PrescriptionTemplateFormClient from './prescription-template-form';
 
 interface PrescriptionsTemplateListClientProps {
 	prescriptionsTemplate: Promise<
-		PaginatedData<PrescriptionTemplateWithRelations>
+		PaginatedData<PrescriptionTemplatesWithRelations>
 	>;
-	doctors: DoctorsWithUser[];
+	doctors: DoctorsWithRelations[];
 }
 
 const PrescriptionsTemplateListClient = ({
@@ -64,7 +64,7 @@ const PrescriptionsTemplateListClient = ({
 	];
 
 	const renderRow = (
-		prescriptionTemplate: PrescriptionTemplateWithRelations,
+		prescriptionTemplate: PrescriptionTemplatesWithRelations,
 	) => {
 		return (
 			<TableRow key={prescriptionTemplate.id}>
@@ -90,7 +90,7 @@ const PrescriptionsTemplateListClient = ({
 	};
 
 	const renderMobile = (
-		prescriptionTemplate: PrescriptionTemplateWithRelations,
+		prescriptionTemplate: PrescriptionTemplatesWithRelations,
 	) => {
 		return (
 			<div key={prescriptionTemplate.id} className='flex flex-col gap-4'>

@@ -2,7 +2,7 @@
 
 import { deleteCustomer } from '@/api/actions/customers.actions';
 import { MAX_PAGE_SIZE, PaginatedData } from '@/api/config/consts';
-import { CustomerWithUser } from '@/api/schema/customers.schema';
+import { CustomersWithRelations } from '@/api/schema/customers.schema';
 import { getInitials } from '@/api/util';
 import { GoogleMapsIcon } from '@/components/icons/icon-googlemaps';
 import { WhatsappIcon } from '@/components/icons/icon-whatsapp';
@@ -32,7 +32,7 @@ import { toast } from 'sonner';
 import CustomerFormClient from './customer-form';
 
 interface CustomersListClientProps {
-	customers: Promise<PaginatedData<CustomerWithUser>>;
+	customers: Promise<PaginatedData<CustomersWithRelations>>;
 }
 
 const CustomersListClient = ({ customers }: CustomersListClientProps) => {
@@ -71,7 +71,7 @@ const CustomersListClient = ({ customers }: CustomersListClientProps) => {
 		{ header: 'Ações', accessorKey: 'actions' },
 	];
 
-	const renderRow = (customer: CustomerWithUser) => {
+	const renderRow = (customer: CustomersWithRelations) => {
 		const firstName = customer.user.name.split(' ')[0];
 		const whatsappUrl = `https://wa.me/55${customer.phone.replace(/\D/g, '')}/?text=Ol%C3%A1,%20tudo%20bem%3F%20Gostaria%20de%20falar%20com%20${firstName}`;
 		const fullAddress = `${customer.address}, ${customer.addressNumber} - ${customer.neighborhood}. ${customer.city}/${customer.state}`;
@@ -155,7 +155,7 @@ const CustomersListClient = ({ customers }: CustomersListClientProps) => {
 		);
 	};
 
-	const renderMobile = (customer: CustomerWithUser) => {
+	const renderMobile = (customer: CustomersWithRelations) => {
 		const fullAddress = `${customer.address}, ${customer.addressNumber} - ${customer.neighborhood}. ${customer.city}/${customer.state}`;
 		const whatsappUrl = `https://wa.me/55${customer.phone.replace(/\D/g, '')}/?text=Ol%C3%A1,%20gostaria%20de%20falar%20com%20${customer.user.name}`;
 		const googleMapsUrl = `https://www.google.com/maps/place/${fullAddress}`;

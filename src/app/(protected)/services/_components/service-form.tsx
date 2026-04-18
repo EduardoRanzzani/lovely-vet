@@ -2,9 +2,9 @@ import { upsertService } from '@/api/actions/services.actions';
 import {
 	createServiceSchema,
 	CreateServiceSchema,
-	ServiceWithSpecie,
+	ServicesWithRelations,
 } from '@/api/schema/services.schema';
-import { Specie } from '@/api/schema/species.schema';
+import { Species } from '@/api/schema/species.schema';
 import InputForm from '@/components/form/input-form';
 import MoneyInputForm from '@/components/form/money-input-form';
 import SelectForm from '@/components/form/select-form';
@@ -26,8 +26,8 @@ import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 
 interface ServiceFormClientProps {
-	service?: ServiceWithSpecie;
-	species: Specie[];
+	service?: ServicesWithRelations;
+	species: Species[];
 	onSuccess?: () => void;
 }
 

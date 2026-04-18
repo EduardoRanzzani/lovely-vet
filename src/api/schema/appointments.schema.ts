@@ -9,7 +9,6 @@ import {
 } from '@/db/schema';
 import z from 'zod';
 
-// Tipo complexo para listagem (Join de Pet, Cliente do Pet e Médico)
 export type AppointmentsWithRelations =
 	typeof appointmentsTable.$inferSelect & {
 		pet: typeof petsTable.$inferSelect & {

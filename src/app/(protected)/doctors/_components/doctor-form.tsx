@@ -6,7 +6,7 @@ import { timesOfDay, ufs, weekDays } from '@/api/config/consts';
 import {
 	CreateDoctorWithUserSchema,
 	createDoctorWithUserSchema,
-	DoctorsWithUser,
+	DoctorsWithRelations,
 } from '@/api/schema/doctors.schema';
 import DropzoneForm from '@/components/form/image-dropzone-form';
 import InputForm from '@/components/form/input-form';
@@ -30,7 +30,7 @@ import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 
 interface DoctorFormClientProps {
-	doctor?: DoctorsWithUser;
+	doctor?: DoctorsWithRelations;
 	onSuccess?: () => void;
 }
 

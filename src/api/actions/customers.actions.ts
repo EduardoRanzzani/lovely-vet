@@ -10,7 +10,7 @@ import z from 'zod';
 import { PaginatedData } from '../config/consts';
 import {
 	createCustomerWithUserSchema,
-	CustomerWithUser,
+	CustomersWithRelations,
 	onboardingCustomerSchema,
 } from '../schema/customers.schema';
 import { createNewClerkUser } from './clerk.actions';
@@ -60,7 +60,7 @@ export const onboardingCustomer = actionClient
 		revalidatePath('/customers');
 	});
 
-export const getCustomers = async (): Promise<CustomerWithUser[]> => {
+export const getCustomers = async (): Promise<CustomersWithRelations[]> => {
 	const authenticatedUser = await currentUser();
 	if (!authenticatedUser) throw new Error('Usuário não autenticado');
 
@@ -74,14 +74,14 @@ export const getCustomers = async (): Promise<CustomerWithUser[]> => {
 	return customers.map((row) => ({
 		...row.customers,
 		user: row.users,
-	})) as CustomerWithUser[];
+	})) as CustomersWithRelations[];
 };
 
 export const getCustomersPaginated = async (
 	page: number = 1,
 	limit: number = 20,
 	search?: string,
-): Promise<PaginatedData<CustomerWithUser>> => {
+): Promise<PaginatedData<CustomersWithRelations>> => {
 	const authenticatedUser = await currentUser();
 	if (!authenticatedUser) throw new Error('Usuário não autenticado');
 

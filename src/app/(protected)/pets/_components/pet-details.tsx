@@ -1,8 +1,8 @@
 'use client';
-import { BreedsWithSpecies } from '@/api/schema/breeds.schema';
-import { CustomerWithUser } from '@/api/schema/customers.schema';
-import { PetWithTutorAndBreed } from '@/api/schema/pets.schema';
-import { Specie } from '@/api/schema/species.schema';
+import { BreedsWithRelations } from '@/api/schema/breeds.schema';
+import { CustomersWithRelations } from '@/api/schema/customers.schema';
+import { PetsWithRelations } from '@/api/schema/pets.schema';
+import { Species } from '@/api/schema/species.schema';
 import { calculateAge } from '@/api/util';
 import { GoogleMapsIcon } from '@/components/icons/icon-googlemaps';
 import EditButton from '@/components/list/edit-button';
@@ -38,10 +38,10 @@ import DialogServices from './dialog-services';
 import PetFormClient from './pet-form';
 
 interface PetDetailsClientProps {
-	pet: PetWithTutorAndBreed;
-	speciesPromise: Promise<Specie[]>;
-	breedsPromise: Promise<BreedsWithSpecies[]>;
-	customersPromise: Promise<CustomerWithUser[]>;
+	pet: PetsWithRelations;
+	speciesPromise: Promise<Species[]>;
+	breedsPromise: Promise<BreedsWithRelations[]>;
+	customersPromise: Promise<CustomersWithRelations[]>;
 }
 
 const PetDetailsClient = ({

@@ -12,19 +12,22 @@ import {
 } from 'date-fns';
 import { and, gte, lte } from 'drizzle-orm';
 import { monthNames } from '../config/consts';
-import { createShiftSchema, ShiftWithDoctor } from '../schema/shifts.schema';
+import {
+	createShiftSchema,
+	ShiftsWithRelations,
+} from '../schema/shifts.schema';
 import { actionClient } from '@/lib/next-safe-action';
 import { revalidatePath } from 'next/cache';
 
 export const getShifts = async (
 	monthName?: string,
-	yearParam?: string,
-): Promise<ShiftWithDoctor[]> => {
+	extraMonths?: boolean,
+): Promise<ShiftsWithRelations[]> => {
 	const authenticatedUser = await currentUser();
 	if (!authenticatedUser) throw new Error('Usuário não autenticado');
 
 	const now = new Date();
-	const year = yearParam ? parseInt(yearParam) : now.getFullYear();
+	const year = now.getFullYear();
 	const monthIndex = monthName
 		? monthNames.indexOf(monthName.toLowerCase())
 		: now.getMonth();
@@ -34,9 +37,13 @@ export const getShifts = async (
 
 	// Monta a data: Primeiro dia do mês e ano escolhidos
 	const referenceDate = new Date(year, safeMonthIndex, 1);
+	let startRange = startOfMonth(referenceDate);
+	let endRange = endOfMonth(referenceDate);
 
-	const startRange = startOfMonth(subMonths(referenceDate, 1));
-	const endRange = endOfMonth(addMonths(referenceDate, 1));
+	if (extraMonths) {
+		startRange = startOfMonth(subMonths(referenceDate, 1));
+		endRange = endOfMonth(addMonths(referenceDate, 1));
+	}
 
 	const shifts = await db.query.shiftsTable.findMany({
 		where: and(
@@ -46,7 +53,7 @@ export const getShifts = async (
 		with: { doctor: { with: { user: true } } },
 	});
 
-	return shifts as ShiftWithDoctor[];
+	return shifts as ShiftsWithRelations[];
 };
 
 export const upsertShift = actionClient
@@ -56,7 +63,7 @@ export const upsertShift = actionClient
 		if (!authenticatedUser) throw new Error('Usuário não autenticado');
 
 		const { id, doctorId, clinicName, startTime, duration } = parsedInput;
-		const endDate = addHours(startTime, duration);
+		const endDate = addHours(startTime, Number(duration));
 
 		const result = await db.transaction(async (tx) => {
 			const [insertedShift] = await tx

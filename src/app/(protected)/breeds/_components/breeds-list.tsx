@@ -2,8 +2,8 @@
 
 import { deleteBreed } from '@/api/actions/breeds.actions';
 import { MAX_PAGE_SIZE, PaginatedData } from '@/api/config/consts';
-import { BreedsWithSpecies } from '@/api/schema/breeds.schema';
-import { Specie } from '@/api/schema/species.schema';
+import { BreedsWithRelations } from '@/api/schema/breeds.schema';
+import { Species } from '@/api/schema/species.schema';
 import AddButton from '@/components/list/add-button';
 import DeleteAlertButton from '@/components/list/delete-alert-dialog';
 import EditButton from '@/components/list/edit-button';
@@ -19,8 +19,8 @@ import BreedFormClient from './breed-form';
 import LoadingDialog from '@/components/ui/loading';
 
 interface BreedsListClientProps {
-	breeds: Promise<PaginatedData<BreedsWithSpecies>>;
-	species: Specie[];
+	breeds: Promise<PaginatedData<BreedsWithRelations>>;
+	species: Species[];
 }
 
 const BreedsListClient = ({ breeds, species }: BreedsListClientProps) => {
@@ -57,7 +57,7 @@ const BreedsListClient = ({ breeds, species }: BreedsListClientProps) => {
 		{ header: 'Ações', accessorKey: 'actions' },
 	];
 
-	const renderRow = (breed: BreedsWithSpecies) => {
+	const renderRow = (breed: BreedsWithRelations) => {
 		return (
 			<TableRow key={breed.id}>
 				<TableCell>{breed.name}</TableCell>
@@ -80,7 +80,7 @@ const BreedsListClient = ({ breeds, species }: BreedsListClientProps) => {
 		);
 	};
 
-	const renderMobile = (breed: BreedsWithSpecies) => {
+	const renderMobile = (breed: BreedsWithRelations) => {
 		return (
 			<div key={breed.id} className='flex flex-col gap-4'>
 				<div className='flex items-center justify-between'>

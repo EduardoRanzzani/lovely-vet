@@ -1,7 +1,7 @@
 import { speciesTable } from '@/db/schema';
 import z from 'zod';
 
-export type Specie = typeof speciesTable.$inferSelect;
+export type Species = typeof speciesTable.$inferSelect;
 
 export const createSpecieSchema = z.object({
 	id: z.uuid().optional(),

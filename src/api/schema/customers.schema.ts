@@ -1,7 +1,7 @@
 import { customersTable, usersTable } from '@/db/schema';
 import { z } from 'zod';
 
-export type CustomerWithUser = typeof customersTable.$inferSelect & {
+export type CustomersWithRelations = typeof customersTable.$inferSelect & {
 	user: typeof usersTable.$inferSelect;
 };
 

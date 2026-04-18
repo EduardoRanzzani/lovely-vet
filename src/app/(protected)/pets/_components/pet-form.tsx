@@ -1,14 +1,14 @@
 'use client';
 import { upsertPet } from '@/api/actions/pets.actions';
 import { uploadImageAction } from '@/api/actions/upload-cloudinary';
-import { BreedsWithSpecies } from '@/api/schema/breeds.schema';
-import { CustomerWithUser } from '@/api/schema/customers.schema';
+import { BreedsWithRelations } from '@/api/schema/breeds.schema';
+import { CustomersWithRelations } from '@/api/schema/customers.schema';
 import {
 	createPetWithTutorAndBreedSchema,
 	CreatePetWithTutorAndBreedSchema,
-	PetWithTutorAndBreed,
+	PetsWithRelations,
 } from '@/api/schema/pets.schema';
-import { Specie } from '@/api/schema/species.schema';
+import { Species } from '@/api/schema/species.schema';
 import DatePickerForm from '@/components/form/datepicker-form';
 import DropzoneForm from '@/components/form/image-dropzone-form';
 import InputForm from '@/components/form/input-form';
@@ -33,10 +33,10 @@ import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 
 interface PetFormClientProps {
-	pet?: PetWithTutorAndBreed;
-	species: Specie[];
-	breeds: BreedsWithSpecies[];
-	customers: CustomerWithUser[];
+	pet?: PetsWithRelations;
+	species: Species[];
+	breeds: BreedsWithRelations[];
+	customers: CustomersWithRelations[];
 	onSuccess?: () => void;
 }
 

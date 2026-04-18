@@ -24,7 +24,7 @@ const ShiftsPage = async ({ searchParams }: ShiftsPageProps) => {
 	const currentMonth = params.month;
 
 	// Busca os dados
-	const shiftsPromise = getShifts(currentMonth);
+	const shiftsPromise = getShifts(currentMonth, true);
 	const doctors = await getDoctors();
 
 	return (

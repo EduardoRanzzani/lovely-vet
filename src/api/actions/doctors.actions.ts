@@ -10,11 +10,11 @@ import z from 'zod';
 import { MAX_PAGE_SIZE, PaginatedData } from '../config/consts';
 import {
 	createDoctorWithUserSchema,
-	DoctorsWithUser,
+	DoctorsWithRelations,
 } from '../schema/doctors.schema';
 import { createNewClerkUser } from './clerk.actions';
 
-export const getDoctors = async (): Promise<DoctorsWithUser[]> => {
+export const getDoctors = async (): Promise<DoctorsWithRelations[]> => {
 	const authenticatedUser = await currentUser();
 	if (!authenticatedUser) throw new Error('Usuário não autenticado');
 
@@ -27,7 +27,7 @@ export const getDoctors = async (): Promise<DoctorsWithUser[]> => {
 		.innerJoin(usersTable, sql`${doctorsTable.userId} = ${usersTable.id}`)
 		.orderBy(asc(usersTable.name));
 
-	const formattedData: DoctorsWithUser[] = data.map((row) => ({
+	const formattedData: DoctorsWithRelations[] = data.map((row) => ({
 		...row.doctors,
 		user: row.users,
 	}));
@@ -39,7 +39,7 @@ export const getDoctorsPaginated = async (
 	page: number = 1,
 	limit: number = MAX_PAGE_SIZE,
 	search?: string,
-): Promise<PaginatedData<DoctorsWithUser>> => {
+): Promise<PaginatedData<DoctorsWithRelations>> => {
 	const authenticatedUser = await currentUser();
 	if (!authenticatedUser) throw new Error('Usuário não autenticado');
 

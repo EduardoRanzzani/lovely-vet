@@ -2,10 +2,10 @@
 
 import { deletePet } from '@/api/actions/pets.actions';
 import { MAX_PAGE_SIZE, PaginatedData } from '@/api/config/consts';
-import { BreedsWithSpecies } from '@/api/schema/breeds.schema';
-import { CustomerWithUser } from '@/api/schema/customers.schema';
-import { PetWithTutorAndBreed } from '@/api/schema/pets.schema';
-import { Specie } from '@/api/schema/species.schema';
+import { BreedsWithRelations } from '@/api/schema/breeds.schema';
+import { CustomersWithRelations } from '@/api/schema/customers.schema';
+import { PetsWithRelations } from '@/api/schema/pets.schema';
+import { Species } from '@/api/schema/species.schema';
 import { calculateAge, getInitials } from '@/api/util';
 import { WhatsappIcon } from '@/components/icons/icon-whatsapp';
 import AddButton from '@/components/list/add-button';
@@ -41,10 +41,10 @@ import { toast } from 'sonner';
 import PetFormClient from './pet-form';
 
 interface PetsListClientProps {
-	pets: Promise<PaginatedData<PetWithTutorAndBreed>>;
-	species: Specie[];
-	breeds: BreedsWithSpecies[];
-	customers: CustomerWithUser[];
+	pets: Promise<PaginatedData<PetsWithRelations>>;
+	species: Species[];
+	breeds: BreedsWithRelations[];
+	customers: CustomersWithRelations[];
 }
 
 const PetsListClient = ({
@@ -95,7 +95,7 @@ const PetsListClient = ({
 		},
 	];
 
-	const renderRow = (pet: PetWithTutorAndBreed) => {
+	const renderRow = (pet: PetsWithRelations) => {
 		const firstName = pet.tutor.user.name.split(' ')[0];
 		const whatsappUrl = `https://wa.me/55${pet.tutor.phone.replace(/\D/g, '')}/?text=Ol%C3%A1,%20tudo%20bem%3F%20Gostaria%20de%20falar%20com%20${firstName}%20sobre%20${pet.gender === 'female' ? 'a' : 'o'}%20${pet.name}`;
 
@@ -182,7 +182,7 @@ const PetsListClient = ({
 		);
 	};
 
-	const renderMobile = (pet: PetWithTutorAndBreed) => {
+	const renderMobile = (pet: PetsWithRelations) => {
 		const firstName = pet.tutor.user.name.split(' ')[0];
 		const whatsappUrl = `https://wa.me/55${pet.tutor.phone.replace(/\D/g, '')}/?text=Ol%C3%A1,%20tudo%20bem%3F%20Gostaria%20de%20falar%20com%20${firstName}%20sobre%20${pet.gender === 'female' ? 'a' : 'o'}%20${pet.name}`;
 
