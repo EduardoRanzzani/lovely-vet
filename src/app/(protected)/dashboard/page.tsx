@@ -12,7 +12,13 @@ import { auth } from '@clerk/nextjs/server';
 import { eq } from 'drizzle-orm';
 import OnboardingCustomerFormDialog from '../customers/_component/onboarding-customer-form';
 
-const DashboardPage = async () => {
+const DashboardPage = async ({
+	searchParams,
+}: {
+	searchParams: { month?: string };
+}) => {
+	console.log(searchParams);
+
 	const { userId, isAuthenticated } = await auth();
 	if (!isAuthenticated) return <div>Redirecinando para login...</div>;
 
@@ -30,6 +36,14 @@ const DashboardPage = async () => {
 
 	const needsToCreateCustomer = existingUser && !existingCustomer;
 
+	// const monthName =
+	// 	searchParams.month || format(new Date(), 'MMMM').toLowerCase();
+
+	// const [shifts, appointments] = await Promise.all([
+	// 	getShifts(monthName),
+	// 	getAppointments(monthName),
+	// ]);
+
 	return (
 		<PageContainer>
 			<PageHeader>
@@ -43,6 +57,9 @@ const DashboardPage = async () => {
 					Olá, {existingUser.name}! Aqui você vai encontrar as métricas de todos
 					os atendimentos e próximos agendamentos.
 				</PageDescription>
+
+				{/* <DashboardCalendarClient shifts={shifts} appointments={appointments} /> */}
+
 				{needsToCreateCustomer && (
 					<OnboardingCustomerFormDialog isOpen={needsToCreateCustomer} />
 				)}

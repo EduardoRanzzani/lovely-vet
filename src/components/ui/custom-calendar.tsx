@@ -35,6 +35,7 @@ interface CustomCalendarProps {
 	onDayClick?: (date: Date) => void;
 	onDutyDates?: Date[]; // Lista de dias que têm plantão
 	className?: string;
+	showDetails?: boolean;
 }
 
 export function CustomCalendar({
@@ -45,6 +46,7 @@ export function CustomCalendar({
 	onDayClick,
 	onDutyDates = [],
 	className,
+	showDetails,
 }: CustomCalendarProps) {
 	// 1. Corrigido: Inicializar isMobile como false e só mudar no useEffect
 	// Isso evita o erro de "Hydration failed"
@@ -214,14 +216,7 @@ export function CustomCalendar({
 			</div>
 
 			{/* Painel de Detalhes Mobile */}
-			{isMobile && (
-				// <div className='p-4 border-t bg-background mt-auto'>
-				// 	<div className='flex items-center gap-2 mb-3 text-sm font-semibold'>
-				// 		<CalendarIcon className='w-4 h-4' />
-				// 		{format(selectedDate, "dd 'de' MMMM", { locale: ptBR })}
-				// 	</div>
-				// 	<div className='min-h-25'>{renderDay(selectedDate, true, true)}</div>
-				// </div>
+			{(isMobile || showDetails) && (
 				<div className='p-4 border-t bg-background mt-auto'>
 					<div className='flex items-center justify-between mb-3'>
 						<div className='flex items-center gap-2 text-sm font-semibold'>

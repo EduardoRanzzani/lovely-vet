@@ -9,10 +9,11 @@ import {
 } from '@/db/schema';
 import { actionClient } from '@/lib/next-safe-action';
 import { currentUser } from '@clerk/nextjs/server';
-import { and, count, desc, eq, ilike, ne } from 'drizzle-orm';
+import { addMonths, endOfMonth, startOfMonth, subMonths } from 'date-fns';
+import { and, count, desc, eq, gte, ilike, lte, ne } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 import z from 'zod';
-import { MAX_PAGE_SIZE, PaginatedData } from '../config/consts';
+import { MAX_PAGE_SIZE, monthNames, PaginatedData } from '../config/consts';
 import {
 	AppointmentsWithRelations,
 	createAppointmentSchema,
@@ -112,6 +113,40 @@ export const getAppointmentsPaginated = async (
 			limit,
 		},
 	};
+};
+
+export const getAppointments = async (
+	monthName?: string,
+): Promise<AppointmentsWithRelations[]> => {
+	const authenticatedUser = await currentUser();
+	if (!authenticatedUser) throw new Error('Usuário não autenticado');
+
+	const now = new Date();
+	const year = now.getFullYear();
+	const monthIndex = monthName
+		? monthNames.indexOf(monthName.toLowerCase())
+		: now.getMonth();
+
+	const safeMonthIndex = monthIndex === -1 ? now.getMonth() : monthIndex;
+
+	const referenceDate = new Date(year, safeMonthIndex, 1);
+
+	const startRange = startOfMonth(subMonths(referenceDate, 1));
+	const endRange = endOfMonth(addMonths(referenceDate, 1));
+
+	const appointments = await db.query.appointmentsTable.findMany({
+		where: and(
+			lte(appointmentsTable.scheduledAt, endRange),
+			gte(appointmentsTable.scheduledAt, startRange),
+		),
+		with: {
+			pet: { with: { tutor: { with: { user: true } } } },
+			doctor: { with: { user: true } },
+			items: { with: { service: true } },
+		},
+	});
+
+	return appointments as AppointmentsWithRelations[];
 };
 
 export const upsertAppointment = actionClient
