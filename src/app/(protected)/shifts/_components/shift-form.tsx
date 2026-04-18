@@ -1,8 +1,13 @@
+import { upsertShift } from '@/api/actions/shifts.actions';
+import { DoctorsWithUser } from '@/api/schema/doctors.schema';
 import {
 	createShiftSchema,
 	CreateShiftSchema,
 	ShiftWithDoctor,
 } from '@/api/schema/shifts.schema';
+import DateTimePickerForm from '@/components/form/datetimepicker-form';
+import InputForm from '@/components/form/input-form';
+import SelectForm from '@/components/form/select-form';
 import { Button } from '@/components/ui/button';
 import {
 	DialogClose,
@@ -14,33 +19,67 @@ import {
 } from '@/components/ui/dialog';
 import { Form } from '@/components/ui/form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { differenceInHours } from 'date-fns';
 import { BanIcon, SaveIcon } from 'lucide-react';
+import { useAction } from 'next-safe-action/hooks';
 import { useForm } from 'react-hook-form';
+import { toast } from 'sonner';
 
 interface ShiftFormProps {
 	shift?: ShiftWithDoctor;
+	doctors: DoctorsWithUser[];
 	selectedDate?: Date | null;
 	onSuccess?: () => void;
 }
 
 const ShiftFormClient = ({
 	shift,
+	doctors,
 	selectedDate,
 	onSuccess,
 }: ShiftFormProps) => {
+	const defaultShiftTime = 12;
+	const shiftStart = shift?.startTime
+		? new Date(shift.startTime)
+		: selectedDate || new Date();
+	const shiftEnd = shift?.endTime ? new Date(shift.endTime) : null;
+
+	// Calcula a duração se o shift existir, senão usa o padrão
+	const calculatedDuration: number = shiftEnd
+		? differenceInHours(shiftEnd, shiftStart)
+		: 12; // fallback padrão
+
 	const form = useForm<CreateShiftSchema>({
 		resolver: zodResolver(createShiftSchema),
-		shouldUnregister: true,
+		// Importante: keepDefaultValues: false garante que ele use os novos dados
 		defaultValues: {
-			startTime: shift?.startTime || selectedDate || new Date(),
-			endTime: shift?.endTime || selectedDate || new Date(),
+			startTime: shift?.startTime
+				? new Date(shift.startTime)
+				: selectedDate || new Date(),
+			duration: calculatedDuration,
 			doctorId: shift?.doctorId || '',
+			clinicName: shift?.clinicName || '',
 		},
 	});
 
 	const formSubmit = (data: CreateShiftSchema) => {
-		console.log(data);
+		upsertShiftAction.execute({
+			...data,
+			id: shift?.id,
+		});
 	};
+
+	const upsertShiftAction = useAction(upsertShift, {
+		onSuccess: () => {
+			onSuccess?.();
+			toast.success('Plantão salvo com sucesso!');
+			form.reset();
+		},
+		onError: (err) => {
+			console.error('Erro ao salvar plantão:', err);
+			toast.error('Ocorreu um erro ao salvar o plantão.');
+		},
+	});
 
 	return (
 		<DialogContent
@@ -63,6 +102,44 @@ const ShiftFormClient = ({
 					onSubmit={form.handleSubmit(formSubmit)}
 					className='flex flex-col gap-4'
 				>
+					<SelectForm
+						label='Veterinário:'
+						name='doctorId'
+						control={form.control}
+						error={form.formState.errors.doctorId?.message}
+						options={doctors.map((doctor) => ({
+							value: doctor.id,
+							label: doctor.user.name,
+						}))}
+					/>
+
+					<div className='flex flex-col lg:flex-row gap-4'>
+						<DateTimePickerForm
+							control={form.control}
+							label='Data/Hora de início:'
+							name='startTime'
+							error={form.formState.errors.startTime?.message}
+						/>
+
+						<InputForm
+							register={form.register}
+							label='Duração (em horas):'
+							name='duration'
+							error={form.formState.errors.duration?.message}
+							defaultValue={defaultShiftTime}
+							type='number'
+							min={1}
+							max={24}
+						/>
+					</div>
+
+					<InputForm
+						register={form.register}
+						label='Nome da clínica:'
+						name='clinicName'
+						error={form.formState.errors.clinicName?.message}
+					/>
+
 					<DialogFooter>
 						<div className='flex flex-col lg:flex-row gap-4 w-full mt-4'>
 							<DialogClose asChild>

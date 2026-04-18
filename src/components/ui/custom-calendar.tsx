@@ -20,10 +20,8 @@ import {
 	Calendar as CalendarIcon,
 	ChevronLeft,
 	ChevronRight,
-	HospitalIcon,
 } from 'lucide-react';
 import { ReactNode, useEffect, useMemo, useState } from 'react';
-import { Badge } from './badge';
 
 interface CustomCalendarProps {
 	currentMonth: Date;
@@ -53,6 +51,7 @@ export function CustomCalendar({
 	);
 	const [isMobile, setIsMobile] = useState(false);
 	const [mounted, setMounted] = useState(false);
+	const [lastClickTime, setLastClickTime] = useState(0);
 
 	useEffect(() => {
 		const mount = () => {
@@ -139,8 +138,23 @@ export function CustomCalendar({
 							key={day.toISOString()}
 							onClick={() => {
 								const d = startOfDay(day);
+
+								if (!isMobile) {
+									onDayClick?.(d); // No desktop abre direto
+									return;
+								}
+
+								const now = Date.now();
+								const DOUBLE_CLICK_THRESHOLD = 300;
+
 								setSelectedDate(d);
-								onDayClick?.(d);
+
+								if (now - lastClickTime < DOUBLE_CLICK_THRESHOLD) {
+									onDayClick?.(d);
+									setLastClickTime(0);
+								} else {
+									setLastClickTime(now);
+								}
 							}}
 							className={cn(
 								'relative transition-colors flex flex-col border-b border-r',
@@ -194,10 +208,23 @@ export function CustomCalendar({
 
 			{/* Painel de Detalhes Mobile */}
 			{isMobile && (
+				// <div className='p-4 border-t bg-background mt-auto'>
+				// 	<div className='flex items-center gap-2 mb-3 text-sm font-semibold'>
+				// 		<CalendarIcon className='w-4 h-4' />
+				// 		{format(selectedDate, "dd 'de' MMMM", { locale: ptBR })}
+				// 	</div>
+				// 	<div className='min-h-25'>{renderDay(selectedDate, true, true)}</div>
+				// </div>
 				<div className='p-4 border-t bg-background mt-auto'>
-					<div className='flex items-center gap-2 mb-3 text-sm font-semibold'>
-						<CalendarIcon className='w-4 h-4' />
-						{format(selectedDate, "dd 'de' MMMM", { locale: ptBR })}
+					<div className='flex items-center justify-between mb-3'>
+						<div className='flex items-center gap-2 text-sm font-semibold'>
+							<CalendarIcon className='w-4 h-4' />
+							{format(selectedDate, "dd 'de' MMMM", { locale: ptBR })}
+						</div>
+						{/* Feedback para o usuário saber que pode adicionar */}
+						<span className='text-[10px] text-muted-foreground italic'>
+							Toque duplo no dia para adicionar
+						</span>
 					</div>
 					<div className='min-h-25'>{renderDay(selectedDate, true, true)}</div>
 				</div>

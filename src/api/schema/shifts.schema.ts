@@ -15,8 +15,12 @@ export const createShiftSchema = z.object({
 	clinicName: z
 		.string()
 		.nonempty({ message: 'O campo nome da clínica é obrigatório' }),
-	startTime: z.date({ message: 'Data de início do plantão é obrigatório' }),
-	endTime: z.date({ message: 'Data de término do plantão é obrigatório' }),
+	startTime: z
+		.date({ message: 'Data de início do plantão é obrigatório' })
+		.refine((date) => date >= new Date(), {
+			message: 'A data de início não pode ser anterior ao horário atual',
+		}),
+	duration: z.number().min(1, 'Mínimo 1h').max(12, 'Máximo 12h'),
 });
 
 export type CreateShiftSchema = z.infer<typeof createShiftSchema>;

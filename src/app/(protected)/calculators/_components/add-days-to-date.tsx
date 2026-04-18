@@ -10,7 +10,6 @@ import {
 } from '@/components/ui/dialog';
 import { Form } from '@/components/ui/form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { sub } from 'date-fns';
 import { MinusIcon, PlusIcon } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import z from 'zod';
@@ -50,7 +49,11 @@ const AddDaysToDate = () => {
 	};
 
 	return (
-		<DialogContent>
+		<DialogContent
+			onInteractOutside={(e) => {
+				e.preventDefault();
+			}}
+		>
 			<DialogHeader>
 				<DialogTitle>Somar/Subtrair dias a uma Data</DialogTitle>
 				<DialogDescription>
@@ -95,14 +98,14 @@ const AddDaysToDate = () => {
 					<DialogFooter className='mt-6'>
 						<Button
 							type='button'
-							className='w-1/2'
+							className='w-full lg:w-1/2'
 							onClick={() => substractDays(form.getValues())}
 						>
 							<MinusIcon />
 							Subtrair
 						</Button>
 
-						<Button type='submit' className='w-1/2'>
+						<Button type='submit' className='w-full lg:w-1/2'>
 							<PlusIcon />
 							Somar
 						</Button>

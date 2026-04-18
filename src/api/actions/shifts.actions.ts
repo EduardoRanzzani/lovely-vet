@@ -1,10 +1,20 @@
+'use server';
+
 import { db } from '@/db';
 import { shiftsTable } from '@/db/schema';
 import { currentUser } from '@clerk/nextjs/server';
-import { addMonths, endOfMonth, startOfMonth, subMonths } from 'date-fns';
+import {
+	addHours,
+	addMonths,
+	endOfMonth,
+	startOfMonth,
+	subMonths,
+} from 'date-fns';
 import { and, gte, lte } from 'drizzle-orm';
 import { monthNames } from '../config/consts';
-import { ShiftWithDoctor } from '../schema/shifts.schema';
+import { createShiftSchema, ShiftWithDoctor } from '../schema/shifts.schema';
+import { actionClient } from '@/lib/next-safe-action';
+import { revalidatePath } from 'next/cache';
 
 export const getShifts = async (
 	monthName?: string,
@@ -38,3 +48,40 @@ export const getShifts = async (
 
 	return shifts as ShiftWithDoctor[];
 };
+
+export const upsertShift = actionClient
+	.schema(createShiftSchema)
+	.action(async ({ parsedInput }) => {
+		const authenticatedUser = await currentUser();
+		if (!authenticatedUser) throw new Error('Usuário não autenticado');
+
+		const { id, doctorId, clinicName, startTime, duration } = parsedInput;
+		const endDate = addHours(startTime, duration);
+
+		const result = await db.transaction(async (tx) => {
+			const [insertedShift] = await tx
+				.insert(shiftsTable)
+				.values({
+					id: id ?? undefined,
+					doctorId: doctorId,
+					clinicName: clinicName,
+					startTime: startTime,
+					endTime: endDate,
+				})
+				.onConflictDoUpdate({
+					target: shiftsTable.id, // O conflito ocorre no ID
+					set: {
+						doctorId: doctorId,
+						clinicName: clinicName,
+						startTime: startTime,
+						endTime: endDate,
+					},
+				})
+				.returning();
+
+			if (!insertedShift) throw new Error('Erro ao salvar plantão');
+		});
+
+		revalidatePath('/shifts');
+		return result;
+	});
