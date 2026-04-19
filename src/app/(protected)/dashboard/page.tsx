@@ -60,7 +60,7 @@ const DashboardPage = async ({ searchParams }: DashboardPageProps) => {
 					os atendimentos e próximos agendamentos.
 				</PageDescription>
 
-				<DashboardCalendarClient shifts={shifts} appointments={appointments} />
+				{/* <DashboardCalendarClient shifts={shifts} appointments={appointments} /> */}
 
 				{needsToCreateCustomer && (
 					<OnboardingCustomerFormDialog isOpen={needsToCreateCustomer} />
