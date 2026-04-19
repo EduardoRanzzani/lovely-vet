@@ -20,6 +20,7 @@ import {
 	createPetWithTutorAndBreedSchema,
 	PetsWithRelations,
 } from '../schema/pets.schema';
+import { sendEmailAction } from './emails.actions';
 
 export const getPetById = async (id: string): Promise<PetsWithRelations> => {
 	const authUser = await currentUser();
@@ -210,6 +211,19 @@ export const upsertPet = actionClient
 			}
 
 			return insertedPet;
+		});
+
+		const tutor = await db.query.customersTable.findFirst({
+			where: eq(customersTable.id, result.customerId),
+			with: {
+				user: true,
+			},
+		});
+
+		await sendEmailAction({
+			to: tutor!.user!.email,
+			subject: 'Novo Pet Adicionado',
+			body: `Olá, ${tutor?.user.name}! <br/> O pet ${result.name} foi adicionado ao seu cadastro.`,
 		});
 
 		revalidatePath('/pets');

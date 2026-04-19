@@ -2,6 +2,7 @@
 
 import { db } from '@/db';
 import { shiftsTable } from '@/db/schema';
+import { actionClient } from '@/lib/next-safe-action';
 import { currentUser } from '@clerk/nextjs/server';
 import {
 	addHours,
@@ -11,13 +12,12 @@ import {
 	subMonths,
 } from 'date-fns';
 import { and, gte, lte } from 'drizzle-orm';
+import { revalidatePath } from 'next/cache';
 import { monthNames } from '../config/consts';
 import {
 	createShiftSchema,
 	ShiftsWithRelations,
 } from '../schema/shifts.schema';
-import { actionClient } from '@/lib/next-safe-action';
-import { revalidatePath } from 'next/cache';
 
 export const getShifts = async (
 	monthName?: string,
@@ -62,8 +62,18 @@ export const upsertShift = actionClient
 		const authenticatedUser = await currentUser();
 		if (!authenticatedUser) throw new Error('Usuário não autenticado');
 
-		const { id, doctorId, clinicName, startTime, duration } = parsedInput;
+		const {
+			id,
+			doctorId,
+			clinicName,
+			startTime,
+			duration,
+			requesterName,
+			amountInCents,
+			isPaid,
+		} = parsedInput;
 		const endDate = addHours(startTime, Number(duration));
+		const amount = amountInCents ? amountInCents * 100 : null;
 
 		const result = await db.transaction(async (tx) => {
 			const [insertedShift] = await tx
@@ -74,6 +84,9 @@ export const upsertShift = actionClient
 					clinicName: clinicName,
 					startTime: startTime,
 					endTime: endDate,
+					requesterName,
+					amountInCents: amount,
+					isPaid,
 				})
 				.onConflictDoUpdate({
 					target: shiftsTable.id, // O conflito ocorre no ID
@@ -82,6 +95,9 @@ export const upsertShift = actionClient
 						clinicName: clinicName,
 						startTime: startTime,
 						endTime: endDate,
+						requesterName,
+						amountInCents: amount,
+						isPaid,
 					},
 				})
 				.returning();

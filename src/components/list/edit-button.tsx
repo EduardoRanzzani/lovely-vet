@@ -38,7 +38,7 @@ const EditButton = ({
 					<DialogTrigger asChild>
 						<Button size={size} variant={variant} disabled={disabled}>
 							<PencilIcon className='h-4 w-4' />
-							<span className='text-xs'>{size !== 'icon' && text}</span>
+							{size !== 'icon' && <span className='text-xs'>{text}</span>}
 						</Button>
 					</DialogTrigger>
 				</TooltipTrigger>

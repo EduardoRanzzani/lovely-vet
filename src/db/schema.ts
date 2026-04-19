@@ -281,6 +281,9 @@ export const shiftsTable = pgTable('shifts', {
 	clinicName: text('clinic_name').notNull(),
 	startTime: timestamp('start_time').notNull(),
 	endTime: timestamp('end_time').notNull(),
+	requesterName: text('requester_name'),
+	amountInCents: integer('amount_in_cents'),
+	isPaid: boolean('is_paid').default(false).notNull(),
 	createdAt: timestamp('created_at').defaultNow().notNull(),
 	updatedAt: timestamp('updated_at')
 		.defaultNow()

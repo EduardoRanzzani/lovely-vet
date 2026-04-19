@@ -5,8 +5,10 @@ import {
 	CreateShiftSchema,
 	ShiftsWithRelations,
 } from '@/api/schema/shifts.schema';
+import CheckboxForm from '@/components/form/checkbox-form';
 import DateTimePickerForm from '@/components/form/datetimepicker-form';
 import InputForm from '@/components/form/input-form';
+import MoneyInputForm from '@/components/form/money-input-form';
 import SelectForm from '@/components/form/select-form';
 import { Button } from '@/components/ui/button';
 import {
@@ -20,7 +22,7 @@ import {
 import { Form } from '@/components/ui/form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { differenceInHours } from 'date-fns';
-import { BanIcon, SaveIcon } from 'lucide-react';
+import { BanIcon, Loader2Icon, SaveIcon } from 'lucide-react';
 import { useAction } from 'next-safe-action/hooks';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
@@ -51,14 +53,18 @@ const ShiftFormClient = ({
 
 	const form = useForm<CreateShiftSchema>({
 		resolver: zodResolver(createShiftSchema),
-		// Importante: keepDefaultValues: false garante que ele use os novos dados
 		defaultValues: {
+			doctorId: shift?.doctorId || '',
+			clinicName: shift?.clinicName || '',
 			startTime: shift?.startTime
 				? new Date(shift.startTime)
 				: selectedDate || new Date(),
 			duration: calculatedDuration,
-			doctorId: shift?.doctorId || '',
-			clinicName: shift?.clinicName || '',
+			requesterName: shift?.requesterName || undefined,
+			amountInCents: shift?.amountInCents
+				? shift.amountInCents / 100
+				: undefined,
+			isPaid: shift?.isPaid || false,
 		},
 	});
 
@@ -140,6 +146,39 @@ const ShiftFormClient = ({
 						error={form.formState.errors.clinicName?.message}
 					/>
 
+					<div className='flex flex-col lg:flex-row gap-4'>
+						<InputForm
+							register={form.register}
+							label='Solicitante:'
+							name='requesterName'
+							error={form.formState.errors.requesterName?.message}
+						/>
+
+						<MoneyInputForm
+							control={form.control}
+							label='Valor:'
+							name='amountInCents'
+							error={form.formState.errors.amountInCents?.message}
+						/>
+
+						<SelectForm
+							control={form.control}
+							label='Pago?'
+							name='isPaid'
+							error={form.formState.errors.isPaid?.message}
+							options={[
+								{
+									value: true,
+									label: 'Sim',
+								},
+								{
+									value: false,
+									label: 'Não',
+								},
+							]}
+						/>
+					</div>
+
 					<DialogFooter>
 						<div className='flex flex-col lg:flex-row gap-4 w-full mt-4'>
 							<DialogClose asChild>
@@ -154,8 +193,14 @@ const ShiftFormClient = ({
 							</DialogClose>
 
 							<Button type='submit' className='flex-1'>
-								<SaveIcon />
-								Salvar
+								{upsertShiftAction.isPending ? (
+									<Loader2Icon className='h-5 w-5 animate-spin' />
+								) : (
+									<>
+										<SaveIcon />
+										Salvar
+									</>
+								)}
 							</Button>
 						</div>
 					</DialogFooter>

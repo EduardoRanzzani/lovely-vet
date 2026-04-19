@@ -8,19 +8,20 @@ export type ShiftsWithRelations = typeof shiftsTable.$inferSelect & {
 };
 
 export const createShiftSchema = z.object({
-	id: z.uuid().optional(),
+	id: z.string().uuid().optional(),
 	doctorId: z
-		.uuid({ message: 'O campo veterinário é obrigatório' })
-		.nonempty({ message: 'O campo veterinário é obrigatório' }),
-	clinicName: z
 		.string()
-		.nonempty({ message: 'O campo nome da clínica é obrigatório' }),
-	startTime: z
-		.date({ message: 'Data de início do plantão é obrigatório' })
-		.refine((date) => date >= new Date(), {
-			message: 'A data de início não pode ser anterior ao horário atual',
-		}),
-	duration: z.string().min(1, 'Mínimo 1h').max(12, 'Máximo 12h'),
+		.uuid({ message: 'O campo veterinário é obrigatório' })
+		.min(1, 'O campo veterinário é obrigatório'),
+	clinicName: z.string().min(1, 'O campo nome da clínica é obrigatório'),
+	startTime: z.date({ message: 'Data de início é obrigatória' }),
+	// .refine((date) => date >= new Date(new Date().setSeconds(0, 0)), {
+	// 	message: 'A data de início não pode ser anterior ao horário atual',
+	// }),
+	duration: z.string().min(1, 'Mínimo 1h'),
+	requesterName: z.string().optional(),
+	amountInCents: z.number().optional(),
+	isPaid: z.boolean({ message: 'Selecione uma das opções' }),
 });
 
 export type CreateShiftSchema = z.infer<typeof createShiftSchema>;

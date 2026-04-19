@@ -21,6 +21,7 @@ import {
 	HospitalIcon,
 	LayoutDashboardIcon,
 	LucideIcon,
+	MailIcon,
 	PawPrintIcon,
 	StethoscopeIcon,
 	UsersRoundIcon,
@@ -86,6 +87,12 @@ const AppSidebar = () => {
 			url: '/shifts',
 			icon: HospitalIcon,
 			roles: ['admin', 'doctor'],
+		},
+		{
+			title: 'Emails',
+			url: '/emails',
+			icon: MailIcon,
+			roles: ['admin'],
 		},
 	];
 
