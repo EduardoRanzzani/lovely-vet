@@ -115,6 +115,20 @@ export const getAppointmentsPaginated = async (
 	};
 };
 
+export const getAllAppointments = async (): Promise<
+	AppointmentsWithRelations[]
+> => {
+	const appointments = await db.query.appointmentsTable.findMany({
+		with: {
+			pet: { with: { tutor: { with: { user: true } } } },
+			doctor: { with: { user: true } },
+			items: { with: { service: true } },
+		},
+	});
+
+	return appointments as AppointmentsWithRelations[];
+};
+
 export const getAppointments = async (
 	monthName?: string,
 	extraMonths?: boolean,

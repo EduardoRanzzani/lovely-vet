@@ -187,8 +187,9 @@ export const appointmentsTable = pgTable(
 			.references(() => doctorsTable.id),
 		scheduledAt: timestamp('scheduled_at').notNull(),
 		status: appointmentStatusEnum('status').default('pending').notNull(),
-		totalPriceInCents: integer('total_price_in_cents').notNull(),
 		notes: text('notes'),
+		totalPriceInCents: integer('total_price_in_cents').notNull(),
+		isPaid: boolean('is_paid').default(false).notNull(),
 		createdAt: timestamp('created_at').defaultNow().notNull(),
 		updatedAt: timestamp('updated_at')
 			.defaultNow()

@@ -14,8 +14,7 @@ import { auth } from '@clerk/nextjs/server';
 import { format } from 'date-fns';
 import { eq } from 'drizzle-orm';
 import OnboardingCustomerFormDialog from '../customers/_component/onboarding-customer-form';
-import DashboardCalendarClient from './_components/dashboard-calendar';
-
+import DashboardCards from './_components/dashboard-cards';
 interface DashboardPageProps {
 	searchParams: Promise<{ month?: string }>;
 }
@@ -31,7 +30,19 @@ const DashboardPage = async ({ searchParams }: DashboardPageProps) => {
 	});
 
 	if (!existingUser) {
-		return <h1 className='text-center'>Usuário não encontrado</h1>;
+		return (
+			<PageContainer>
+				<PageHeader>
+					<PageHeaderContent>
+						<PageTitle>Dashboard</PageTitle>
+					</PageHeaderContent>
+				</PageHeader>
+
+				<PageContent>
+					<PageDescription>Usuário não encontrado</PageDescription>
+				</PageContent>
+			</PageContainer>
+		);
 	}
 
 	const existingCustomer = await db.query.customersTable.findFirst({
@@ -42,8 +53,8 @@ const DashboardPage = async ({ searchParams }: DashboardPageProps) => {
 
 	const monthName = params.month || format(new Date(), 'MMMM').toLowerCase();
 	const [shifts, appointments] = await Promise.all([
-		getShifts(monthName, true),
-		getAppointments(monthName),
+		getShifts(monthName, false),
+		getAppointments(monthName, false),
 	]);
 
 	return (
@@ -61,6 +72,9 @@ const DashboardPage = async ({ searchParams }: DashboardPageProps) => {
 				</PageDescription>
 
 				{/* <DashboardCalendarClient shifts={shifts} appointments={appointments} /> */}
+				{existingUser.role !== 'customer' && (
+					<DashboardCards shifts={shifts} appointments={appointments} />
+				)}
 
 				{needsToCreateCustomer && (
 					<OnboardingCustomerFormDialog isOpen={needsToCreateCustomer} />

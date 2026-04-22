@@ -19,6 +19,14 @@ import {
 	ShiftsWithRelations,
 } from '../schema/shifts.schema';
 
+export const getAllShifts = async (): Promise<ShiftsWithRelations[]> => {
+	const result = await db.query.shiftsTable.findMany({
+		with: { doctor: { with: { user: true } } },
+	});
+
+	return result as ShiftsWithRelations[];
+};
+
 export const getShifts = async (
 	monthName?: string,
 	extraMonths?: boolean,

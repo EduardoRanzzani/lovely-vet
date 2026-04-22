@@ -1,0 +1,1 @@
+ALTER TABLE "appointments" ADD COLUMN "is_paid" boolean DEFAULT false NOT NULL;
