@@ -19,7 +19,7 @@ const rolePermissions = {
 		'/prescriptions-template',
 		'/calculators',
 		'/shifts',
-		'/emails',
+		'/messages',
 	],
 	doctor: [
 		'/dashboard',

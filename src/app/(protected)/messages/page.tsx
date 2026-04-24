@@ -9,6 +9,7 @@ import { ListSkeleton } from '@/components/ui/list-skeleton';
 import LoadingDialog from '@/components/ui/loading';
 import { Suspense } from 'react';
 import EmailFormClient from './_components/email-form';
+import WhatsappFormClient from './_components/whatsapp-form';
 
 const EmailsPage = () => {
 	return (
@@ -29,6 +30,8 @@ const EmailsPage = () => {
 					}
 				>
 					<EmailFormClient />
+
+					<WhatsappFormClient />
 				</Suspense>
 			</PageContent>
 		</PageContainer>

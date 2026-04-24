@@ -1,7 +1,7 @@
 'use server';
 
 import { db } from '@/db';
-import { shiftsTable } from '@/db/schema';
+import { doctorsTable, shiftsTable } from '@/db/schema';
 import { actionClient } from '@/lib/next-safe-action';
 import { currentUser } from '@clerk/nextjs/server';
 import {
@@ -11,13 +11,14 @@ import {
 	startOfMonth,
 	subMonths,
 } from 'date-fns';
-import { and, gte, lte } from 'drizzle-orm';
+import { and, eq, gte, lte } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 import { monthNames } from '../config/consts';
 import {
 	createShiftSchema,
 	ShiftsWithRelations,
 } from '../schema/shifts.schema';
+import { sendWhatsappMessage } from './whatsapp.actions';
 
 export const getAllShifts = async (): Promise<ShiftsWithRelations[]> => {
 	const result = await db.query.shiftsTable.findMany({
@@ -83,7 +84,9 @@ export const upsertShift = actionClient
 		const endDate = addHours(startTime, Number(duration));
 		const amount = amountInCents ? amountInCents * 100 : null;
 
-		const result = await db.transaction(async (tx) => {
+		const isNewRegistration = !parsedInput.id;
+
+		const shiftResult = await db.transaction(async (tx) => {
 			const [insertedShift] = await tx
 				.insert(shiftsTable)
 				.values({
@@ -113,6 +116,44 @@ export const upsertShift = actionClient
 			if (!insertedShift) throw new Error('Erro ao salvar plantão');
 		});
 
+		if (isNewRegistration) {
+			console.log('Novo plantão criado, enviando notificação WhatsApp...');
+
+			const doctor = await db.query.doctorsTable.findFirst({
+				where: eq(doctorsTable.id, doctorId),
+				with: {
+					user: true,
+				},
+			});
+
+			console.log('Dados do médico:', { doctor });
+
+			if (doctor?.phone) {
+				// Formatador para: "23/04/2026 às 18:30"
+				const formattedDate = new Intl.DateTimeFormat('pt-BR', {
+					dateStyle: 'short',
+					timeStyle: 'short',
+				})
+					.format(startTime)
+					.replace(',', ' às');
+
+				let doctorName = doctor.gender === 'male' ? 'Dr. ' : 'Dra. ';
+				doctorName += doctor.user.name.substring(
+					0,
+					doctor.user.name.indexOf(' '),
+				);
+
+				const whatsappResult = await sendWhatsappMessage({
+					number: '55' + doctor.phone.replace(/\D/g, ''),
+					text: `Olá ${doctorName}, seu plantão em ${clinicName} foi agendado para ${formattedDate}.`,
+					delay: 1200,
+					linkPreview: false,
+				});
+
+				console.log('Resposta do envio WhatsApp:', { whatsappResult });
+			}
+		}
+
 		revalidatePath('/shifts');
-		return result;
+		return shiftResult;
 	});

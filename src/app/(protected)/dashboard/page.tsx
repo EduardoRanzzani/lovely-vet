@@ -1,4 +1,5 @@
 import { getAppointments } from '@/api/actions/appointments.actions';
+import { getCreatedPets } from '@/api/actions/pets.actions';
 import { getShifts } from '@/api/actions/shifts.actions';
 import {
 	PageContainer,
@@ -15,6 +16,7 @@ import { format } from 'date-fns';
 import { eq } from 'drizzle-orm';
 import OnboardingCustomerFormDialog from '../customers/_component/onboarding-customer-form';
 import DashboardCards from './_components/dashboard-cards';
+import { getCreatedCustomers } from '@/api/actions/customers.actions';
 interface DashboardPageProps {
 	searchParams: Promise<{ month?: string }>;
 }
@@ -52,10 +54,13 @@ const DashboardPage = async ({ searchParams }: DashboardPageProps) => {
 	const needsToCreateCustomer = existingUser && !existingCustomer;
 
 	const monthName = params.month || format(new Date(), 'MMMM').toLowerCase();
-	const [shifts, appointments] = await Promise.all([
-		getShifts(monthName, false),
-		getAppointments(monthName, false),
-	]);
+	const [shifts, appointments, createdPets, createdCustomers] =
+		await Promise.all([
+			getShifts(monthName, false),
+			getAppointments(monthName, false),
+			getCreatedPets(monthName),
+			getCreatedCustomers(monthName),
+		]);
 
 	return (
 		<PageContainer>
@@ -67,13 +72,18 @@ const DashboardPage = async ({ searchParams }: DashboardPageProps) => {
 
 			<PageContent>
 				<PageDescription>
-					Olá, {existingUser.name}! Aqui você vai encontrar as métricas de todos
-					os atendimentos e próximos agendamentos.
+					Olá, {existingUser.name}! Aqui você vai encontrar algumas informações
+					do sistema referentes ao mês selecionado.
 				</PageDescription>
 
 				{/* <DashboardCalendarClient shifts={shifts} appointments={appointments} /> */}
 				{existingUser.role !== 'customer' && (
-					<DashboardCards shifts={shifts} appointments={appointments} />
+					<DashboardCards
+						shifts={shifts}
+						appointments={appointments}
+						createdPets={createdPets}
+						createdCustomers={createdCustomers}
+					/>
 				)}
 
 				{needsToCreateCustomer && (

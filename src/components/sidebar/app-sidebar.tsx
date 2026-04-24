@@ -22,6 +22,7 @@ import {
 	LayoutDashboardIcon,
 	LucideIcon,
 	MailIcon,
+	MessageSquareIcon,
 	PawPrintIcon,
 	StethoscopeIcon,
 	UsersRoundIcon,
@@ -89,9 +90,9 @@ const AppSidebar = () => {
 			roles: ['admin', 'doctor'],
 		},
 		{
-			title: 'Emails',
-			url: '/emails',
-			icon: MailIcon,
+			title: 'Mensagens',
+			url: '/messages',
+			icon: MessageSquareIcon,
 			roles: ['admin'],
 		},
 	];

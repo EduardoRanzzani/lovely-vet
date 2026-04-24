@@ -2,6 +2,8 @@
 
 import { monthNames } from '@/api/config/consts';
 import { AppointmentsWithRelations } from '@/api/schema/appointments.schema';
+import { CustomersWithRelations } from '@/api/schema/customers.schema';
+import { PetsWithRelations } from '@/api/schema/pets.schema';
 import { ShiftsWithRelations } from '@/api/schema/shifts.schema';
 import { Button } from '@/components/ui/button';
 import {
@@ -10,18 +12,39 @@ import {
 	CardHeader,
 	CardTitle,
 } from '@/components/ui/card';
+import {
+	Tooltip,
+	TooltipContent,
+	TooltipTrigger,
+} from '@/components/ui/tooltip';
 import { formatCurrencyFromCents } from '@/helpers/currency';
 import { addMonths, format, setMonth, subMonths } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import {
+	ChevronLeft,
+	ChevronRight,
+	DotIcon,
+	EyeClosedIcon,
+	EyeIcon,
+} from 'lucide-react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { useState } from 'react';
 
 interface DashboardCardsProps {
 	shifts: ShiftsWithRelations[];
 	appointments: AppointmentsWithRelations[];
+	createdPets: PetsWithRelations[];
+	createdCustomers: CustomersWithRelations[];
 }
 
-const DashboardCards = ({ shifts, appointments }: DashboardCardsProps) => {
+const DashboardCards = ({
+	shifts,
+	appointments,
+	createdPets,
+	createdCustomers,
+}: DashboardCardsProps) => {
+	const [showValues, setShowValues] = useState<boolean>(false);
+
 	const searchParams = useSearchParams();
 	const pathname = usePathname();
 	const router = useRouter();
@@ -63,6 +86,25 @@ const DashboardCards = ({ shifts, appointments }: DashboardCardsProps) => {
 					{format(currentMonth, 'MMMM yyyy', { locale: ptBR })}
 				</h2>
 				<div className='flex gap-2'>
+					<Tooltip>
+						<TooltipTrigger asChild>
+							<Button
+								variant='outline'
+								size='icon'
+								className='h-8 w-8'
+								onClick={() => setShowValues((prev) => !prev)}
+							>
+								{showValues ? (
+									<EyeIcon className='w-4 h-4' />
+								) : (
+									<EyeClosedIcon className='w-4 h-4' />
+								)}
+							</Button>
+						</TooltipTrigger>
+						<TooltipContent>
+							{showValues ? 'Esconder valores' : 'Mostrar valores'}
+						</TooltipContent>
+					</Tooltip>
 					<Button
 						variant='outline'
 						size='icon'
@@ -71,6 +113,7 @@ const DashboardCards = ({ shifts, appointments }: DashboardCardsProps) => {
 					>
 						<ChevronLeft className='w-4 h-4' />
 					</Button>
+
 					<Button
 						variant='outline'
 						size='icon'
@@ -109,7 +152,16 @@ const DashboardCards = ({ shifts, appointments }: DashboardCardsProps) => {
 					</CardHeader>
 					<CardDescription>
 						<h1 className='text-center font-bold text-3xl'>
-							{formatCurrencyFromCents(nonPaidAmountInCents)}
+							{showValues ? (
+								formatCurrencyFromCents(nonPaidAmountInCents)
+							) : (
+								<div className='flex items-center justify-center gap-3'>
+									<DotIcon className='w-9 h-9' />
+									<DotIcon className='w-9 h-9' />
+									<DotIcon className='w-9 h-9' />
+									<DotIcon className='w-9 h-9' />
+								</div>
+							)}
 						</h1>
 					</CardDescription>
 				</Card>
@@ -144,7 +196,40 @@ const DashboardCards = ({ shifts, appointments }: DashboardCardsProps) => {
 					</CardHeader>
 					<CardDescription>
 						<h1 className='text-center font-bold text-3xl'>
-							{formatCurrencyFromCents(nonPaidAppointmentsAmountInCents)}
+							{showValues ? (
+								formatCurrencyFromCents(nonPaidAppointmentsAmountInCents)
+							) : (
+								<div className='flex items-center justify-center gap-3'>
+									<DotIcon className='w-9 h-9' />
+									<DotIcon className='w-9 h-9' />
+									<DotIcon className='w-9 h-9' />
+									<DotIcon className='w-9 h-9' />
+								</div>
+							)}
+						</h1>
+					</CardDescription>
+				</Card>
+			</div>
+
+			<div className='flex flex-col lg:flex-row w-full gap-4'>
+				<Card className='flex-1'>
+					<CardHeader className='border-b text-center'>
+						<CardTitle>Total de Pets Criados</CardTitle>
+					</CardHeader>
+					<CardDescription>
+						<h1 className='text-center font-bold text-3xl'>
+							{createdPets.length}
+						</h1>
+					</CardDescription>
+				</Card>
+
+				<Card className='flex-1'>
+					<CardHeader className='border-b text-center'>
+						<CardTitle>Total de Clientes Criados</CardTitle>
+					</CardHeader>
+					<CardDescription>
+						<h1 className='flex items-center justify-center font-bold text-3xl gap-4'>
+							{createdCustomers.length}
 						</h1>
 					</CardDescription>
 				</Card>

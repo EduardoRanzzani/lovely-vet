@@ -1,6 +1,6 @@
 import { ViaCepResponse } from '@/types/viacep';
 
-export const MAX_PAGE_SIZE = 20;
+export const MAX_PAGE_SIZE = 10;
 
 export type PaginatedData<T> = {
 	data: T[];
