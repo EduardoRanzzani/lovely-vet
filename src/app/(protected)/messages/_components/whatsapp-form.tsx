@@ -1,6 +1,5 @@
 'use client';
 
-import { sendEmailAction } from '@/api/actions/emails.actions';
 import { sendWhatsappMessage } from '@/api/actions/whatsapp.actions';
 import InputForm from '@/components/form/input-form';
 import { Button } from '@/components/ui/button';

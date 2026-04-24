@@ -21,7 +21,6 @@ import {
 	HospitalIcon,
 	LayoutDashboardIcon,
 	LucideIcon,
-	MailIcon,
 	MessageSquareIcon,
 	PawPrintIcon,
 	StethoscopeIcon,
