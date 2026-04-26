@@ -113,7 +113,7 @@ export const speciesTable = pgTable('species', {
 export const breedsTable = pgTable('breeds', {
 	id: uuid('id').primaryKey().defaultRandom(),
 	name: text('name').notNull(),
-	specieId: uuid('specie_id')
+specieId: uuid('specie_id')
 		.notNull()
 		.references(() => speciesTable.id, { onDelete: 'cascade' }),
 	createdAt: timestamp('created_at').defaultNow().notNull(),

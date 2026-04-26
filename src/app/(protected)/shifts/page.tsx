@@ -1,3 +1,4 @@
+import { getDoctors } from '@/api/actions/doctors.actions';
 import { getShifts } from '@/api/actions/shifts.actions';
 import {
 	PageContainer,
@@ -7,11 +8,10 @@ import {
 	PageHeaderContent,
 	PageTitle,
 } from '@/components/shared/page-container';
-import { ListSkeleton } from '@/components/ui/list-skeleton';
+import CustomCalendarSkeleton from '@/components/ui/custom-calendar-skeleton';
 import LoadingDialog from '@/components/ui/loading';
 import { Suspense } from 'react';
 import ShiftsCalendarClient from './_components/shifts-calendar';
-import { getDoctors } from '@/api/actions/doctors.actions';
 
 interface ShiftsPageProps {
 	searchParams: Promise<{ month?: string }>;
@@ -42,7 +42,7 @@ const ShiftsPage = async ({ searchParams }: ShiftsPageProps) => {
 				<Suspense
 					fallback={
 						<>
-							<ListSkeleton />
+							<CustomCalendarSkeleton />
 							<LoadingDialog />
 						</>
 					}

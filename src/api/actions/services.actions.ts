@@ -74,7 +74,8 @@ export const upsertService = actionClient
 		const authenticatedUser = await currentUser();
 		if (!authenticatedUser) throw new Error('Usuário não autenticado');
 
-		console.log({ parsedInput });
+		// Verifica se a especie foi preenchida, caso contrário salva null no banco
+		const specieId = parsedInput?.specieId === '' ? null : parsedInput.specieId;
 
 		await db
 			.insert(servicesTable)
@@ -82,7 +83,7 @@ export const upsertService = actionClient
 				id: parsedInput.id ?? undefined,
 				name: parsedInput.name,
 				description: parsedInput.description,
-				specieId: parsedInput.specieId,
+				specieId: specieId,
 				priceInCents: parsedInput.price * 100,
 			})
 			.onConflictDoUpdate({
@@ -90,7 +91,7 @@ export const upsertService = actionClient
 				set: {
 					name: parsedInput.name,
 					description: parsedInput.description,
-					specieId: parsedInput.specieId,
+					specieId: specieId,
 					priceInCents: parsedInput.price * 100,
 					updatedAt: new Date(),
 				},

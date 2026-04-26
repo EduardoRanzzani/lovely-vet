@@ -8,7 +8,7 @@ import {
 	PageHeaderContent,
 	PageTitle,
 } from '@/components/shared/page-container';
-import { ListSkeleton } from '@/components/ui/list-skeleton';
+import { ListSkeleton } from '@/components/list/list-skeleton';
 import LoadingDialog from '@/components/ui/loading';
 import { Suspense } from 'react';
 import CustomersListClient from './_component/customers-list';

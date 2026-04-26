@@ -26,7 +26,7 @@ const AddButton = ({ text, renderForm }: AddButtonProps) => {
 				</Button>
 			</DialogTrigger>
 
-			{renderForm(handleSuccess)}
+			{isOpen && renderForm(handleSuccess)}
 		</Dialog>
 	);
 };

@@ -110,7 +110,7 @@ const DoctorFormClient = ({ doctor, onSuccess }: DoctorFormClientProps) => {
 		<DialogContent
 			onInteractOutside={(e) => e.preventDefault()}
 			showCloseButton={false}
-			className='max-w-lg h-auto overflow-scroll'
+			className='max-w-lg max-h-150 2xl:max-h-200 overflow-scroll'
 		>
 			<Form {...form}>
 				<form

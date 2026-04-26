@@ -13,7 +13,6 @@ import { TableCell, TableRow } from '@/components/ui/table';
 import { getWeekDay } from '@/helpers/week';
 import { handleNavigation } from '@/lib/utils';
 import { CalendarIcon, ClockIcon, IdCardIcon, PhoneIcon } from 'lucide-react';
-import Image from 'next/image';
 import { useSearchParams } from 'next/navigation';
 import { use } from 'react';
 import DoctorFormClient from './doctor-form';
@@ -33,8 +32,7 @@ const DoctorsListClient = ({ doctors }: DoctorsListClientProps) => {
 	};
 
 	const columns = [
-		{ header: 'Nome', accessorKey: 'name' },
-		{ header: 'Email', accessorKey: 'email' },
+		{ header: 'Veterinário', accessorKey: 'name' },
 		{ header: 'CPF', accessorKey: 'cpf' },
 		{ header: 'Telefone', accessorKey: 'phone' },
 		{ header: 'Disponibilidade', accessorKey: 'available' },
@@ -66,13 +64,15 @@ const DoctorsListClient = ({ doctors }: DoctorsListClientProps) => {
 							<span className='flex flex-col'>
 								<h3>{doctor.user.name}</h3>
 								<p className='text-xs text-muted-foreground'>
+									{doctor.user.email}
+								</p>
+								<p className='text-xs text-muted-foreground'>
 									CRMV/{doctor.licenseState} - {doctor.licenseNumber}
 								</p>
 							</span>
 						</div>
 					</div>
 				</TableCell>
-				<TableCell>{doctor.user.email}</TableCell>
 				<TableCell>{doctor.cpf}</TableCell>
 				<TableCell>{doctor.phone}</TableCell>
 				<TableCell>

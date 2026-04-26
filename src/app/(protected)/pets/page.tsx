@@ -13,7 +13,7 @@ import {
 } from '@/components/shared/page-container';
 import { Suspense } from 'react';
 import PetsListClient from './_components/pets-list';
-import { ListSkeleton } from '@/components/ui/list-skeleton';
+import { ListSkeleton } from '@/components/list/list-skeleton';
 import LoadingDialog from '@/components/ui/loading';
 
 interface PetsPageProps {

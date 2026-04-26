@@ -13,6 +13,12 @@ import {
 	CardTitle,
 } from '@/components/ui/card';
 import {
+	Dialog,
+	DialogContent,
+	DialogTitle,
+	DialogTrigger,
+} from '@/components/ui/dialog';
+import {
 	Tooltip,
 	TooltipContent,
 	TooltipTrigger,
@@ -23,9 +29,11 @@ import { ptBR } from 'date-fns/locale';
 import {
 	ChevronLeft,
 	ChevronRight,
+	Divide,
 	DotIcon,
 	EyeClosedIcon,
 	EyeIcon,
+	UserIcon,
 } from 'lucide-react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useState } from 'react';
@@ -218,7 +226,44 @@ const DashboardCards = ({
 					</CardHeader>
 					<CardDescription>
 						<h1 className='text-center font-bold text-3xl'>
-							{createdPets.length}
+							<Dialog>
+								<DialogTrigger>{createdPets.length}</DialogTrigger>
+								<DialogContent>
+									<DialogTitle>Pets Cadastrados</DialogTitle>
+									<div className='flex flex-col gap-4 overflow-scroll max-h-100'>
+										{createdPets.length > 0 ? (
+											// adicionar sort por data de criação para mostrar os mais recentes primeiro
+											createdPets
+												.sort(
+													(a, b) =>
+														b.createdAt.getDate() - a.createdAt.getDate(),
+												)
+												.map((pet) => (
+													<div
+														key={pet.id}
+														className='flex items-center justify-between gap-4 p-4 border rounded-lg'
+													>
+														<div className='flex items-center gap-4'>
+															<div className='w-10 h-10 rounded-full bg-primary/10 p-2'>
+																<UserIcon />
+															</div>
+															<div className='flex flex-col'>
+																<h2 className='text-sm font-bold'>
+																	{pet.name}
+																</h2>
+																<p className='text-xs'>{pet.tutor.user.name}</p>
+															</div>
+														</div>
+													</div>
+												))
+										) : (
+											<div>
+												<h1>Nenhum pet cadastrado.</h1>
+											</div>
+										)}
+									</div>
+								</DialogContent>
+							</Dialog>
 						</h1>
 					</CardDescription>
 				</Card>
@@ -229,7 +274,43 @@ const DashboardCards = ({
 					</CardHeader>
 					<CardDescription>
 						<h1 className='flex items-center justify-center font-bold text-3xl gap-4'>
-							{createdCustomers.length}
+							<Dialog>
+								<DialogTrigger>{createdCustomers.length}</DialogTrigger>
+								<DialogContent>
+									<DialogTitle>Clientes Cadastrados</DialogTitle>
+									<div className='flex flex-col gap-4 overflow-scroll max-h-100'>
+										{createdCustomers.length > 0 ? (
+											createdCustomers
+												.sort(
+													(a, b) =>
+														b.createdAt.getDate() - a.createdAt.getDate(),
+												)
+												.map((customer) => (
+													<div
+														key={customer.id}
+														className='flex items-center justify-between gap-4 p-4 border rounded-lg'
+													>
+														<div className='flex items-center gap-4'>
+															<div className='w-10 h-10 rounded-full bg-primary/10 p-2'>
+																<UserIcon />
+															</div>
+															<div className='flex flex-col'>
+																<h2 className='text-sm font-bold'>
+																	{customer.user.name}
+																</h2>
+																<p className='text-xs'>{customer.user.email}</p>
+															</div>
+														</div>
+													</div>
+												))
+										) : (
+											<div>
+												<h1>Nenhum cliente cadastrado.</h1>
+											</div>
+										)}
+									</div>
+								</DialogContent>
+							</Dialog>
 						</h1>
 					</CardDescription>
 				</Card>

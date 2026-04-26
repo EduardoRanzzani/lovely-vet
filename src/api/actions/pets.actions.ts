@@ -12,7 +12,17 @@ import {
 import { actionClient } from '@/lib/next-safe-action';
 import { currentUser } from '@clerk/nextjs/server';
 import { endOfMonth, format, startOfMonth } from 'date-fns';
-import { and, asc, countDistinct, eq, gte, ilike, lte, or } from 'drizzle-orm';
+import {
+	and,
+	asc,
+	countDistinct,
+	desc,
+	eq,
+	gte,
+	ilike,
+	lte,
+	or,
+} from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 import z from 'zod';
 import { monthNames, PaginatedData } from '../config/consts';
@@ -21,7 +31,6 @@ import {
 	PetsWithRelations,
 } from '../schema/pets.schema';
 import { sendEmailAction } from './emails.actions';
-import { sendWhatsappMessage } from './whatsapp.actions';
 
 export const getCreatedPets = async (
 	monthName?: string,
@@ -97,20 +106,53 @@ export const getPetById = async (id: string): Promise<PetsWithRelations> => {
 };
 
 // Helper para evitar repetição da base da query de listagem
+// const getPetWithRelationsQuery = () => {
+// 	return db
+// 		.select({
+// 			pet: petsTable,
+// 			breed: breedsTable,
+// 			specie: speciesTable,
+// 			tutor: customersTable,
+// 			user: usersTable,
+// 		})
+// 		.from(petsTable)
+// 		.innerJoin(breedsTable, eq(petsTable.breedId, breedsTable.id))
+// 		.innerJoin(speciesTable, eq(breedsTable.specieId, speciesTable.id)) // Join corrigido
+// 		.innerJoin(customersTable, eq(petsTable.customerId, customersTable.id))
+// 		.innerJoin(usersTable, eq(customersTable.userId, usersTable.id));
+// };
+
 const getPetWithRelationsQuery = () => {
-	return db
-		.select({
-			pet: petsTable,
-			breed: breedsTable,
-			specie: speciesTable,
-			tutor: customersTable,
-			user: usersTable,
-		})
-		.from(petsTable)
-		.innerJoin(breedsTable, eq(petsTable.breedId, breedsTable.id))
-		.innerJoin(speciesTable, eq(breedsTable.specieId, speciesTable.id)) // Join corrigido
-		.innerJoin(customersTable, eq(petsTable.customerId, customersTable.id))
-		.innerJoin(usersTable, eq(customersTable.userId, usersTable.id));
+	return (
+		db
+			.select({
+				pet: petsTable,
+				breed: breedsTable,
+				specie: speciesTable,
+				tutor: customersTable,
+				user: usersTable,
+				// Selecionamos o peso da tabela que faremos join
+				lastWeightGrams: petWeightsTable.weightInGrams,
+			})
+			.from(petsTable)
+			.innerJoin(breedsTable, eq(petsTable.breedId, breedsTable.id))
+			.innerJoin(speciesTable, eq(breedsTable.specieId, speciesTable.id))
+			.innerJoin(customersTable, eq(petsTable.customerId, customersTable.id))
+			.innerJoin(usersTable, eq(customersTable.userId, usersTable.id))
+			// Join com a tabela de pesos apenas para o registro mais recente de cada pet
+			.leftJoin(
+				petWeightsTable,
+				eq(
+					petWeightsTable.id,
+					db
+						.select({ id: petWeightsTable.id })
+						.from(petWeightsTable)
+						.where(eq(petWeightsTable.petId, petsTable.id))
+						.orderBy(desc(petWeightsTable.measuredAt))
+						.limit(1),
+				),
+			)
+	);
 };
 
 export const getPets = async (): Promise<PetsWithRelations[]> => {
@@ -152,6 +194,8 @@ export const getPetsPaginated = async (
 		where: eq(usersTable.clerkUserId, authUser.id),
 		with: { customer: true },
 	});
+
+	if (!dbUser) throw new Error('Usuário não encontrado no banco');
 
 	const offset = (page - 1) * limit;
 	const conditions = [];
@@ -196,6 +240,9 @@ export const getPetsPaginated = async (
 			...row.pet,
 			breed: { ...row.breed, specie: row.specie },
 			tutor: { ...row.tutor, user: row.user },
+			weightHistory: row.lastWeightGrams
+				? [{ weightInGrams: row.lastWeightGrams, measuredAt: new Date() }]
+				: [],
 		})),
 		metadata: {
 			totalCount,
