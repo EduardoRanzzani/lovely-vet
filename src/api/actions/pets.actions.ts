@@ -2,12 +2,19 @@
 
 import { db } from '@/db';
 import {
+	appointmentsTable,
 	breedsTable,
 	customersTable,
+	medicalRecordsTable,
+	pathologiesTable,
+	petAttachmentsTable,
+	petNotesTable,
 	petsTable,
 	petWeightsTable,
+	prescriptionsTable,
 	speciesTable,
 	usersTable,
+	vaccinesTable,
 } from '@/db/schema';
 import { actionClient } from '@/lib/next-safe-action';
 import { currentUser } from '@clerk/nextjs/server';
@@ -84,75 +91,88 @@ export const getPetById = async (id: string): Promise<PetsWithRelations> => {
 	const pet = await db.query.petsTable.findFirst({
 		where: eq(petsTable.id, id),
 		with: {
-			tutor: {
-				with: {
-					user: true,
-				},
+			breed: { with: { specie: true } },
+			tutor: { with: { user: true } },
+			medicalRecords: {
+				orderBy: desc(medicalRecordsTable.createdAt),
+				with: { doctor: { with: { user: true } } },
 			},
-			breed: {
-				with: {
-					specie: true,
-				},
+			prescriptions: {
+				orderBy: desc(prescriptionsTable.issuedAt),
+				with: { doctor: { with: { user: true } } },
 			},
 			weightHistory: {
-				orderBy: (weights, { desc }) => [desc(weights.measuredAt)],
-				limit: 1,
+				orderBy: desc(petWeightsTable.measuredAt),
+			},
+			appointments: {
+				orderBy: desc(appointmentsTable.scheduledAt),
+				with: {
+					doctor: { with: { user: true } },
+					items: { with: { service: true } },
+				},
+			},
+			vaccines: {
+				// 'doctor' aqui refere-se ao nome definido em 'vaccinesRelations'
+				with: { doctor: { with: { user: true } } },
+			},
+			pathologies: true,
+			attachments: true,
+			notes: {
+				// 'author' aqui refere-se ao nome definido em 'petNotesRelations'
+				with: { author: true },
 			},
 		},
 	});
 
 	if (!pet) throw new Error('Pet não encontrado');
-	return pet as PetsWithRelations;
+
+	// O cast duplo (unknown -> Type) resolve problemas de complexidade do Drizzle
+	return pet as unknown as PetsWithRelations;
 };
 
-// Helper para evitar repetição da base da query de listagem
-// const getPetWithRelationsQuery = () => {
-// 	return db
-// 		.select({
-// 			pet: petsTable,
-// 			breed: breedsTable,
-// 			specie: speciesTable,
-// 			tutor: customersTable,
-// 			user: usersTable,
-// 		})
-// 		.from(petsTable)
-// 		.innerJoin(breedsTable, eq(petsTable.breedId, breedsTable.id))
-// 		.innerJoin(speciesTable, eq(breedsTable.specieId, speciesTable.id)) // Join corrigido
-// 		.innerJoin(customersTable, eq(petsTable.customerId, customersTable.id))
-// 		.innerJoin(usersTable, eq(customersTable.userId, usersTable.id));
-// };
-
 const getPetWithRelationsQuery = () => {
-	return (
-		db
-			.select({
-				pet: petsTable,
-				breed: breedsTable,
-				specie: speciesTable,
-				tutor: customersTable,
-				user: usersTable,
-				// Selecionamos o peso da tabela que faremos join
-				lastWeightGrams: petWeightsTable.weightInGrams,
-			})
-			.from(petsTable)
-			.innerJoin(breedsTable, eq(petsTable.breedId, breedsTable.id))
-			.innerJoin(speciesTable, eq(breedsTable.specieId, speciesTable.id))
-			.innerJoin(customersTable, eq(petsTable.customerId, customersTable.id))
-			.innerJoin(usersTable, eq(customersTable.userId, usersTable.id))
-			// Join com a tabela de pesos apenas para o registro mais recente de cada pet
-			.leftJoin(
-				petWeightsTable,
-				eq(
-					petWeightsTable.id,
-					db
-						.select({ id: petWeightsTable.id })
-						.from(petWeightsTable)
-						.where(eq(petWeightsTable.petId, petsTable.id))
-						.orderBy(desc(petWeightsTable.measuredAt))
-						.limit(1),
-				),
-			)
-	);
+	return db
+		.select({
+			pet: petsTable,
+			breed: breedsTable,
+			specie: speciesTable,
+			tutor: customersTable,
+			user: usersTable,
+			// Selecionamos o peso da tabela que faremos join
+			lastWeightGrams: petWeightsTable.weightInGrams,
+		})
+		.from(petsTable)
+		.innerJoin(breedsTable, eq(petsTable.breedId, breedsTable.id))
+		.innerJoin(speciesTable, eq(breedsTable.specieId, speciesTable.id))
+		.innerJoin(customersTable, eq(petsTable.customerId, customersTable.id))
+		.innerJoin(usersTable, eq(customersTable.userId, usersTable.id))
+		.leftJoin(medicalRecordsTable, eq(medicalRecordsTable.petId, petsTable.id))
+		.leftJoin(appointmentsTable, eq(appointmentsTable.petId, petsTable.id))
+		.leftJoin(vaccinesTable, eq(vaccinesTable.petId, petsTable.id))
+		.leftJoin(
+			petWeightsTable,
+			eq(
+				petWeightsTable.id,
+				db
+					.select({ id: petWeightsTable.id })
+					.from(petWeightsTable)
+					.where(eq(petWeightsTable.petId, petsTable.id))
+					.orderBy(desc(petWeightsTable.measuredAt))
+					.limit(1),
+			),
+		)
+		.leftJoin(pathologiesTable, eq(pathologiesTable.petId, petsTable.id))
+		.leftJoin(petAttachmentsTable, eq(petAttachmentsTable.petId, petsTable.id))
+		.leftJoin(petNotesTable, eq(petNotesTable.petId, petsTable.id))
+		.leftJoin(prescriptionsTable, eq(prescriptionsTable.petId, petsTable.id))
+		.groupBy(
+			petsTable.id,
+			breedsTable.id,
+			speciesTable.id,
+			customersTable.id,
+			usersTable.id,
+			petWeightsTable.id,
+		);
 };
 
 export const getPets = async (): Promise<PetsWithRelations[]> => {
@@ -345,3 +365,44 @@ export const deletePet = actionClient
 
 		revalidatePath('/pets');
 	});
+
+export const getPetHistory = async (petId: string) => {
+	const data = await db.query.petsTable.findFirst({
+		where: eq(petsTable.id, petId),
+		with: {
+			medicalRecords: {
+				orderBy: desc(medicalRecordsTable.createdAt),
+				with: { doctor: { with: { user: true } } },
+			},
+			prescriptions: {
+				orderBy: desc(prescriptionsTable.issuedAt),
+				with: { doctor: { with: { user: true } } },
+			},
+			weightHistory: {
+				orderBy: desc(petWeightsTable.measuredAt),
+			},
+			appointments: {
+				orderBy: desc(appointmentsTable.scheduledAt), // Adicionado ordem
+				with: {
+					doctor: { with: { user: true } }, // ESSENCIAL: Faltava isso aqui
+					items: { with: { service: true } },
+				},
+			},
+			vaccines: {
+				with: { doctor: { with: { user: true } } },
+			},
+			pathologies: true,
+			attachments: true,
+			notes: {
+				with: { author: true },
+			},
+			breed: {
+				with: { specie: true },
+			},
+			tutor: {
+				with: { user: true },
+			},
+		},
+	});
+	return data;
+};

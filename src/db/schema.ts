@@ -113,7 +113,7 @@ export const speciesTable = pgTable('species', {
 export const breedsTable = pgTable('breeds', {
 	id: uuid('id').primaryKey().defaultRandom(),
 	name: text('name').notNull(),
-specieId: uuid('specie_id')
+	specieId: uuid('specie_id')
 		.notNull()
 		.references(() => speciesTable.id, { onDelete: 'cascade' }),
 	createdAt: timestamp('created_at').defaultNow().notNull(),
@@ -292,6 +292,59 @@ export const shiftsTable = pgTable('shifts', {
 		.notNull(),
 });
 
+// Vacinas
+export const vaccinesTable = pgTable('vaccines', {
+	id: uuid('id').primaryKey().defaultRandom(),
+	petId: uuid('pet_id')
+		.notNull()
+		.references(() => petsTable.id, { onDelete: 'cascade' }),
+	name: text('name').notNull(), // Ex: "V10", "Raiva"
+	applicationDate: date('application_date').notNull(),
+	nextDoseDate: date('next_dose_date'), // Importante para o dashboard/agenda
+	lotNumber: text('lot_number'),
+	manufacturer: text('manufacturer'),
+	appliedById: uuid('applied_by_id').references(() => doctorsTable.id),
+	createdAt: timestamp('created_at').defaultNow().notNull(),
+});
+
+// Patologias / Condições Crônicas
+export const pathologiesTable = pgTable('pathologies', {
+	id: uuid('id').primaryKey().defaultRandom(),
+	petId: uuid('pet_id')
+		.notNull()
+		.references(() => petsTable.id, { onDelete: 'cascade' }),
+	name: text('name').notNull(),
+	description: text('description'),
+	status: text('status').default('active').notNull(), // active, resolved, chronic
+	diagnosedAt: date('diagnosed_at').notNull(),
+	createdAt: timestamp('created_at').defaultNow().notNull(),
+});
+
+// Documentos e Exames (Anexos)
+export const petAttachmentsTable = pgTable('pet_attachments', {
+	id: uuid('id').primaryKey().defaultRandom(),
+	petId: uuid('pet_id')
+		.notNull()
+		.references(() => petsTable.id, { onDelete: 'cascade' }),
+	name: text('name').notNull(), // Ex: "Hemograma Completo"
+	url: text('url').notNull(), // URL do S3/Uploadthing
+	type: text('type').notNull(), // 'exam', 'document', 'image'
+	createdAt: timestamp('created_at').defaultNow().notNull(),
+});
+
+// Observações / Notas Gerais (que não são prontuários)
+export const petNotesTable = pgTable('pet_notes', {
+	id: uuid('id').primaryKey().defaultRandom(),
+	petId: uuid('pet_id')
+		.notNull()
+		.references(() => petsTable.id, { onDelete: 'cascade' }),
+	content: text('content').notNull(),
+	authorId: uuid('author_id')
+		.notNull()
+		.references(() => usersTable.id),
+	createdAt: timestamp('created_at').defaultNow().notNull(),
+});
+
 // --- RELATIONS ---
 
 export const usersRelations = relations(usersTable, ({ one }) => ({
@@ -356,8 +409,12 @@ export const petsRelations = relations(petsTable, ({ one, many }) => ({
 	}),
 	medicalRecords: many(medicalRecordsTable),
 	appointments: many(appointmentsTable),
-	// Adicione esta linha:
 	weightHistory: many(petWeightsTable),
+	vaccines: many(vaccinesTable),
+	pathologies: many(pathologiesTable),
+	attachments: many(petAttachmentsTable),
+	notes: many(petNotesTable),
+	prescriptions: many(prescriptionsTable),
 }));
 
 export const petWeightsRelations = relations(petWeightsTable, ({ one }) => ({
@@ -450,5 +507,44 @@ export const shiftsRelations = relations(shiftsTable, ({ one }) => ({
 	doctor: one(doctorsTable, {
 		fields: [shiftsTable.doctorId],
 		references: [doctorsTable.id],
+	}),
+}));
+
+export const vaccinesRelations = relations(vaccinesTable, ({ one }) => ({
+	pet: one(petsTable, {
+		fields: [vaccinesTable.petId],
+		references: [petsTable.id],
+	}),
+	doctor: one(doctorsTable, {
+		fields: [vaccinesTable.appliedById],
+		references: [doctorsTable.id],
+	}),
+}));
+
+export const pathologiesRelations = relations(pathologiesTable, ({ one }) => ({
+	pet: one(petsTable, {
+		fields: [pathologiesTable.petId],
+		references: [petsTable.id],
+	}),
+}));
+
+export const petAttachmentsRelations = relations(
+	petAttachmentsTable,
+	({ one }) => ({
+		pet: one(petsTable, {
+			fields: [petAttachmentsTable.petId],
+			references: [petsTable.id],
+		}),
+	}),
+);
+
+export const petNotesRelations = relations(petNotesTable, ({ one }) => ({
+	pet: one(petsTable, {
+		fields: [petNotesTable.petId],
+		references: [petsTable.id],
+	}),
+	author: one(usersTable, {
+		fields: [petNotesTable.authorId],
+		references: [usersTable.id],
 	}),
 }));

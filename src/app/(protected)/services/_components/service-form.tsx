@@ -100,11 +100,14 @@ const ServiceFormClient = ({
 						name='specieId'
 						control={form.control}
 						error={form.formState.errors.specieId?.message}
-						options={species.map((specie) => ({
-							value: specie.id,
-							label: specie.name,
-							key: specie.id,
-						}))}
+						options={[
+							{ value: '', label: 'Geral' },
+							...species.map((specie) => ({
+								value: specie.id,
+								label: specie.name,
+								key: specie.id,
+							})),
+						]}
 					/>
 
 					<MoneyInputForm

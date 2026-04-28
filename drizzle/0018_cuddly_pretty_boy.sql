@@ -1,0 +1,1 @@
+ALTER TABLE "pathologies" ALTER COLUMN "diagnosed_at" SET NOT NULL;
