@@ -1,12 +1,15 @@
 'use client';
+import { deleteTimelineItem } from '@/api/actions/timeline.actions';
 import { BreedsWithRelations } from '@/api/schema/breeds.schema';
 import { CustomersWithRelations } from '@/api/schema/customers.schema';
 import { PetsWithRelations } from '@/api/schema/pets.schema';
 import { Species } from '@/api/schema/species.schema';
+import { TimelineItem } from '@/api/schema/timeline.schema';
 import { calculateAge } from '@/api/util';
 import { GoogleMapsIcon } from '@/components/icons/icon-googlemaps';
 import EditButton from '@/components/list/edit-button';
 import { Button } from '@/components/ui/button';
+import LoadingDialog from '@/components/ui/loading';
 import {
 	Select,
 	SelectContent,
@@ -16,13 +19,13 @@ import {
 } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useUser } from '@clerk/nextjs';
 import { format } from 'date-fns';
 import {
 	CalendarIcon,
 	DropletIcon,
 	FileIcon,
 	FilmIcon,
-	FlaskConicalIcon,
 	GalleryHorizontalIcon,
 	MessageCircleIcon,
 	ScaleIcon,
@@ -31,14 +34,14 @@ import {
 	StethoscopeIcon,
 	SyringeIcon,
 } from 'lucide-react';
+import { useAction } from 'next-safe-action/hooks';
 import Image from 'next/image';
 import Link from 'next/link';
 import { use, useState } from 'react';
-import DialogServices from './dialog-services';
+import { toast } from 'sonner';
 import PetFormClient from './pet-form';
-import { HistoryItem } from './pet-history';
-import { Badge } from '@/components/ui/badge';
-import { useUser } from '@clerk/nextjs';
+import TabHistory from './tabs/tab-history';
+import TabTimeline from './tabs/tab-timeline';
 
 interface PetDetailsClientProps {
 	pet: PetsWithRelations;
@@ -55,24 +58,23 @@ const PetDetailsClient = ({
 }: PetDetailsClientProps) => {
 	const signedInUser = useUser();
 	const isCustomer = signedInUser?.user?.publicMetadata?.role === 'customer';
+	console.log({ isCustomer });
 
 	const species = use(speciesPromise);
 	const breeds = use(breedsPromise);
 	const customers = use(customersPromise);
 
-	const [activeTab, setActiveTab] = useState('history');
+	const [activeTab, setActiveTab] = useState(
+		!isCustomer ? 'history' : 'timeline',
+	);
 
 	const age = calculateAge(new Date(pet.birthDate));
 	const fullAddress = `${pet.tutor.address}, ${pet.tutor.addressNumber} - ${pet.tutor.neighborhood}, ${pet.tutor.city} - ${pet.tutor.state}`;
-
-	// 1. Extrair o peso mais recente (convertendo para Kg para o form)
 	const lastWeightGrams = pet.weightHistory?.[0]?.weightInGrams ?? 0;
 	const lastWeightKg = lastWeightGrams / 1000;
 
-	// CORREÇÃO: URL correta para busca no Google Maps
 	const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(fullAddress)}`;
 
-	// Lista de opções das abas
 	const tabOptions = [
 		{ id: 'history', label: 'Histórico', icon: GalleryHorizontalIcon },
 		{ id: 'protocols', label: 'Protocolos', icon: DropletIcon },
@@ -81,81 +83,115 @@ const PetDetailsClient = ({
 		{ id: 'sales', label: 'Vendas', icon: ShoppingCartIcon },
 	];
 
-	const historyEvents = [
+	const visibleTabs = tabOptions.filter((tab) => {
+		if (tab.id === 'timeline') return true;
+		return !isCustomer;
+	});
+
+	const historyEvents: TimelineItem[] = [
 		...(pet.medicalRecords?.map((mr) => ({
-			type: 'record',
+			type: 'record' as const,
+			id: mr.id,
 			date: new Date(mr.createdAt),
 			title: 'Atendimento Clínico',
 			doctor: mr.doctor.user.name,
 			content: mr.diagnosis,
 			icon: <StethoscopeIcon className='w-5 h-5 text-accent-foreground' />,
-			color: 'bg-pathology',
+			color: 'bg-pathology/30',
 		})) || []),
 		...(pet.prescriptions?.map((p) => ({
-			type: 'prescription',
+			type: 'prescription' as const,
+			id: p.id,
 			date: new Date(p.issuedAt),
 			title: 'Receita Emitida',
-			doctor: '',
 			content: p.content,
 			icon: <SquarePenIcon className='w-5 h-5 text-accent-foreground' />,
-			color: 'bg-prescription',
+			color: 'bg-prescription/30',
 		})) || []),
 		...(pet.weightHistory?.map((w) => ({
-			type: 'weight',
+			type: 'weight' as const,
+			id: w.id,
 			date: new Date(w.measuredAt),
 			title: 'Pesagem',
-			doctor: '',
 			content: `Peso registrado: ${(w.weightInGrams / 1000).toFixed(2)}kg`,
 			icon: <ScaleIcon className='w-5 h-5 text-accent-foreground' />,
-			color: 'bg-weight',
+			color: 'bg-weight/30',
 		})) || []),
 		...(pet.appointments?.map((a) => ({
-			type: 'appointment',
+			type: 'appointment' as const,
+			id: a.id,
 			date: new Date(a.scheduledAt),
 			title: 'Agendamento',
 			doctor: a.doctor?.user?.name || 'Não atribuído',
 			content:
 				a.items?.map((i) => i.service.name).join(', ') || 'Nenhum serviço',
 			icon: <CalendarIcon className='w-5 h-5 text-accent-foreground' />,
-			color: 'bg-appointment',
+			color: 'bg-appointment/30',
 		})) || []),
 		...(pet.vaccines?.map((v) => ({
-			type: 'vaccine',
+			type: 'vaccine' as const,
+			id: v.id,
 			date: new Date(v.applicationDate),
 			title: 'Vacina',
 			doctor: v.doctor?.user?.name || 'Não atribuído',
 			content: v.name,
 			icon: <SyringeIcon className='w-5 h-5 text-accent-foreground' />,
-			color: 'bg-vaccine',
+			color: 'bg-vaccine/30',
 		})) || []),
 		...(pet.pathologies?.map((p) => ({
-			type: 'pathology',
+			type: 'pathology' as const,
+			id: p.id,
 			date: new Date(p.diagnosedAt),
 			title: 'Patologia',
 			doctor: '',
 			content: p.name,
 			icon: <StethoscopeIcon className='w-5 h-5 text-accent-foreground' />,
-			color: 'bg-pathology',
+			color: 'bg-pathology/30',
 		})) || []),
 		...(pet.attachments?.map((a) => ({
-			type: 'attachment',
+			type: 'attachment' as const,
+			id: a.id,
 			date: new Date(a.createdAt),
 			title: 'Anexo',
 			doctor: '',
 			content: a.name,
 			icon: <FileIcon className='w-5 h-5 text-accent-foreground' />,
-			color: 'bg-document',
+			color: 'bg-document/30',
 		})) || []),
 		...(pet.notes?.map((n) => ({
-			type: 'note',
+			type: 'note' as const,
+			id: n.id,
 			date: new Date(n.createdAt),
 			title: 'Observação',
 			doctor: '',
 			content: n.content,
 			icon: <MessageCircleIcon className='w-5 h-5 text-accent-foreground' />,
-			color: 'bg-notes',
+			color: 'bg-notes/80',
 		})) || []),
-	].sort((a, b) => b.date.getTime() - a.date.getTime());
+	]
+		.filter((event) => !(isCustomer && event.type === 'note'))
+		.sort((a, b) => b.date.getTime() - a.date.getTime());
+
+	const handleDelete = (item: TimelineItem) => {
+		if (!item.id) return;
+
+		execute({
+			id: item.id!,
+			type: item.type,
+			petId: pet.id,
+		});
+	};
+
+	const { execute, isExecuting } = useAction(deleteTimelineItem, {
+		onSuccess: () => {
+			toast.success('Item removido do histórico!');
+		},
+		onError: ({ error }) => {
+			toast.error(
+				'Erro ao deletar: ' + (error.serverError || 'Tente novamente'),
+			);
+		},
+	});
 
 	return (
 		<div className='flex flex-col gap-4 w-full'>
@@ -278,7 +314,6 @@ const PetDetailsClient = ({
 				</div>
 			</div>
 
-			{/* Seção de Abas Mobile-Friendly */}
 			<div className='flex flex-col gap-4 p-5 w-full border border-muted rounded-lg bg-card'>
 				<h2 className='text-xl font-semibold'>Informações Adicionais</h2>
 				<Separator />
@@ -291,7 +326,7 @@ const PetDetailsClient = ({
 								<SelectValue placeholder='Selecione uma categoria' />
 							</SelectTrigger>
 							<SelectContent>
-								{tabOptions.map((tab) => (
+								{visibleTabs.map((tab) => (
 									<SelectItem key={tab.id} value={tab.id}>
 										<div className='flex items-center gap-2'>
 											<tab.icon className='w-4 h-4' />
@@ -305,7 +340,7 @@ const PetDetailsClient = ({
 
 					{/* VIEW DESKTOP: Tabs tradicionais */}
 					<TabsList className='hidden md:flex w-full justify-start h-auto p-1 bg-muted/50 border'>
-						{tabOptions.map((tab) => (
+						{visibleTabs.map((tab) => (
 							<TabsTrigger
 								key={tab.id}
 								value={tab.id}
@@ -318,94 +353,21 @@ const PetDetailsClient = ({
 					</TabsList>
 
 					<div className='p-4 border rounded-md bg-card'>
-						<TabsContent value='history' className='w-full'>
-							<div className='flex flex-col lg:flex-row gap-4'>
-								<div className='grid grid-cols-1 lg:grid-cols-3 gap-2 lg:w-3/5 bg-card max-h-30'>
-									<DialogServices />
-
-									<Button className='bg-weight hover:bg-weight/80'>
-										<ScaleIcon />
-										Peso
-									</Button>
-
-									<Button className='bg-pathology hover:bg-pathology/80'>
-										<StethoscopeIcon />
-										Patologia
-									</Button>
-
-									<Button className='bg-document hover:bg-document/80'>
-										<FileIcon />
-										Documento
-									</Button>
-
-									<Button className='bg-exam hover:bg-exam/80'>
-										<FlaskConicalIcon /> Exame
-									</Button>
-
-									<Button className='bg-vaccine hover:bg-vaccine/80'>
-										<SyringeIcon />
-										Vacina
-									</Button>
-
-									<Button className='bg-prescription hover:bg-prescription/80'>
-										<SquarePenIcon />
-										Receita
-									</Button>
-
-									<Button className='bg-notes hover:bg-notes/80'>
-										<MessageCircleIcon />
-										Observações
-									</Button>
-								</div>
-
-								<div className='flex-1 w-full border p-6 rounded-xl bg-muted/20 max-h-70 overflow-hidden'>
-									<div className='flex items-center justify-between mb-2 pb-4 border-b'>
-										<h3 className='font-bold text-lg'>Histórico Clínico</h3>
-										<Badge
-											variant={'outline'}
-											className='text-xs px-2 py-1 rounded-full border shadow-sm'
-										>
-											{historyEvents.length} registro
-											{historyEvents.length > 1 ? 's' : ''}
-										</Badge>
-									</div>
-
-									<div className='max-h-70 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-muted pb-20'>
-										{historyEvents.length > 0 ? (
-											historyEvents.map((event, idx) => (
-												<HistoryItem
-													key={idx}
-													title={event.title}
-													subtitle={event.doctor}
-													date={event.date}
-													icon={event.icon}
-													colorClass={event.color}
-													content={event.content}
-												/>
-											))
-										) : (
-											<div className='flex flex-col items-center justify-center py-20 text-muted-foreground border-2 border-dashed rounded-2xl bg-white/50'>
-												<GalleryHorizontalIcon className='w-12 h-12 mb-3 opacity-20' />
-												<p className='font-medium'>
-													O histórico deste pet está vazio.
-												</p>
-												<p className='text-xs'>
-													Comece adicionando um atendimento ou peso.
-												</p>
-											</div>
-										)}
-									</div>
-								</div>
-							</div>
-						</TabsContent>
+						<TabHistory
+							historyEvents={historyEvents}
+							canDelete={!isCustomer}
+							onDelete={handleDelete}
+						/>
 
 						<TabsContent value='protocols'>
 							<h1>Protocolos Clínicos</h1>4
 						</TabsContent>
 
-						<TabsContent value='timeline'>
-							<h1>Linha do Tempo</h1>
-						</TabsContent>
+						<TabTimeline
+							historyEvents={historyEvents}
+							canDelete={!isCustomer}
+							onDelete={handleDelete}
+						/>
 
 						<TabsContent value='schedule'>
 							<h1>Próximos Agendamentos</h1>
@@ -417,6 +379,8 @@ const PetDetailsClient = ({
 					</div>
 				</Tabs>
 			</div>
+
+			{isExecuting && <LoadingDialog />}
 		</div>
 	);
 };

@@ -57,7 +57,7 @@ const DeleteAlertButton = ({
 								variant: 'destructive',
 								size: 'default',
 							}),
-							'mt-0 w-full hover:bg-destructive/90 hover:text-white', // 'mt-0' remove a margem padrão do mobile
+							'mt-0 w-full hover:text-destructive', // 'mt-0' remove a margem padrão do mobile
 						)}
 					>
 						<BanIcon className='mr-2 h-4 w-4' />
