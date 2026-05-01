@@ -128,169 +128,169 @@ const PetFormClient = ({
 		<DialogContent
 			onInteractOutside={(e) => e.preventDefault()}
 			showCloseButton={false}
-			className='max-w-lg'
 		>
+			<DialogHeader>
+				<DialogTitle>{pet ? 'Atualizar Pet' : 'Cadastrar Pet'}</DialogTitle>
+				<DialogDescription>
+					{pet
+						? 'Atualize as informações do pet selecionado'
+						: 'Adicione um novo pet ao sistema'}
+				</DialogDescription>
+			</DialogHeader>
+
 			<Form {...form}>
-				<form
-					onSubmit={form.handleSubmit(formSubmit)}
-					className='flex flex-col gap-2'
-				>
-					<DialogHeader>
-						<DialogTitle>{pet ? 'Atualizar Pet' : 'Cadastrar Pet'}</DialogTitle>
-						<DialogDescription>
-							{pet
-								? 'Atualize as informações do pet selecionado'
-								: 'Adicione um novo pet ao sistema'}
-						</DialogDescription>
-					</DialogHeader>
-
-					<input type='text' {...form.register('status')} className='hidden' />
-
-					<div className='w-full flex flex-col lg:flex-row gap-4'>
-						<InputForm
-							label='Nome:'
-							register={form.register}
-							name='name'
-							error={form.formState.errors.name?.message}
+				<form onSubmit={form.handleSubmit(formSubmit)}>
+					<div className='flex flex-col gap-2 max-h-100 overflow-y-auto px-1 sm:max-h-none sm:overflow-visible'>
+						<input
+							type='text'
+							{...form.register('status')}
+							className='hidden'
 						/>
 
-						<DatePickerForm
-							label='Data de Nascimento:'
+						<div className='w-full flex flex-col lg:flex-row gap-4'>
+							<InputForm
+								label='Nome:'
+								register={form.register}
+								name='name'
+								error={form.formState.errors.name?.message}
+							/>
+
+							<DatePickerForm
+								label='Data de Nascimento:'
+								control={form.control}
+								name='birthDate'
+								error={form.formState.errors.birthDate?.message}
+							/>
+						</div>
+
+						<DropzoneForm
+							label='Foto:'
+							name='photo'
 							control={form.control}
-							name='birthDate'
-							error={form.formState.errors.birthDate?.message}
+							onUpload={handlePhotoUpload}
+							error={form.formState.errors.photo?.message}
 						/>
-					</div>
 
-					<DropzoneForm
-						label='Foto:'
-						name='photo'
-						control={form.control}
-						onUpload={handlePhotoUpload}
-						error={form.formState.errors.photo?.message}
-					/>
-
-					<SelectForm
-						label='Tutor:'
-						control={form.control}
-						name='customerId'
-						options={customers.map((customer) => ({
-							value: customer.id,
-							label: customer.user.name,
-						}))}
-						error={form.formState.errors.customerId?.message}
-					/>
-
-					<div className='w-full flex flex-row gap-4'>
 						<SelectForm
-							label='Espécie:'
+							label='Tutor:'
 							control={form.control}
-							name='specieId'
-							options={species.map((specie) => ({
-								value: specie.id,
-								label: specie.name,
+							name='customerId'
+							options={customers.map((customer) => ({
+								value: customer.id,
+								label: customer.user.name,
 							}))}
-							onSelect={() => handleSpeciesChange()}
-							error={form.formState.errors.specieId?.message}
+							error={form.formState.errors.customerId?.message}
 						/>
 
-						<SelectForm
-							label='Raça:'
-							control={form.control}
-							name='breedId'
-							options={filteredBreeds.map((breed) => ({
-								value: breed.id,
-								label: breed.name,
-							}))}
-							error={form.formState.errors.breedId?.message}
-						/>
-					</div>
+						<div className='w-full flex flex-row gap-4'>
+							<SelectForm
+								label='Espécie:'
+								control={form.control}
+								name='specieId'
+								options={species.map((specie) => ({
+									value: specie.id,
+									label: specie.name,
+								}))}
+								onSelect={() => handleSpeciesChange()}
+								error={form.formState.errors.specieId?.message}
+							/>
 
-					<div className='w-full flex flex-row gap-4'>
-						<InputForm
-							label='Pelagem:'
-							register={form.register}
-							name='color'
-							error={form.formState.errors.color?.message}
-						/>
+							<SelectForm
+								label='Raça:'
+								control={form.control}
+								name='breedId'
+								options={filteredBreeds.map((breed) => ({
+									value: breed.id,
+									label: breed.name,
+								}))}
+								error={form.formState.errors.breedId?.message}
+							/>
+						</div>
 
-						<SelectForm
-							label='Gênero'
-							control={form.control}
-							name='gender'
-							options={[
-								{
-									value: 'male',
-									label: 'Macho',
-								},
-								{
-									value: 'female',
-									label: 'Fêmea',
-								},
-							]}
-							error={form.formState.errors.gender?.message}
-						/>
-					</div>
+						<div className='w-full flex flex-row gap-4'>
+							<InputForm
+								label='Pelagem:'
+								register={form.register}
+								name='color'
+								error={form.formState.errors.color?.message}
+							/>
 
-					<div className='w-full flex flex-row gap-4'>
-						<SelectForm
-							label='Castrado?'
-							control={form.control}
-							name='sterile'
-							options={[
-								{
-									value: true,
-									label: 'Sim',
-								},
-								{
-									value: false,
-									label: 'Não',
-								},
-							]}
-							error={form.formState.errors.sterile?.message}
-						/>
+							<SelectForm
+								label='Gênero'
+								control={form.control}
+								name='gender'
+								options={[
+									{
+										value: 'male',
+										label: 'Macho',
+									},
+									{
+										value: 'female',
+										label: 'Fêmea',
+									},
+								]}
+								error={form.formState.errors.gender?.message}
+							/>
+						</div>
 
-						<WeightInputForm
-							label='Peso:'
-							control={form.control}
-							name='weightInGrams'
-							error={form.formState.errors.weightInGrams?.message}
-						/>
+						<div className='w-full flex flex-row gap-4'>
+							<SelectForm
+								label='Castrado?'
+								control={form.control}
+								name='sterile'
+								options={[
+									{
+										value: true,
+										label: 'Sim',
+									},
+									{
+										value: false,
+										label: 'Não',
+									},
+								]}
+								error={form.formState.errors.sterile?.message}
+							/>
+
+							<WeightInputForm
+								label='Peso:'
+								control={form.control}
+								name='weightInGrams'
+								error={form.formState.errors.weightInGrams?.message}
+							/>
+						</div>
 					</div>
 
 					{upsertPetAction.isPending && <LoadingDialog />}
 
-					<DialogFooter>
-						<div className='flex flex-col lg:flex-row gap-4 w-full mt-4'>
-							<DialogClose asChild>
-								<Button
-									type='button'
-									variant={'destructive'}
-									onClick={() => {
-										if (!upsertPetAction.isPending) form.reset();
-									}}
-									className='flex-1'
-								>
-									<BanIcon />
-									Cancelar
-								</Button>
-							</DialogClose>
-
+					<DialogFooter className='mt-4'>
+						<DialogClose asChild>
 							<Button
-								type='submit'
-								disabled={upsertPetAction.isPending}
+								type='button'
+								variant={'destructive'}
+								onClick={() => {
+									if (!upsertPetAction.isPending) form.reset();
+								}}
 								className='flex-1'
 							>
-								{upsertPetAction.isPending ? (
-									<Loader2Icon className='h-5 w-5 animate-spin' />
-								) : (
-									<>
-										<SaveIcon />
-										Salvar
-									</>
-								)}
+								<BanIcon />
+								Cancelar
 							</Button>
-						</div>
+						</DialogClose>
+
+						<Button
+							type='submit'
+							disabled={upsertPetAction.isPending}
+							className='flex-1'
+						>
+							{upsertPetAction.isPending ? (
+								<Loader2Icon className='h-5 w-5 animate-spin' />
+							) : (
+								<>
+									<SaveIcon />
+									Salvar
+								</>
+							)}
+						</Button>
 					</DialogFooter>
 				</form>
 			</Form>

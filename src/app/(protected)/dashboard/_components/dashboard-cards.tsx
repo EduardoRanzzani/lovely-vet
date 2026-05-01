@@ -27,12 +27,14 @@ import { formatCurrencyFromCents } from '@/helpers/currency';
 import { addMonths, format, setMonth, subMonths } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import {
+	CatIcon,
 	ChevronLeft,
 	ChevronRight,
-	Divide,
+	DogIcon,
 	DotIcon,
 	EyeClosedIcon,
 	EyeIcon,
+	PawPrintIcon,
 	UserIcon,
 } from 'lucide-react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
@@ -75,6 +77,33 @@ const DashboardCards = ({
 			return acc + (appointment.totalPriceInCents ?? 0);
 		},
 		0,
+	);
+
+	// Agrupa plantões não pagos por clínica
+	const nonPaidShiftsByClinic = nonPaidShifts.reduce(
+		(acc, shift) => {
+			// Acesse o nome da clínica através da relação (ajuste conforme seu schema)
+			const clinicName = shift.clinicName || 'Clínica não identificada';
+			const amount = shift.amountInCents ?? 0;
+
+			if (!acc[clinicName]) {
+				acc[clinicName] = { count: 0, total: 0 };
+			}
+
+			acc[clinicName].count += 1;
+			acc[clinicName].total += amount;
+
+			return acc;
+		},
+		{} as Record<string, { count: number; total: number }>,
+	);
+
+	// Converte em array para facilitar o mapeamento no JSX
+	const clinicBreakdown = Object.entries(nonPaidShiftsByClinic).map(
+		([name, data]) => ({
+			name,
+			...data,
+		}),
 	);
 
 	const onMonthChange = (newDate: Date) => {
@@ -149,7 +178,45 @@ const DashboardCards = ({
 					</CardHeader>
 					<CardDescription>
 						<h1 className='text-center font-bold text-3xl'>
-							{nonPaidShifts.length}
+							<Dialog>
+								<DialogTrigger asChild>
+									<button className='hover:underline decoration-primary'>
+										{nonPaidShifts.length}
+									</button>
+								</DialogTrigger>
+								<DialogContent>
+									<DialogTitle>Pendências por Clínica</DialogTitle>
+									<div className='flex flex-col gap-3 mt-4'>
+										{clinicBreakdown.length > 0 ? (
+											clinicBreakdown.map((clinic) => (
+												<div
+													key={clinic.name}
+													className='flex items-center justify-between p-3 border rounded-lg bg-muted/5'
+												>
+													<div className='flex flex-col'>
+														<span className='text-sm font-bold'>
+															{clinic.name}
+														</span>
+														<span className='text-xs text-muted-foreground'>
+															{clinic.count}{' '}
+															{clinic.count === 1 ? 'plantão' : 'plantões'}
+														</span>
+													</div>
+													<span className='font-mono font-semibold'>
+														{showValues
+															? formatCurrencyFromCents(clinic.total)
+															: '••••'}
+													</span>
+												</div>
+											))
+										) : (
+											<p className='text-center text-muted-foreground'>
+												Tudo em dia!
+											</p>
+										)}
+									</div>
+								</DialogContent>
+							</Dialog>
 						</h1>
 					</CardDescription>
 				</Card>
@@ -245,7 +312,13 @@ const DashboardCards = ({
 													>
 														<div className='flex items-center gap-4'>
 															<div className='w-10 h-10 rounded-full bg-primary/10 p-2'>
-																<UserIcon />
+																{pet.breed.specie.name === 'Canino' ? (
+																	<DogIcon />
+																) : pet.breed.specie.name === 'Felino' ? (
+																	<CatIcon />
+																) : (
+																	<PawPrintIcon />
+																)}
 															</div>
 															<div className='flex flex-col'>
 																<h2 className='text-sm font-bold'>

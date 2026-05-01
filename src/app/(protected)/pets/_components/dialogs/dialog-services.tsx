@@ -16,13 +16,17 @@ import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import z from 'zod';
 
+interface DialogServicesProps {
+	petId: string;
+}
+
 const formSchema = z.object({
 	test: z.string(),
 });
 
 type FormSchema = z.infer<typeof formSchema>;
 
-const DialogServices = () => {
+const DialogServices = ({ petId }: DialogServicesProps) => {
 	const form = useForm<FormSchema>({
 		resolver: zodResolver(formSchema),
 	});

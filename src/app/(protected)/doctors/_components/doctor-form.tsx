@@ -110,185 +110,184 @@ const DoctorFormClient = ({ doctor, onSuccess }: DoctorFormClientProps) => {
 		<DialogContent
 			onInteractOutside={(e) => e.preventDefault()}
 			showCloseButton={false}
-			className='max-w-lg max-h-150 2xl:max-h-200 overflow-scroll'
 		>
+			<DialogHeader>
+				<DialogTitle>
+					{doctor ? 'Editar Veterinário' : 'Cadastrar Veterinário'}
+				</DialogTitle>
+				<DialogDescription>
+					{doctor
+						? 'Atualize as informações do Veterinário selecionado'
+						: 'Adicione um novo Veterinário ao sistema'}
+				</DialogDescription>
+			</DialogHeader>
+
 			<Form {...form}>
-				<form
-					id='registerForm'
-					onSubmit={form.handleSubmit(formSubmit)}
-					className='flex flex-col gap-2'
-				>
-					<DialogHeader>
-						<DialogTitle>
-							{doctor ? 'Editar Veterinário' : 'Cadastrar Veterinário'}
-						</DialogTitle>
-						<DialogDescription>
-							{doctor
-								? 'Atualize as informações do Veterinário selecionado'
-								: 'Adicione um novo Veterinário ao sistema'}
-						</DialogDescription>
-					</DialogHeader>
-
-					<input type='text' {...form.register('userId')} className='hidden' />
-
-					<InputForm
-						label='Nome: '
-						register={form.register}
-						name='name'
-						error={form.formState.errors.name?.message}
-					/>
-
-					<InputForm
-						label='Email: '
-						register={form.register}
-						name='email'
-						error={form.formState.errors.email?.message}
-					/>
-
-					<DropzoneForm
-						label='Foto:'
-						name='image'
-						control={form.control}
-						onUpload={handlePhotoUpload}
-						error={form.formState.errors.image?.message}
-					/>
-
-					<div className='flex flex-row gap-4'>
-						<InputFormMask
-							label='Telefone:'
-							control={form.control}
-							error={form.formState.errors.phone?.message}
-							format='(##) #####-####'
-							mask='x'
-							name='phone'
-							className='w-full'
-						/>
-
-						<InputFormMask
-							label='CPF:'
-							control={form.control}
-							error={form.formState.errors.cpf?.message}
-							format='###.###.###-##'
-							mask='x'
-							name='cpf'
-							className='w-full'
-						/>
-					</div>
-
-					<div className='flex flex-row gap-4'>
-						<SelectForm
-							label='Sexo:'
-							control={form.control}
-							error={form.formState.errors.gender?.message}
-							name='gender'
-							options={[
-								{
-									value: 'male',
-									label: 'Masculino',
-								},
-								{
-									value: 'female',
-									label: 'Feminino',
-								},
-							]}
-							className='w-full'
+				<form id='registerForm' onSubmit={form.handleSubmit(formSubmit)}>
+					<div className='flex flex-col gap-2 max-h-100 overflow-y-auto px-1 sm:max-h-none sm:overflow-visible'>
+						<input
+							type='text'
+							{...form.register('userId')}
+							className='hidden'
 						/>
 
 						<InputForm
-							label='CRMV:'
+							label='Nome: '
 							register={form.register}
-							name='licenseNumber'
-							error={form.formState.errors.licenseNumber?.message}
+							name='name'
+							error={form.formState.errors.name?.message}
 						/>
 
-						<SelectForm
-							label='UF:'
+						<InputForm
+							label='Email: '
+							register={form.register}
+							name='email'
+							error={form.formState.errors.email?.message}
+						/>
+
+						<DropzoneForm
+							label='Foto:'
+							name='image'
 							control={form.control}
-							error={form.formState.errors.licenseState?.message}
-							name='licenseState'
-							options={ufs}
-						/>
-					</div>
-
-					<InputForm
-						label='Especialidade: '
-						register={form.register}
-						name='specialty'
-						error={form.formState.errors.specialty?.message}
-					/>
-
-					<div className='flex flex-row gap-4'>
-						<SelectForm
-							label='Disponível de: '
-							control={form.control}
-							name='availableFromWeekDay'
-							options={weekDays}
-							error={form.formState.errors.availableFromWeekDay?.message}
+							onUpload={handlePhotoUpload}
+							error={form.formState.errors.image?.message}
 						/>
 
-						<SelectForm
-							label='Disponível até: '
-							control={form.control}
-							name='availableToWeekDay'
-							options={weekDays}
-							error={form.formState.errors.availableToWeekDay?.message}
-						/>
-					</div>
+						<div className='flex flex-row gap-4'>
+							<InputFormMask
+								label='Telefone:'
+								control={form.control}
+								error={form.formState.errors.phone?.message}
+								format='(##) #####-####'
+								mask='x'
+								name='phone'
+								className='w-full'
+							/>
 
-					<div className='flex flex-row gap-4'>
-						<SelectForm
-							label='Horário de início:'
-							name='availableFromTime'
-							control={form.control}
-							options={timesOfDay}
-							className='w-full'
-							error={form.formState.errors.availableFromTime?.message}
+							<InputFormMask
+								label='CPF:'
+								control={form.control}
+								error={form.formState.errors.cpf?.message}
+								format='###.###.###-##'
+								mask='x'
+								name='cpf'
+								className='w-full'
+							/>
+						</div>
+
+						<div className='flex flex-row gap-4'>
+							<SelectForm
+								label='Sexo:'
+								control={form.control}
+								error={form.formState.errors.gender?.message}
+								name='gender'
+								options={[
+									{
+										value: 'male',
+										label: 'Masculino',
+									},
+									{
+										value: 'female',
+										label: 'Feminino',
+									},
+								]}
+								className='w-full'
+							/>
+
+							<InputForm
+								label='CRMV:'
+								register={form.register}
+								name='licenseNumber'
+								error={form.formState.errors.licenseNumber?.message}
+							/>
+
+							<SelectForm
+								label='UF:'
+								control={form.control}
+								error={form.formState.errors.licenseState?.message}
+								name='licenseState'
+								options={ufs}
+							/>
+						</div>
+
+						<InputForm
+							label='Especialidade: '
+							register={form.register}
+							name='specialty'
+							error={form.formState.errors.specialty?.message}
 						/>
 
-						<SelectForm
-							label='Horário de Término:'
-							name='availableToTime'
-							control={form.control}
-							options={timesOfDay}
-							className='w-full'
-							error={form.formState.errors.availableToTime?.message}
-						/>
+						<div className='flex flex-row gap-4'>
+							<SelectForm
+								label='Disponível de: '
+								control={form.control}
+								name='availableFromWeekDay'
+								options={weekDays}
+								error={form.formState.errors.availableFromWeekDay?.message}
+							/>
+
+							<SelectForm
+								label='Disponível até: '
+								control={form.control}
+								name='availableToWeekDay'
+								options={weekDays}
+								error={form.formState.errors.availableToWeekDay?.message}
+							/>
+						</div>
+
+						<div className='flex flex-row gap-4'>
+							<SelectForm
+								label='Horário de início:'
+								name='availableFromTime'
+								control={form.control}
+								options={timesOfDay}
+								className='w-full'
+								error={form.formState.errors.availableFromTime?.message}
+							/>
+
+							<SelectForm
+								label='Horário de Término:'
+								name='availableToTime'
+								control={form.control}
+								options={timesOfDay}
+								className='w-full'
+								error={form.formState.errors.availableToTime?.message}
+							/>
+						</div>
 					</div>
 
 					{upsertDoctorAction.isPending && <LoadingDialog />}
 
-					<DialogFooter>
-						<div className='flex flex-col lg:flex-row gap-4 w-full mt-4'>
-							<DialogClose asChild>
-								<Button
-									type='button'
-									variant={'destructive'}
-									onClick={() => {
-										if (!upsertDoctorAction.isPending) form.reset();
-									}}
-									className='flex-1'
-								>
-									<BanIcon />
-									Cancelar
-								</Button>
-							</DialogClose>
-
+					<DialogFooter className='mt-4'>
+						<DialogClose asChild>
 							<Button
-								type='submit'
-								disabled={upsertDoctorAction.isPending}
-								form='registerForm'
+								type='button'
+								variant={'destructive'}
+								onClick={() => {
+									if (!upsertDoctorAction.isPending) form.reset();
+								}}
 								className='flex-1'
 							>
-								{upsertDoctorAction.isPending ? (
-									<Loader2Icon className='h-5 w-5 animate-spin' />
-								) : (
-									<>
-										<SaveIcon />
-										Salvar
-									</>
-								)}
+								<BanIcon />
+								Cancelar
 							</Button>
-						</div>
+						</DialogClose>
+
+						<Button
+							type='submit'
+							disabled={upsertDoctorAction.isPending}
+							form='registerForm'
+							className='flex-1'
+						>
+							{upsertDoctorAction.isPending ? (
+								<Loader2Icon className='h-5 w-5 animate-spin' />
+							) : (
+								<>
+									<SaveIcon />
+									Salvar
+								</>
+							)}
+						</Button>
 					</DialogFooter>
 				</form>
 			</Form>

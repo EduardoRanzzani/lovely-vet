@@ -70,93 +70,89 @@ const ServiceFormClient = ({
 		<DialogContent
 			onInteractOutside={(e) => e.preventDefault()}
 			showCloseButton={false}
-			className='max-w-lg'
 		>
+			<DialogHeader>
+				<DialogTitle>
+					{service ? 'Editar Serviço' : 'Cadastrar Serviço'}
+				</DialogTitle>
+				<DialogDescription>
+					{service
+						? 'Atualize as informações do serviço selecionado'
+						: 'Adicione um novo serviço ao sistema'}
+				</DialogDescription>
+			</DialogHeader>
+
 			<Form {...form}>
-				<form
-					onSubmit={form.handleSubmit(formSubmit)}
-					className='flex flex-col gap-4'
-				>
-					<DialogHeader>
-						<DialogTitle>
-							{service ? 'Editar Serviço' : 'Cadastrar Serviço'}
-						</DialogTitle>
-						<DialogDescription>
-							{service
-								? 'Atualize as informações do serviço selecionado'
-								: 'Adicione um novo serviço ao sistema'}
-						</DialogDescription>
-					</DialogHeader>
+				<form onSubmit={form.handleSubmit(formSubmit)}>
+					<div className='flex flex-col gap-2 max-h-100 overflow-y-auto px-1 sm:max-h-none sm:overflow-visible'>
+						<InputForm
+							label='Nome:'
+							register={form.register}
+							name='name'
+							error={form.formState.errors.name?.message}
+						/>
 
-					<InputForm
-						label='Nome:'
-						register={form.register}
-						name='name'
-						error={form.formState.errors.name?.message}
-					/>
+						<SelectForm
+							label='Espécie:'
+							name='specieId'
+							control={form.control}
+							error={form.formState.errors.specieId?.message}
+							options={[
+								{ value: '', label: 'Geral' },
+								...species.map((specie) => ({
+									value: specie.id,
+									label: specie.name,
+									key: specie.id,
+								})),
+							]}
+						/>
 
-					<SelectForm
-						label='Espécie:'
-						name='specieId'
-						control={form.control}
-						error={form.formState.errors.specieId?.message}
-						options={[
-							{ value: '', label: 'Geral' },
-							...species.map((specie) => ({
-								value: specie.id,
-								label: specie.name,
-								key: specie.id,
-							})),
-						]}
-					/>
+						<MoneyInputForm
+							label='Valor:'
+							control={form.control}
+							name='price'
+							error={form.formState.errors.price?.message}
+						/>
 
-					<MoneyInputForm
-						label='Valor:'
-						control={form.control}
-						name='price'
-						error={form.formState.errors.price?.message}
-					/>
-
-					<InputForm
-						label='Descrição:'
-						register={form.register}
-						name='description'
-						error={form.formState.errors.description?.message}
-					/>
+						<InputForm
+							label='Descrição:'
+							register={form.register}
+							name='description'
+							error={form.formState.errors.description?.message}
+						/>
+					</div>
 
 					{upsertServiceAction.isPending && <LoadingDialog />}
 
-					<DialogFooter>
-						<div className='flex flex-col lg:flex-row gap-4 w-full mt-4'>
-							<DialogClose asChild>
-								<Button
-									type='button'
-									variant={'destructive'}
-									onClick={() => {
-										if (!upsertServiceAction.isPending) form.reset();
-									}}
-									className='flex-1'
-								>
-									<BanIcon />
-									Cancelar
-								</Button>
-							</DialogClose>
-
+					<DialogFooter className='mt-4'>
+						<DialogClose asChild>
 							<Button
-								type='submit'
-								disabled={upsertServiceAction.isPending}
+								type='button'
+								variant={'destructive'}
+								onClick={() => {
+									if (!upsertServiceAction.isPending) form.reset();
+								}}
 								className='flex-1'
 							>
-								{upsertServiceAction.isPending ? (
-									<Loader2Icon className='h-5 w-5 animate-spin' />
-								) : (
-									<>
-										<SaveIcon />
-										Salvar
-									</>
-								)}
+								<BanIcon />
+								Cancelar
 							</Button>
-						</div>
+						</DialogClose>
+
+						<Button
+							type='submit'
+							disabled={upsertServiceAction.isPending}
+							className='flex-1'
+						>
+							{upsertServiceAction.isPending ? (
+								<Loader2Icon className='h-5 w-5 animate-spin' />
+							) : (
+								<>
+									<SaveIcon />
+									Salvar
+								</>
+							)}
+						</Button>
 					</DialogFooter>
 				</form>
 			</Form>

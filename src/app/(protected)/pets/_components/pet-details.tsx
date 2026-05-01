@@ -42,6 +42,7 @@ import { toast } from 'sonner';
 import PetFormClient from './pet-form';
 import TabHistory from './tabs/tab-history';
 import TabTimeline from './tabs/tab-timeline';
+import { formatWeight } from '@/helpers/weight';
 
 interface PetDetailsClientProps {
 	pet: PetsWithRelations;
@@ -58,7 +59,6 @@ const PetDetailsClient = ({
 }: PetDetailsClientProps) => {
 	const signedInUser = useUser();
 	const isCustomer = signedInUser?.user?.publicMetadata?.role === 'customer';
-	console.log({ isCustomer });
 
 	const species = use(speciesPromise);
 	const breeds = use(breedsPromise);
@@ -355,6 +355,7 @@ const PetDetailsClient = ({
 					<div className='p-4 border rounded-md bg-card'>
 						<TabHistory
 							historyEvents={historyEvents}
+							petId={pet.id}
 							canDelete={!isCustomer}
 							onDelete={handleDelete}
 						/>

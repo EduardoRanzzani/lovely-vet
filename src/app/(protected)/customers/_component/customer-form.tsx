@@ -88,168 +88,168 @@ const CustomerFormClient = ({
 		<DialogContent
 			onInteractOutside={(e) => e.preventDefault()}
 			showCloseButton={false}
-			className='max-w-lg'
 		>
+			<DialogHeader>
+				<DialogTitle>
+					{customer ? 'Atualizar Cliente' : 'Cadastrar Cliente'}
+				</DialogTitle>
+				<DialogDescription>
+					{customer
+						? 'Atualize as informações do cliente selecionado'
+						: 'Adicione um novo cliente ao sistema'}
+				</DialogDescription>
+			</DialogHeader>
+
 			<Form {...form}>
-				<form
-					onSubmit={form.handleSubmit(formSubmit)}
-					className='flex flex-col gap-2'
-				>
-					<DialogHeader>
-						<DialogTitle>
-							{customer ? 'Atualizar Cliente' : 'Cadastrar Cliente'}
-						</DialogTitle>
-						<DialogDescription>
-							{customer
-								? 'Atualize as informações do cliente selecionado'
-								: 'Adicione um novo cliente ao sistema'}
-						</DialogDescription>
-					</DialogHeader>
-
-					<input type='text' {...form.register('userId')} className='hidden' />
-
-					<InputForm
-						label='Nome:'
-						register={form.register}
-						name='name'
-						error={form.formState.errors.name?.message}
-					/>
-
-					<div className='flex flex-row gap-4'>
-						<InputForm
-							label='Email:'
-							register={form.register}
-							name='email'
-							error={form.formState.errors.email?.message}
-						/>
-
-						<SelectForm
-							label='Sexo:'
-							control={form.control}
-							error={form.formState.errors.gender?.message}
-							name='gender'
-							options={[
-								{
-									value: 'male',
-									label: 'Masculino',
-									key: 'male',
-								},
-								{
-									value: 'female',
-									label: 'Feminino',
-									key: 'female',
-								},
-							]}
-						/>
-					</div>
-
-					<div className='flex flex-row gap-4'>
-						<InputFormMask
-							label='Telefone:'
-							control={form.control}
-							error={form.formState.errors.phone?.message}
-							format='(##) #####-####'
-							mask='x'
-							name='phone'
-						/>
-						<InputFormMask
-							label='CPF:'
-							control={form.control}
-							error={form.formState.errors.cpf?.message}
-							format='###.###.###-##'
-							mask='x'
-							name='cpf'
-						/>
-					</div>
-
-					<div className='flex flex-row gap-4'>
-						<InputFormMask
-							label='CEP:'
-							control={form.control}
-							error={form.formState.errors.postalCode?.message}
-							format='#####-###'
-							mask='x'
-							name='postalCode'
-							onBlur={(event) => handlePostalCodeChange(event.target.value)}
+				<form onSubmit={form.handleSubmit(formSubmit)}>
+					<div className='flex flex-col gap-2 max-h-100 overflow-y-auto px-1 sm:max-h-none sm:overflow-visible'>
+						<input
+							type='text'
+							{...form.register('userId')}
+							className='hidden'
 						/>
 
 						<InputForm
-							label='Número:'
+							label='Nome:'
 							register={form.register}
-							error={form.formState.errors.addressNumber?.message}
-							name='addressNumber'
-							type='number'
+							name='name'
+							error={form.formState.errors.name?.message}
 						/>
-					</div>
 
-					<InputForm
-						label='Endereço:'
-						register={form.register}
-						name='address'
-						error={form.formState.errors.address?.message}
-						disabled
-					/>
+						<div className='flex flex-col xl:flex-row gap-2'>
+							<InputForm
+								label='Email:'
+								register={form.register}
+								name='email'
+								error={form.formState.errors.email?.message}
+							/>
 
-					<InputForm
-						label='Bairro:'
-						register={form.register}
-						name='neighborhood'
-						error={form.formState.errors.neighborhood?.message}
-						disabled
-					/>
+							<SelectForm
+								label='Sexo:'
+								control={form.control}
+								error={form.formState.errors.gender?.message}
+								name='gender'
+								options={[
+									{
+										value: 'male',
+										label: 'Masculino',
+										key: 'male',
+									},
+									{
+										value: 'female',
+										label: 'Feminino',
+										key: 'female',
+									},
+								]}
+							/>
+						</div>
 
-					<div className='flex flex-row gap-4'>
+						<div className='flex flex-col xl:flex-row gap-2'>
+							<InputFormMask
+								label='Telefone:'
+								control={form.control}
+								error={form.formState.errors.phone?.message}
+								format='(##) #####-####'
+								mask='x'
+								name='phone'
+							/>
+							<InputFormMask
+								label='CPF:'
+								control={form.control}
+								error={form.formState.errors.cpf?.message}
+								format='###.###.###-##'
+								mask='x'
+								name='cpf'
+							/>
+						</div>
+
+						<div className='flex flex-row gap-4'>
+							<InputFormMask
+								label='CEP:'
+								control={form.control}
+								error={form.formState.errors.postalCode?.message}
+								format='#####-###'
+								mask='x'
+								name='postalCode'
+								onBlur={(event) => handlePostalCodeChange(event.target.value)}
+							/>
+
+							<InputForm
+								label='Número:'
+								register={form.register}
+								error={form.formState.errors.addressNumber?.message}
+								name='addressNumber'
+								type='number'
+							/>
+						</div>
+
 						<InputForm
-							label='Cidade:'
+							label='Endereço:'
 							register={form.register}
-							name='city'
-							error={form.formState.errors.city?.message}
+							name='address'
+							error={form.formState.errors.address?.message}
 							disabled
 						/>
 
 						<InputForm
-							label='Estado:'
+							label='Bairro:'
 							register={form.register}
-							name='state'
-							error={form.formState.errors.state?.message}
+							name='neighborhood'
+							error={form.formState.errors.neighborhood?.message}
 							disabled
-							className='w-30'
 						/>
+
+						<div className='flex flex-row gap-4'>
+							<InputForm
+								label='Cidade:'
+								register={form.register}
+								name='city'
+								error={form.formState.errors.city?.message}
+								disabled
+							/>
+
+							<InputForm
+								label='Estado:'
+								register={form.register}
+								name='state'
+								error={form.formState.errors.state?.message}
+								disabled
+								className='w-30'
+							/>
+						</div>
 					</div>
 
 					{upsertCustomerAction.isPending && <LoadingDialog />}
 
-					<DialogFooter>
-						<div className='flex flex-col lg:flex-row gap-4 w-full mt-4'>
-							<DialogClose asChild>
-								<Button
-									type='button'
-									variant={'destructive'}
-									onClick={() => {
-										if (!upsertCustomerAction.isPending) form.reset();
-									}}
-									className='flex-1'
-								>
-									<BanIcon />
-									Cancelar
-								</Button>
-							</DialogClose>
-
+					<DialogFooter className='mt-4'>
+						<DialogClose asChild>
 							<Button
-								type='submit'
-								disabled={upsertCustomerAction.isPending}
+								type='button'
+								variant={'destructive'}
+								onClick={() => {
+									if (!upsertCustomerAction.isPending) form.reset();
+								}}
 								className='flex-1'
 							>
-								{upsertCustomerAction.isPending ? (
-									<Loader2Icon className='h-5 w-5 animate-spin' />
-								) : (
-									<>
-										<SaveIcon />
-										Salvar
-									</>
-								)}
+								<BanIcon />
+								Cancelar
 							</Button>
-						</div>
+						</DialogClose>
+
+						<Button
+							type='submit'
+							disabled={upsertCustomerAction.isPending}
+							className='flex-1'
+						>
+							{upsertCustomerAction.isPending ? (
+								<Loader2Icon className='h-5 w-5 animate-spin' />
+							) : (
+								<>
+									<SaveIcon />
+									Salvar
+								</>
+							)}
+						</Button>
 					</DialogFooter>
 				</form>
 			</Form>

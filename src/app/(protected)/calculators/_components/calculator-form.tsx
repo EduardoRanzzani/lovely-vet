@@ -5,6 +5,7 @@ import { CalculatorIcon, CalendarIcon, WashingMachineIcon } from 'lucide-react';
 import RuleOfThree from './rule-of-three';
 import DoseCalculation from './dose';
 import AddDaysToDate from './add-days-to-date';
+import DaysBetween from './days-between';
 
 const CalculatorPageForm = () => {
 	return (
@@ -25,6 +26,12 @@ const CalculatorPageForm = () => {
 				text='Calcular dias em data'
 				icon={CalendarIcon}
 				renderForm={() => <AddDaysToDate />}
+			/>
+
+			<DialogButton
+				text='Calcular dias entre datas'
+				icon={CalendarIcon}
+				renderForm={() => <DaysBetween />}
 			/>
 		</div>
 	);

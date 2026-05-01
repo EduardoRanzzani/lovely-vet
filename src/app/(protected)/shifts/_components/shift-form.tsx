@@ -5,7 +5,6 @@ import {
 	CreateShiftSchema,
 	ShiftsWithRelations,
 } from '@/api/schema/shifts.schema';
-import CheckboxForm from '@/components/form/checkbox-form';
 import DateTimePickerForm from '@/components/form/datetimepicker-form';
 import InputForm from '@/components/form/input-form';
 import MoneyInputForm from '@/components/form/money-input-form';
@@ -20,6 +19,7 @@ import {
 	DialogTitle,
 } from '@/components/ui/dialog';
 import { Form } from '@/components/ui/form';
+import LoadingDialog from '@/components/ui/loading';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { differenceInHours } from 'date-fns';
 import { BanIcon, Loader2Icon, SaveIcon } from 'lucide-react';
@@ -104,105 +104,100 @@ const ShiftFormClient = ({
 			</DialogHeader>
 
 			<Form {...form}>
-				<form
-					onSubmit={form.handleSubmit(formSubmit)}
-					className='flex flex-col gap-4'
-				>
-					<SelectForm
-						label='Veterinário:'
-						name='doctorId'
-						control={form.control}
-						error={form.formState.errors.doctorId?.message}
-						options={doctors.map((doctor) => ({
-							value: doctor.id,
-							label: doctor.user.name,
-						}))}
-					/>
-
-					<div className='flex flex-col lg:flex-row gap-4'>
-						<DateTimePickerForm
-							control={form.control}
-							label='Data/Hora de início:'
-							name='startTime'
-							error={form.formState.errors.startTime?.message}
-						/>
-
-						<InputForm
-							register={form.register}
-							label='Duração (em horas):'
-							name='duration'
-							error={form.formState.errors.duration?.message}
-							defaultValue={defaultShiftTime}
-							type='number'
-							min={1}
-							max={24}
-						/>
-					</div>
-
-					<InputForm
-						register={form.register}
-						label='Nome da clínica:'
-						name='clinicName'
-						error={form.formState.errors.clinicName?.message}
-					/>
-
-					<div className='flex flex-col lg:flex-row gap-4'>
-						<InputForm
-							register={form.register}
-							label='Solicitante:'
-							name='requesterName'
-							error={form.formState.errors.requesterName?.message}
-						/>
-
-						<MoneyInputForm
-							control={form.control}
-							label='Valor:'
-							name='amountInCents'
-							error={form.formState.errors.amountInCents?.message}
-						/>
-
+				<form onSubmit={form.handleSubmit(formSubmit)}>
+					<div className='flex flex-col gap-2 max-h-100 overflow-y-auto px-1 sm:max-h-none sm:overflow-visible'>
 						<SelectForm
+							label='Veterinário:'
+							name='doctorId'
 							control={form.control}
-							label='Pago?'
-							name='isPaid'
-							error={form.formState.errors.isPaid?.message}
-							options={[
-								{
-									value: true,
-									label: 'Sim',
-								},
-								{
-									value: false,
-									label: 'Não',
-								},
-							]}
+							error={form.formState.errors.doctorId?.message}
+							options={doctors.map((doctor) => ({
+								value: doctor.id,
+								label: doctor.user.name,
+							}))}
 						/>
+
+						<div className='flex flex-col lg:flex-row gap-4'>
+							<DateTimePickerForm
+								control={form.control}
+								label='Data/Hora de início:'
+								name='startTime'
+								error={form.formState.errors.startTime?.message}
+							/>
+
+							<InputForm
+								register={form.register}
+								label='Duração (em horas):'
+								name='duration'
+								error={form.formState.errors.duration?.message}
+								defaultValue={defaultShiftTime}
+								type='number'
+								min={1}
+								max={24}
+							/>
+						</div>
+
+						<InputForm
+							register={form.register}
+							label='Nome da clínica:'
+							name='clinicName'
+							error={form.formState.errors.clinicName?.message}
+						/>
+
+						<div className='flex flex-col lg:flex-row gap-4'>
+							<InputForm
+								register={form.register}
+								label='Solicitante:'
+								name='requesterName'
+								error={form.formState.errors.requesterName?.message}
+							/>
+
+							<MoneyInputForm
+								control={form.control}
+								label='Valor:'
+								name='amountInCents'
+								error={form.formState.errors.amountInCents?.message}
+							/>
+
+							<SelectForm
+								control={form.control}
+								label='Pago?'
+								name='isPaid'
+								error={form.formState.errors.isPaid?.message}
+								options={[
+									{
+										value: true,
+										label: 'Sim',
+									},
+									{
+										value: false,
+										label: 'Não',
+									},
+								]}
+							/>
+						</div>
 					</div>
 
-					<DialogFooter>
-						<div className='flex flex-col lg:flex-row gap-4 w-full mt-4'>
-							<DialogClose asChild>
-								<Button
-									type='button'
-									variant={'destructive'}
-									className='flex-1'
-								>
-									<BanIcon />
-									Cancelar
-								</Button>
-							</DialogClose>
+					{upsertShiftAction.isPending && <LoadingDialog />}
 
-							<Button type='submit' className='flex-1'>
-								{upsertShiftAction.isPending ? (
-									<Loader2Icon className='h-5 w-5 animate-spin' />
-								) : (
-									<>
-										<SaveIcon />
-										Salvar
-									</>
-								)}
+					<DialogFooter className='mt-4'>
+						<DialogClose asChild>
+							<Button type='button' variant={'destructive'} className='flex-1'>
+								<BanIcon />
+								Cancelar
 							</Button>
-						</div>
+						</DialogClose>
+
+						<Button type='submit' className='flex-1'>
+							{upsertShiftAction.isPending ? (
+								<Loader2Icon className='h-5 w-5 animate-spin' />
+							) : (
+								<>
+									<SaveIcon />
+									Salvar
+								</>
+							)}
+						</Button>
 					</DialogFooter>
 				</form>
 			</Form>

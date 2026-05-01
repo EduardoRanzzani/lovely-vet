@@ -142,112 +142,110 @@ const AppointmentFormClient = ({
 		},
 	});
 
-	console.log(form.formState.errors);
-
 	return (
 		<DialogContent
 			onInteractOutside={(e) => e.preventDefault()}
-			className='max-w-lg h-screen sm:h-auto overflow-scroll'
+			showCloseButton={false}
 		>
+			<DialogHeader>
+				<DialogTitle>
+					{appointment ? 'Atualizar Agendamento' : 'Cadastrar Agendamento'}
+				</DialogTitle>
+				<DialogDescription>
+					Selecione o pet, o veterinário e os serviços prestados.
+				</DialogDescription>
+			</DialogHeader>
+
 			<Form {...form}>
-				<form
-					id='appointmentForm'
-					onSubmit={form.handleSubmit(formSubmit)}
-					className='flex flex-col gap-4'
-				>
-					<DialogHeader>
-						<DialogTitle>
-							{appointment ? 'Atualizar Agendamento' : 'Cadastrar Agendamento'}
-						</DialogTitle>
-						<DialogDescription>
-							Selecione o pet, o veterinário e os serviços prestados.
-						</DialogDescription>
-					</DialogHeader>
-
-					<input type='text' className='hidden' {...form.register('status')} />
-
-					<SelectForm
-						label='Pet:'
-						name='petId'
-						control={form.control}
-						error={form.formState.errors.petId?.message}
-						options={pets.map((pet) => ({
-							value: pet.id,
-							label: `${pet.name} ${!isCustomer ? `(${pet.tutor.user.name})` : ''}`,
-						}))}
-					/>
-
-					<SelectForm
-						label='Veterinário:'
-						name='doctorId'
-						control={form.control}
-						error={form.formState.errors.doctorId?.message}
-						options={doctors.map((doctor) => ({
-							value: doctor.id,
-							label: doctor.user.name,
-						}))}
-					/>
-
-					<SelectForm
-						label='Serviços (Selecione um ou mais):'
-						name='services'
-						multiple
-						control={form.control}
-						error={form.formState.errors.services?.message}
-						options={filteredServices.map((service) => ({
-							value: service.id,
-							label: `${service.name} - R$ ${(service.priceInCents / 100).toFixed(2)}`,
-						}))}
-					/>
-
-					<div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
-						<DateTimePickerForm
-							label='Data e Hora:'
-							control={form.control}
-							name='scheduledAt'
-							error={form.formState.errors.scheduledAt?.message}
+				<form id='appointmentForm' onSubmit={form.handleSubmit(formSubmit)}>
+					<div className='flex flex-col gap-2 max-h-100 overflow-y-auto px-1 sm:max-h-none sm:overflow-visible'>
+						<input
+							type='text'
+							className='hidden'
+							{...form.register('status')}
 						/>
 
-						<MoneyInputForm
-							label={`Valor Total: ${!isCustomer ? '(Editável)' : ''}`}
+						<SelectForm
+							label='Pet:'
+							name='petId'
 							control={form.control}
-							name='totalPriceInCents'
-							disabled={isCustomer}
-							error={form.formState.errors.totalPriceInCents?.message}
+							error={form.formState.errors.petId?.message}
+							options={pets.map((pet) => ({
+								value: pet.id,
+								label: `${pet.name} ${!isCustomer ? `(${pet.tutor.user.name})` : ''}`,
+							}))}
+						/>
+
+						<SelectForm
+							label='Veterinário:'
+							name='doctorId'
+							control={form.control}
+							error={form.formState.errors.doctorId?.message}
+							options={doctors.map((doctor) => ({
+								value: doctor.id,
+								label: doctor.user.name,
+							}))}
+						/>
+
+						<SelectForm
+							label='Serviços (Selecione um ou mais):'
+							name='services'
+							multiple
+							control={form.control}
+							error={form.formState.errors.services?.message}
+							options={filteredServices.map((service) => ({
+								value: service.id,
+								label: `${service.name} - R$ ${(service.priceInCents / 100).toFixed(2)}`,
+							}))}
+						/>
+
+						<div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
+							<DateTimePickerForm
+								label='Data e Hora:'
+								control={form.control}
+								name='scheduledAt'
+								error={form.formState.errors.scheduledAt?.message}
+							/>
+
+							<MoneyInputForm
+								label={`Valor Total: ${!isCustomer ? '(Editável)' : ''}`}
+								control={form.control}
+								name='totalPriceInCents'
+								disabled={isCustomer}
+								error={form.formState.errors.totalPriceInCents?.message}
+							/>
+						</div>
+
+						<InputForm
+							label='Observações:'
+							register={form.register}
+							name='notes'
+							error={form.formState.errors.notes?.message}
 						/>
 					</div>
 
-					<InputForm
-						label='Observações:'
-						register={form.register}
-						name='notes'
-						error={form.formState.errors.notes?.message}
-					/>
-
 					{upsertAppointmentAction.isPending && <LoadingDialog />}
 
-					<DialogFooter>
-						<div className='flex flex-col w-full gap-4 lg:flex-row'>
-							<DialogClose asChild>
-								<Button type='button' variant='destructive' className='flex-1'>
-									<BanIcon className='w-4 h-4 mr-2' /> Cancelar
-								</Button>
-							</DialogClose>
-
-							<Button
-								type='submit'
-								disabled={upsertAppointmentAction.isPending}
-								className='flex-1'
-							>
-								{upsertAppointmentAction.isPending ? (
-									<Loader2Icon className='w-5 h-5 animate-spin' />
-								) : (
-									<>
-										<SaveIcon className='w-4 h-4 mr-2' /> Salvar
-									</>
-								)}
+					<DialogFooter className='mt-4'>
+						<DialogClose asChild>
+							<Button type='button' variant='destructive' className='flex-1'>
+								<BanIcon className='w-4 h-4 mr-2' /> Cancelar
 							</Button>
-						</div>
+						</DialogClose>
+
+						<Button
+							type='submit'
+							disabled={upsertAppointmentAction.isPending}
+							className='flex-1'
+						>
+							{upsertAppointmentAction.isPending ? (
+								<Loader2Icon className='w-5 h-5 animate-spin' />
+							) : (
+								<>
+									<SaveIcon className='w-4 h-4 mr-2' /> Salvar
+								</>
+							)}
+						</Button>
 					</DialogFooter>
 				</form>
 			</Form>

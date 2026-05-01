@@ -5,23 +5,25 @@ import { TabsContent } from '@/components/ui/tabs';
 import {
 	FileIcon,
 	FlaskConicalIcon,
-	MessageCircleIcon,
 	ScaleIcon,
 	SquarePenIcon,
 	StethoscopeIcon,
 	SyringeIcon,
 } from 'lucide-react';
+import DialogNotes from '../dialogs/dialog-notes';
 import DialogServices from '../dialogs/dialog-services';
 import PetTimelineClient from './history/pet-history-timeline';
 
 interface TabHistoryProps {
 	historyEvents: TimelineItem[];
+	petId: string;
 	canDelete: boolean;
 	onDelete: (item: TimelineItem) => void;
 }
 
 const TabHistory = ({
 	historyEvents,
+	petId,
 	canDelete,
 	onDelete,
 }: TabHistoryProps) => {
@@ -29,7 +31,7 @@ const TabHistory = ({
 		<TabsContent value='history' className='w-full'>
 			<div className='flex flex-col lg:flex-row gap-4'>
 				<div className='grid grid-cols-1 lg:grid-cols-3 gap-2 lg:w-3/5 bg-card lg:max-h-30'>
-					<DialogServices />
+					<DialogServices petId={petId} />
 
 					<Button className='bg-weight hover:bg-weight/80'>
 						<ScaleIcon />
@@ -60,10 +62,7 @@ const TabHistory = ({
 						Receita
 					</Button>
 
-					<Button className='bg-notes hover:bg-notes/80'>
-						<MessageCircleIcon />
-						Observações
-					</Button>
+					<DialogNotes petId={petId} />
 				</div>
 
 				<div className='flex-1 w-full border p-6 rounded-xl bg-muted/20 max-h-70 overflow-hidden'>
