@@ -166,7 +166,7 @@ const DashboardCards = ({
 							{showValues ? 'Esconder valores' : 'Mostrar valores'}
 						</TooltipContent>
 					</Tooltip>
-					
+
 					<Button
 						variant='outline'
 						size='icon'
@@ -222,10 +222,24 @@ const DashboardCards = ({
 												</div>
 											))
 										) : (
-											<p className='text-center text-muted-foreground'>
-												Tudo em dia!
-											</p>
+											<div className='flex items-center justify-center p-3 border rounded-lg bg-muted/5'>
+												<p className='text-center text-muted-foreground'>
+													Tudo em dia!
+												</p>
+											</div>
 										)}
+										<div className='flex justify-end w-full border rounded-lg bg-muted/5 p-3 gap-4'>
+											<h1 className='font-bold'>Total:</h1>
+											<h1 className='font-mono font-semibold'>
+												{showValues
+													? formatCurrencyFromCents(
+															shifts.reduce((acc, shift) => {
+																return acc + (shift.amountInCents ?? 0);
+															}, 0),
+														)
+													: '••••'}
+											</h1>
+										</div>
 									</div>
 								</DialogContent>
 							</Dialog>
@@ -267,10 +281,24 @@ const DashboardCards = ({
 												</div>
 											))
 										) : (
-											<p className='text-center text-muted-foreground'>
-												Tudo em dia!
-											</p>
+											<div className='flex items-center justify-center p-3 border rounded-lg bg-muted/5'>
+												<p className='text-center text-muted-foreground'>
+													Tudo em dia!
+												</p>
+											</div>
 										)}
+										<div className='flex justify-end w-full border rounded-lg bg-muted/5 p-3 gap-4'>
+											<h1 className='font-bold'>Total:</h1>
+											<h1 className='font-mono font-semibold'>
+												{showValues
+													? formatCurrencyFromCents(
+															clinicBreakdown.reduce((acc, clinic) => {
+																return acc + (clinic.total ?? 0);
+															}, 0),
+														)
+													: '••••'}
+											</h1>
+										</div>
 									</div>
 								</DialogContent>
 							</Dialog>
