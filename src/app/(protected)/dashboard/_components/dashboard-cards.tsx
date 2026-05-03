@@ -98,8 +98,32 @@ const DashboardCards = ({
 		{} as Record<string, { count: number; total: number }>,
 	);
 
+	// Agrupa todos os plantões por clínica
+	const shiftsByClinic = shifts.reduce(
+		(acc, shift) => {
+			const clinicName = shift.clinicName || 'Clínica não identificada';
+			const amount = shift.amountInCents ?? 0;
+
+			if (!acc[clinicName]) {
+				acc[clinicName] = { count: 0, total: 0 };
+			}
+
+			acc[clinicName].count += 1;
+			acc[clinicName].total += amount;
+
+			return acc;
+		},
+		{} as Record<string, { count: number; total: number }>,
+	);
+
 	// Converte em array para facilitar o mapeamento no JSX
 	const clinicBreakdown = Object.entries(nonPaidShiftsByClinic).map(
+		([name, data]) => ({
+			name,
+			...data,
+		}),
+	);
+	const shiftsBreakdown = Object.entries(shiftsByClinic).map(
 		([name, data]) => ({
 			name,
 			...data,
@@ -142,6 +166,7 @@ const DashboardCards = ({
 							{showValues ? 'Esconder valores' : 'Mostrar valores'}
 						</TooltipContent>
 					</Tooltip>
+					
 					<Button
 						variant='outline'
 						size='icon'
@@ -168,7 +193,43 @@ const DashboardCards = ({
 						<CardTitle>Total de Plantões</CardTitle>
 					</CardHeader>
 					<CardDescription>
-						<h1 className='text-center font-bold text-3xl'>{shifts.length}</h1>
+						<h1 className='text-center font-bold text-3xl'>
+							<Dialog>
+								<DialogTrigger>{shifts.length}</DialogTrigger>
+								<DialogContent>
+									<DialogTitle>Valores por Clínica</DialogTitle>
+									<div className='flex flex-col gap-3 mt-4'>
+										{shiftsBreakdown.length > 0 ? (
+											shiftsBreakdown.map((clinic) => (
+												<div
+													key={clinic.name}
+													className='flex items-center justify-between p-3 border rounded-lg bg-muted/5'
+												>
+													<div className='flex flex-col'>
+														<span className='text-sm font-bold'>
+															{clinic.name}
+														</span>
+														<span className='text-xs text-muted-foreground'>
+															{clinic.count}{' '}
+															{clinic.count === 1 ? 'plantão' : 'plantões'}
+														</span>
+													</div>
+													<span className='font-mono font-semibold'>
+														{showValues
+															? formatCurrencyFromCents(clinic.total)
+															: '••••'}
+													</span>
+												</div>
+											))
+										) : (
+											<p className='text-center text-muted-foreground'>
+												Tudo em dia!
+											</p>
+										)}
+									</div>
+								</DialogContent>
+							</Dialog>
+						</h1>
 					</CardDescription>
 				</Card>
 
@@ -179,11 +240,7 @@ const DashboardCards = ({
 					<CardDescription>
 						<h1 className='text-center font-bold text-3xl'>
 							<Dialog>
-								<DialogTrigger asChild>
-									<button className='hover:underline decoration-primary'>
-										{nonPaidShifts.length}
-									</button>
-								</DialogTrigger>
+								<DialogTrigger>{nonPaidShifts.length}</DialogTrigger>
 								<DialogContent>
 									<DialogTitle>Pendências por Clínica</DialogTitle>
 									<div className='flex flex-col gap-3 mt-4'>
