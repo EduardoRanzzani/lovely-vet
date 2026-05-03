@@ -1,9 +1,9 @@
-import { insertNote } from '@/api/actions/pet-notes.actions';
+import { insertPetWeight } from '@/api/actions/pet-weight.actions';
 import {
-	CreateNoteSchema,
-	createNoteSchema,
-} from '@/api/schema/pet-notes.schema';
-import TextareaForm from '@/components/form/text-area-form';
+	createPetWeightSchema,
+	CreatePetWeightSchema,
+} from '@/api/schema/pet-weight.schema';
+import WeightInputForm from '@/components/form/weight-input-form';
 import { Button } from '@/components/ui/button';
 import {
 	Dialog,
@@ -18,42 +18,43 @@ import {
 import { Form } from '@/components/ui/form';
 import LoadingDialog from '@/components/ui/loading';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { BanIcon, MessageCircleIcon, SaveIcon } from 'lucide-react';
+import { BanIcon, SaveIcon, ScaleIcon } from 'lucide-react';
 import { useAction } from 'next-safe-action/hooks';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 
-interface DialogNotesProps {
+interface DialogWeightProps {
 	petId: string;
 }
 
-const DialogNotes = ({ petId }: DialogNotesProps) => {
-	const [open, setOpen] = useState<boolean>(false); // Controle manual do estado do Dialog
+const DialogWeight = ({ petId }: DialogWeightProps) => {
+	const [open, setOpen] = useState<boolean>(false);
 
-	const form = useForm<CreateNoteSchema>({
-		resolver: zodResolver(createNoteSchema),
+	const form = useForm<CreatePetWeightSchema>({
+		resolver: zodResolver(createPetWeightSchema),
+		shouldUnregister: true,
 		defaultValues: {
-			content: '',
+			weightInGrams: 0,
 		},
 	});
 
-	const formSubmit = (data: CreateNoteSchema) => {
-		insertNoteAction.execute({
+	const formSubmit = (data: CreatePetWeightSchema) => {
+		insertPetWeightAction.execute({
 			...data,
 			petId: petId,
 		});
 	};
 
-	const insertNoteAction = useAction(insertNote, {
+	const insertPetWeightAction = useAction(insertPetWeight, {
 		onSuccess: () => {
-			toast.success('Observação salva com sucesso!');
+			toast.success('Peso salvo com sucesso!');
 			setOpen(false);
 			form.reset();
 		},
 		onError: (err) => {
-			console.error('Erro ao salvar a observação:', { err });
-			toast.error('Ocorreu um erro ao salvar a observação.');
+			console.error('Erro ao salvar o peso:', { err });
+			toast.error('Ocorreu um erro ao salvar o peso.');
 		},
 	});
 
@@ -65,26 +66,25 @@ const DialogNotes = ({ petId }: DialogNotesProps) => {
 		}
 	};
 
+	console.log('petid', petId);
+	console.log(form.formState.errors);
+
 	return (
 		<Dialog open={open} onOpenChange={handleOpenChange}>
 			<DialogTrigger asChild>
-				<Button className='bg-notes hover:bg-notes/80'>
-					<MessageCircleIcon />
-					Observações
+				<Button className='bg-weight hover:bg-weight/80'>
+					<ScaleIcon />
+					Peso
 				</Button>
 			</DialogTrigger>
 
 			<DialogContent
-				className='max-w-lg'
 				showCloseButton={false}
 				onInteractOutside={(e) => e.preventDefault()}
 			>
 				<DialogHeader>
-					<DialogTitle>Nova Observação</DialogTitle>
-					<DialogDescription>
-						Descreva abaixo as observações do paciente (não será exibido para os
-						tutores)
-					</DialogDescription>
+					<DialogTitle>Novo Peso</DialogTitle>
+					<DialogDescription>Informe o peso do paciente</DialogDescription>
 				</DialogHeader>
 
 				<Form {...form}>
@@ -94,12 +94,12 @@ const DialogNotes = ({ petId }: DialogNotesProps) => {
 					>
 						<input type='hidden' name='id' {...form.register} />
 						<input type='hidden' name='petId' value={petId} />
-						<TextareaForm
-							register={form.register}
-							name='content'
-							label='Observações'
-							error={form.formState.errors.content?.message}
-							placeholder='Digite aqui...'
+
+						<WeightInputForm
+							label='Peso:'
+							control={form.control}
+							name='weightInGrams'
+							error={form.formState.errors.weightInGrams?.message}
 						/>
 
 						<DialogFooter className='mt-4'>
@@ -119,9 +119,9 @@ const DialogNotes = ({ petId }: DialogNotesProps) => {
 				</Form>
 			</DialogContent>
 
-			{insertNoteAction.isPending && <LoadingDialog />}
+			{insertPetWeightAction.isPending && <LoadingDialog />}
 		</Dialog>
 	);
 };
 
-export default DialogNotes;
+export default DialogWeight;

@@ -6,6 +6,7 @@ import {
 	speciesTable,
 	usersTable,
 } from '@/db/schema';
+import z from 'zod';
 
 export type PetWeight = typeof petWeightsTable.$inferSelect;
 
@@ -21,3 +22,11 @@ export type PetWeightWithRelations = typeof petWeightsTable.$inferSelect & {
 		}[];
 	};
 };
+
+export const createPetWeightSchema = z.object({
+	id: z.uuid().optional(),
+	petId: z.uuid().optional(),
+	weightInGrams: z.number({ message: 'O campo peso é obrigatório' }),
+});
+
+export type CreatePetWeightSchema = z.infer<typeof createPetWeightSchema>;

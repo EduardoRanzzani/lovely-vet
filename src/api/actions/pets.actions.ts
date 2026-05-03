@@ -28,7 +28,7 @@ import {
 	inArray,
 	ilike,
 	lte,
-	or
+	or,
 } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 import z from 'zod';
@@ -40,7 +40,7 @@ import {
 import { sendEmailAction } from './emails.actions';
 
 function buildPetsListWhere(
-	dbUser: { role: string; customer?: { id: string; } | null; },
+	dbUser: { role: string; customer?: { id: string } | null },
 	search?: string,
 ): SQL | undefined {
 	const parts: SQL[] = [];
@@ -61,44 +61,32 @@ function buildPetsListWhere(
 			or(
 				ilike(petsTable.name, s),
 				ilike(petsTable.color, s),
-				exists(
+				inArray(
+					petsTable.breedId,
 					db
-						.select()
+						.select({ id: breedsTable.id })
 						.from(breedsTable)
-						.where(
-							and(
-								eq(breedsTable.id, petsTable.breedId),
-								ilike(breedsTable.name, s),
-							),
-						),
+						.where(ilike(breedsTable.name, s)),
 				),
-				exists(
+				inArray(
+					petsTable.breedId,
 					db
-						.select()
+						.select({ id: breedsTable.id })
 						.from(breedsTable)
 						.innerJoin(speciesTable, eq(breedsTable.specieId, speciesTable.id))
-						.where(
-							and(
-								eq(breedsTable.id, petsTable.breedId),
-								ilike(speciesTable.name, s),
-							),
-						),
+						.where(ilike(speciesTable.name, s)),
 				),
-				exists(
+				inArray(
+					petsTable.id,
 					db
-						.select()
+						.select({ petId: petTutorsTable.petId })
 						.from(petTutorsTable)
 						.innerJoin(
 							customersTable,
 							eq(petTutorsTable.customerId, customersTable.id),
 						)
 						.innerJoin(usersTable, eq(customersTable.userId, usersTable.id))
-						.where(
-							and(
-								eq(petTutorsTable.petId, petsTable.id),
-								ilike(usersTable.name, s),
-							),
-						),
+						.where(ilike(usersTable.name, s)),
 				),
 			)!,
 		);
@@ -280,6 +268,11 @@ export const upsertPet = actionClient
 		const authenticatedUser = await currentUser();
 		if (!authenticatedUser) throw new Error('Usuário não autenticado');
 
+		const user = await db.query.usersTable.findFirst({
+			where: eq(usersTable.clerkUserId, authenticatedUser.id),
+		});
+		const authorId = user?.id;
+
 		const isNewRegistration = !parsedInput.id;
 		const tutorIds = [...new Set(parsedInput.customerIds)];
 
@@ -332,6 +325,7 @@ export const upsertPet = actionClient
 				await tx.insert(petWeightsTable).values({
 					petId: insertedPet.id,
 					weightInGrams: Math.round(parsedInput.weightInGrams * 1000),
+					authorId: authorId,
 					measuredAt: new Date(),
 				});
 			}

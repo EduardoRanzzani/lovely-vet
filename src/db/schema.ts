@@ -167,7 +167,36 @@ export const petWeightsTable = pgTable('pet_weights', {
 		.notNull()
 		.references(() => petsTable.id, { onDelete: 'cascade' }),
 	weightInGrams: integer('weight_in_grams').notNull(),
+	authorId: uuid('user_id').references(() => usersTable.id),
 	measuredAt: timestamp('measured_at').defaultNow().notNull(),
+	createdAt: timestamp('created_at').defaultNow().notNull(),
+});
+
+// Documentos e Exames (Anexos)
+export const petAttachmentsTable = pgTable('pet_attachments', {
+	id: uuid('id').primaryKey().defaultRandom(),
+	petId: uuid('pet_id')
+		.notNull()
+		.references(() => petsTable.id, { onDelete: 'cascade' }),
+	name: text('name').notNull(), // Ex: "Hemograma Completo"
+	url: text('url').notNull(), // URL do S3/Uploadthing
+	type: text('type').notNull(), // 'exam', 'document', 'image'
+	authorId: uuid('author_id')
+		.notNull()
+		.references(() => usersTable.id),
+	createdAt: timestamp('created_at').defaultNow().notNull(),
+});
+
+// Observações / Notas Gerais (que não são prontuários)
+export const petNotesTable = pgTable('pet_notes', {
+	id: uuid('id').primaryKey().defaultRandom(),
+	petId: uuid('pet_id')
+		.notNull()
+		.references(() => petsTable.id, { onDelete: 'cascade' }),
+	content: text('content').notNull(),
+	authorId: uuid('author_id')
+		.notNull()
+		.references(() => usersTable.id),
 	createdAt: timestamp('created_at').defaultNow().notNull(),
 });
 
@@ -334,31 +363,6 @@ export const pathologiesTable = pgTable('pathologies', {
 	createdAt: timestamp('created_at').defaultNow().notNull(),
 });
 
-// Documentos e Exames (Anexos)
-export const petAttachmentsTable = pgTable('pet_attachments', {
-	id: uuid('id').primaryKey().defaultRandom(),
-	petId: uuid('pet_id')
-		.notNull()
-		.references(() => petsTable.id, { onDelete: 'cascade' }),
-	name: text('name').notNull(), // Ex: "Hemograma Completo"
-	url: text('url').notNull(), // URL do S3/Uploadthing
-	type: text('type').notNull(), // 'exam', 'document', 'image'
-	createdAt: timestamp('created_at').defaultNow().notNull(),
-});
-
-// Observações / Notas Gerais (que não são prontuários)
-export const petNotesTable = pgTable('pet_notes', {
-	id: uuid('id').primaryKey().defaultRandom(),
-	petId: uuid('pet_id')
-		.notNull()
-		.references(() => petsTable.id, { onDelete: 'cascade' }),
-	content: text('content').notNull(),
-	authorId: uuid('author_id')
-		.notNull()
-		.references(() => usersTable.id),
-	createdAt: timestamp('created_at').defaultNow().notNull(),
-});
-
 // --- RELATIONS ---
 
 export const usersRelations = relations(usersTable, ({ one }) => ({
@@ -443,6 +447,10 @@ export const petWeightsRelations = relations(petWeightsTable, ({ one }) => ({
 	pet: one(petsTable, {
 		fields: [petWeightsTable.petId],
 		references: [petsTable.id],
+	}),
+	author: one(usersTable, {
+		fields: [petWeightsTable.authorId],
+		references: [usersTable.id],
 	}),
 }));
 

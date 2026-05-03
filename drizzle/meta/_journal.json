@@ -141,6 +141,13 @@
       "when": 1777777845404,
       "tag": "0019_nice_the_twelve",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1777848404077,
+      "tag": "0020_nosy_mandroid",
+      "breakpoints": true
     }
   ]
 }

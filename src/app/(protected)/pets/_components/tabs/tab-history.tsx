@@ -5,13 +5,13 @@ import { TabsContent } from '@/components/ui/tabs';
 import {
 	FileIcon,
 	FlaskConicalIcon,
-	ScaleIcon,
 	SquarePenIcon,
 	StethoscopeIcon,
 	SyringeIcon,
 } from 'lucide-react';
 import DialogNotes from '../dialogs/dialog-notes';
 import DialogServices from '../dialogs/dialog-services';
+import DialogWeight from '../dialogs/dialog-weight';
 import PetTimelineClient from './history/pet-history-timeline';
 
 interface TabHistoryProps {
@@ -33,10 +33,7 @@ const TabHistory = ({
 				<div className='grid grid-cols-1 lg:grid-cols-3 gap-2 lg:w-3/5 bg-card lg:max-h-30'>
 					<DialogServices petId={petId} />
 
-					<Button className='bg-weight hover:bg-weight/80'>
-						<ScaleIcon />
-						Peso
-					</Button>
+					<DialogWeight petId={petId} />
 
 					<Button className='bg-pathology hover:bg-pathology/80'>
 						<StethoscopeIcon />
@@ -77,7 +74,7 @@ const TabHistory = ({
 						</Badge>
 					</div>
 
-					<div className='pr-2 pb-20'>
+					<div className='pb-20'>
 						<PetTimelineClient
 							historyEvents={historyEvents}
 							canDelete={canDelete}

@@ -45,7 +45,6 @@ import { toast } from 'sonner';
 import PetFormClient from './pet-form';
 import TabHistory from './tabs/tab-history';
 import TabTimeline from './tabs/tab-timeline';
-import { formatWeight } from '@/helpers/weight';
 
 interface PetDetailsClientProps {
 	pet: PetsWithRelations;
@@ -371,7 +370,7 @@ const PetDetailsClient = ({
 						/>
 
 						<TabsContent value='protocols'>
-							<h1>Protocolos Clínicos</h1>4
+							<h1>Protocolos Clínicos</h1>
 						</TabsContent>
 
 						<TabTimeline
