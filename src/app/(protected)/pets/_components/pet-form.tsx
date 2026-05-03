@@ -55,7 +55,7 @@ const PetFormClient = ({
 			birthDate: pet ? new Date(pet.birthDate + 'T12:00:00') : new Date(),
 			specieId: pet?.breed.specieId ?? '',
 			breedId: pet?.breedId ?? '',
-			customerId: pet?.customerId ?? '',
+			customerIds: pet?.petTutors?.map((pt) => pt.tutor.id) ?? [],
 			color: pet?.color ?? '',
 			gender: pet?.gender ?? 'female',
 			sterile: pet?.sterile ?? false,
@@ -172,14 +172,16 @@ const PetFormClient = ({
 						/>
 
 						<SelectForm
-							label='Tutor:'
+							label='Tutor(es):'
 							control={form.control}
-							name='customerId'
+							name='customerIds'
+							multiple
+							maxVisible={3}
 							options={customers.map((customer) => ({
 								value: customer.id,
 								label: customer.user.name,
 							}))}
-							error={form.formState.errors.customerId?.message}
+							error={form.formState.errors.customerIds?.message}
 						/>
 
 						<div className='w-full flex flex-row gap-4'>

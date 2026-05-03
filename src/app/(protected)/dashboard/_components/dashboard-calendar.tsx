@@ -3,6 +3,7 @@
 
 import { monthNames } from '@/api/config/consts';
 import { AppointmentsWithRelations } from '@/api/schema/appointments.schema';
+import { formatPetTutorNames } from '@/api/schema/pets.schema';
 import { ShiftsWithRelations } from '@/api/schema/shifts.schema';
 import { CustomCalendar } from '@/components/ui/custom-calendar';
 import { cn } from '@/lib/utils';
@@ -108,7 +109,9 @@ const DashboardCalendarClient = ({
 							</span>
 							<span className='flex items-center gap-2'>
 								<UserIcon className='w-3 h-3' />
-								<p className='truncate'>{appo.pet?.tutor?.user.name}</p>
+								<p className='truncate'>
+									{appo.pet ? formatPetTutorNames(appo.pet) : ''}
+								</p>
 							</span>
 						</div>
 					</div>

@@ -14,8 +14,10 @@ export type PetWeightWithRelations = typeof petWeightsTable.$inferSelect & {
 		breed: typeof breedsTable.$inferSelect & {
 			specie: typeof speciesTable.$inferSelect;
 		};
-		tutor: typeof customersTable.$inferSelect & {
-			user: typeof usersTable.$inferSelect;
-		};
+		petTutors: {
+			tutor: typeof customersTable.$inferSelect & {
+				user: typeof usersTable.$inferSelect;
+			};
+		}[];
 	};
 };

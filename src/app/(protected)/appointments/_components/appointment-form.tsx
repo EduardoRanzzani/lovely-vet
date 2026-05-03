@@ -7,7 +7,10 @@ import {
 	CreateAppointmentSchema,
 } from '@/api/schema/appointments.schema';
 import { DoctorsWithRelations } from '@/api/schema/doctors.schema';
-import { PetsWithRelations } from '@/api/schema/pets.schema';
+import {
+	formatPetTutorNames,
+	PetsWithRelations,
+} from '@/api/schema/pets.schema';
 import { ServicesWithRelations } from '@/api/schema/services.schema';
 import DateTimePickerForm from '@/components/form/datetimepicker-form';
 import InputForm from '@/components/form/input-form';
@@ -172,7 +175,7 @@ const AppointmentFormClient = ({
 							error={form.formState.errors.petId?.message}
 							options={pets.map((pet) => ({
 								value: pet.id,
-								label: `${pet.name} ${!isCustomer ? `(${pet.tutor.user.name})` : ''}`,
+								label: `${pet.name} ${!isCustomer ? `(${formatPetTutorNames(pet)})` : ''}`,
 							}))}
 						/>
 

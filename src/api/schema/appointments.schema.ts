@@ -12,9 +12,11 @@ import z from 'zod';
 export type AppointmentsWithRelations =
 	typeof appointmentsTable.$inferSelect & {
 		pet: typeof petsTable.$inferSelect & {
-			tutor: typeof customersTable.$inferSelect & {
-				user: typeof usersTable.$inferSelect;
-			};
+			petTutors: {
+				tutor: typeof customersTable.$inferSelect & {
+					user: typeof usersTable.$inferSelect;
+				};
+			}[];
 		};
 		doctor: typeof doctorsTable.$inferSelect & {
 			user: typeof usersTable.$inferSelect;

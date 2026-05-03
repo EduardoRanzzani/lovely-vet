@@ -9,7 +9,10 @@ import {
 import { MAX_PAGE_SIZE, PaginatedData } from '@/api/config/consts';
 import { AppointmentsWithRelations } from '@/api/schema/appointments.schema';
 import { DoctorsWithRelations } from '@/api/schema/doctors.schema';
-import { PetsWithRelations } from '@/api/schema/pets.schema';
+import {
+	formatPetTutorNames,
+	PetsWithRelations,
+} from '@/api/schema/pets.schema';
 import { ServicesWithRelations } from '@/api/schema/services.schema';
 import AddButton from '@/components/list/add-button';
 import ConfirmAlertButton from '@/components/list/confirm-alert-dialog';
@@ -163,7 +166,7 @@ const AppointmentsListClient = ({
 					})}
 				</TableCell>
 				<TableCell>{appointment.pet.name}</TableCell>
-				<TableCell>{appointment.pet.tutor.user.name}</TableCell>
+				<TableCell>{formatPetTutorNames(appointment.pet)}</TableCell>
 				<TableCell>
 					<BadgeStatus appointment={appointment} />
 				</TableCell>
@@ -287,7 +290,7 @@ const AppointmentsListClient = ({
 						<span className='text-sm font-semibold'>
 							<UserRoundIcon className='w-4 h-4' />
 						</span>
-						<span className='text-sm'>{appointment.pet.tutor.user.name}</span>
+						<span className='text-sm'>{formatPetTutorNames(appointment.pet)}</span>
 					</p>
 					<p className='flex items-center gap-4'>
 						<span className='text-sm font-semibold'>

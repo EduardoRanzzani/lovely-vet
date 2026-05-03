@@ -5,12 +5,13 @@ import {
 	appointmentItemsTable,
 	appointmentsTable,
 	petsTable,
+	petTutorsTable,
 	usersTable,
 } from '@/db/schema';
 import { actionClient } from '@/lib/next-safe-action';
 import { currentUser } from '@clerk/nextjs/server';
 import { addMonths, endOfMonth, startOfMonth, subMonths } from 'date-fns';
-import { and, count, desc, eq, gte, ilike, lte, ne } from 'drizzle-orm';
+import { and, count, desc, eq, exists, gte, ilike, lte, ne } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 import z from 'zod';
 import { MAX_PAGE_SIZE, monthNames, PaginatedData } from '../config/consts';
@@ -42,17 +43,15 @@ export const getAppointmentsPaginated = async (
 
 			// FILTRO DE SEGURANÇA: Somente pets do cliente logado
 			if (dbUser.role === 'customer' && dbUser.customer) {
-				// Usamos subquery para verificar se o petId do agendamento
-				// pertence ao customerId do usuário logado
 				filters.push(
 					exists(
 						db
 							.select()
-							.from(petsTable)
+							.from(petTutorsTable)
 							.where(
 								and(
-									eq(petsTable.id, appointments.petId),
-									eq(petsTable.customerId, dbUser.customer!.id),
+									eq(petTutorsTable.petId, appointments.petId),
+									eq(petTutorsTable.customerId, dbUser.customer!.id),
 								),
 							),
 					),
@@ -81,7 +80,9 @@ export const getAppointmentsPaginated = async (
 		offset: offset,
 		orderBy: desc(appointmentsTable.scheduledAt),
 		with: {
-			pet: { with: { tutor: { with: { user: true } } } },
+			pet: {
+				with: { petTutors: { with: { tutor: { with: { user: true } } } } },
+			},
 			doctor: { with: { user: true } },
 			items: { with: { service: true } },
 		},
@@ -94,8 +95,18 @@ export const getAppointmentsPaginated = async (
 		.innerJoin(petsTable, eq(appointmentsTable.petId, petsTable.id))
 		.where(
 			and(
-				dbUser.role === 'customer'
-					? eq(petsTable.customerId, dbUser.customer!.id)
+				dbUser.role === 'customer' && dbUser.customer
+					? exists(
+							db
+								.select()
+								.from(petTutorsTable)
+								.where(
+									and(
+										eq(petTutorsTable.petId, appointmentsTable.petId),
+										eq(petTutorsTable.customerId, dbUser.customer.id),
+									),
+								),
+						)
 					: undefined,
 				search ? ilike(petsTable.name, `%${search}%`) : undefined,
 			),
@@ -120,7 +131,9 @@ export const getAllAppointments = async (): Promise<
 > => {
 	const appointments = await db.query.appointmentsTable.findMany({
 		with: {
-			pet: { with: { tutor: { with: { user: true } } } },
+			pet: {
+				with: { petTutors: { with: { tutor: { with: { user: true } } } } },
+			},
 			doctor: { with: { user: true } },
 			items: { with: { service: true } },
 		},
@@ -159,7 +172,9 @@ export const getAppointments = async (
 			gte(appointmentsTable.scheduledAt, startRange),
 		),
 		with: {
-			pet: { with: { tutor: { with: { user: true } } } },
+			pet: {
+				with: { petTutors: { with: { tutor: { with: { user: true } } } } },
+			},
 			doctor: { with: { user: true } },
 			items: { with: { service: true } },
 		},

@@ -4,7 +4,10 @@ import { deletePet } from '@/api/actions/pets.actions';
 import { MAX_PAGE_SIZE, PaginatedData } from '@/api/config/consts';
 import { BreedsWithRelations } from '@/api/schema/breeds.schema';
 import { CustomersWithRelations } from '@/api/schema/customers.schema';
-import { PetsWithRelations } from '@/api/schema/pets.schema';
+import {
+	formatPetTutorNames,
+	PetsWithRelations,
+} from '@/api/schema/pets.schema';
 import { Species } from '@/api/schema/species.schema';
 import { calculateAge, getInitials } from '@/api/util';
 import { WhatsappIcon } from '@/components/icons/icon-whatsapp';
@@ -88,7 +91,7 @@ const PetsListClient = ({
 		{ header: 'Nome', accessorKey: 'name' },
 		{ header: 'Idade', accessorKey: 'age' },
 		{ header: 'Peso', accessorKey: 'weight' },
-		{ header: 'Tutor', accessorKey: 'tutor' },
+		{ header: 'Tutor(es)', accessorKey: 'tutor' },
 		{
 			header: 'Ações',
 			accessorKey: 'actions',
@@ -97,8 +100,11 @@ const PetsListClient = ({
 	];
 
 	const renderRow = (pet: PetsWithRelations) => {
-		const firstName = pet.tutor.user.name.split(' ')[0];
-		const whatsappUrl = `https://wa.me/55${pet.tutor.phone.replace(/\D/g, '')}/?text=Ol%C3%A1,%20tudo%20bem%3F%20Gostaria%20de%20falar%20com%20${firstName}%20sobre%20${pet.gender === 'female' ? 'a' : 'o'}%20${pet.name}`;
+		const firstTutor = pet.petTutors[0]?.tutor;
+		const firstName = firstTutor?.user.name.split(' ')[0] ?? '';
+		const whatsappUrl = firstTutor
+			? `https://wa.me/55${firstTutor.phone.replace(/\D/g, '')}/?text=Ol%C3%A1,%20tudo%20bem%3F%20Gostaria%20de%20falar%20com%20${firstName}%20sobre%20${pet.gender === 'female' ? 'a' : 'o'}%20${pet.name}`
+			: '';
 
 		return (
 			<TableRow key={pet.id} className='group'>
@@ -145,22 +151,28 @@ const PetsListClient = ({
 
 				<TableCell>
 					<div className='flex gap-4 items-center'>
-						<Tooltip>
-							<TooltipTrigger asChild>
-								<Button asChild variant={'outline'} size={'icon'}>
-									<Link target='_blank' href={whatsappUrl}>
-										<WhatsappIcon />
-									</Link>
-								</Button>
-							</TooltipTrigger>
-							<TooltipContent>Conversar via WhatsApp</TooltipContent>
-						</Tooltip>
+						{whatsappUrl ? (
+							<Tooltip>
+								<TooltipTrigger asChild>
+									<Button asChild variant={'outline'} size={'icon'}>
+										<Link target='_blank' href={whatsappUrl}>
+											<WhatsappIcon />
+										</Link>
+									</Button>
+								</TooltipTrigger>
+								<TooltipContent>Conversar via WhatsApp</TooltipContent>
+							</Tooltip>
+						) : null}
 
-						<div className='flex flex-col'>
-							<span className='text-sm font-medium'>{pet.tutor.user.name}</span>
-							<span className='text-[10px] text-muted-foreground uppercase'>
-								{pet.tutor.phone}
+						<div className='flex flex-col min-w-0'>
+							<span className='text-sm font-medium'>
+								{formatPetTutorNames(pet)}
 							</span>
+							{firstTutor ? (
+								<span className='text-[10px] text-muted-foreground uppercase'>
+									{firstTutor.phone}
+								</span>
+							) : null}
 						</div>
 					</div>
 				</TableCell>
@@ -189,8 +201,11 @@ const PetsListClient = ({
 	};
 
 	const renderMobile = (pet: PetsWithRelations) => {
-		const firstName = pet.tutor.user.name.split(' ')[0];
-		const whatsappUrl = `https://wa.me/55${pet.tutor.phone.replace(/\D/g, '')}/?text=Ol%C3%A1,%20tudo%20bem%3F%20Gostaria%20de%20falar%20com%20${firstName}%20sobre%20${pet.gender === 'female' ? 'a' : 'o'}%20${pet.name}`;
+		const firstTutor = pet.petTutors[0]?.tutor;
+		const firstName = firstTutor?.user.name.split(' ')[0] ?? '';
+		const whatsappUrl = firstTutor
+			? `https://wa.me/55${firstTutor.phone.replace(/\D/g, '')}/?text=Ol%C3%A1,%20tudo%20bem%3F%20Gostaria%20de%20falar%20com%20${firstName}%20sobre%20${pet.gender === 'female' ? 'a' : 'o'}%20${pet.name}`
+			: '';
 
 		return (
 			<div key={pet.id} className='flex flex-col gap-4'>
@@ -198,11 +213,21 @@ const PetsListClient = ({
 					<div className='flex gap-4'>
 						<Avatar className='h-10 w-10 rounded-full' draggable={false}>
 							{pet.photo ? (
-								<AvatarImage src={pet.photo} alt={pet.name} />
+								<AvatarImage
+									src={pet.photo}
+									alt={pet.name}
+									draggable={false}
+									className='object-cover'
+								/>
 							) : (
-								<AvatarFallback className='rounded-full'>
-									{getInitials(pet.name)}
-								</AvatarFallback>
+								<AvatarImage
+									src={
+										pet?.breed?.specie.name === 'Canino'
+											? '/dog-placeholder.png'
+											: '/cat-placeholder.svg'
+									}
+									alt={pet.name}
+								/>
 							)}
 						</Avatar>
 
@@ -277,14 +302,16 @@ const PetsListClient = ({
 						<span className='text-sm font-semibold'>
 							<UserRoundIcon className='w-4 h-4' />
 						</span>
-						<span className='flex items-center text-sm gap-4'>
-							Tutor: {pet.tutor.user.name}
-							<Button asChild variant={'outline'}>
-								<Link target='_blank' href={whatsappUrl}>
-									<WhatsappIcon />
-									Conversar
-								</Link>
-							</Button>
+						<span className='flex flex-wrap items-center text-sm gap-4'>
+							Tutor(es): {formatPetTutorNames(pet)}
+							{whatsappUrl ? (
+								<Button asChild variant={'outline'}>
+									<Link target='_blank' href={whatsappUrl}>
+										<WhatsappIcon />
+										Conversar
+									</Link>
+								</Button>
+							) : null}
 						</span>
 					</p>
 				</div>

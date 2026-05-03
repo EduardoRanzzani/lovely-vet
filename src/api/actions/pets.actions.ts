@@ -6,10 +6,8 @@ import {
 	breedsTable,
 	customersTable,
 	medicalRecordsTable,
-	pathologiesTable,
-	petAttachmentsTable,
-	petNotesTable,
 	petsTable,
+	petTutorsTable,
 	petWeightsTable,
 	prescriptionsTable,
 	speciesTable,
@@ -25,11 +23,13 @@ import {
 	countDistinct,
 	desc,
 	eq,
+	exists,
 	gte,
 	ilike,
 	lte,
 	or,
 } from 'drizzle-orm';
+import type { SQL } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 import z from 'zod';
 import { monthNames, PaginatedData } from '../config/consts';
@@ -38,6 +38,83 @@ import {
 	PetsWithRelations,
 } from '../schema/pets.schema';
 import { sendEmailAction } from './emails.actions';
+
+function buildPetsListWhere(
+	dbUser: { role: string; customer?: { id: string } | null },
+	search?: string,
+): SQL | undefined {
+	const parts: SQL[] = [];
+	if (dbUser.role === 'customer' && dbUser.customer) {
+		parts.push(
+			exists(
+				db
+					.select()
+					.from(petTutorsTable)
+					.where(
+						and(
+							eq(petTutorsTable.petId, petsTable.id),
+							eq(petTutorsTable.customerId, dbUser.customer.id),
+						),
+					),
+			),
+		);
+	}
+	if (search?.trim()) {
+		const s = `%${search.trim()}%`;
+		parts.push(
+			or(
+				ilike(petsTable.name, s),
+				ilike(petsTable.color, s),
+				exists(
+					db
+						.select()
+						.from(breedsTable)
+						.where(
+							and(
+								eq(breedsTable.id, petsTable.breedId),
+								ilike(breedsTable.name, s),
+							),
+						),
+				),
+				exists(
+					db
+						.select()
+						.from(breedsTable)
+						.innerJoin(
+							speciesTable,
+							eq(breedsTable.specieId, speciesTable.id),
+						)
+						.where(
+							and(
+								eq(breedsTable.id, petsTable.breedId),
+								ilike(speciesTable.name, s),
+							),
+						),
+				),
+				exists(
+					db
+						.select()
+						.from(petTutorsTable)
+						.innerJoin(
+							customersTable,
+							eq(petTutorsTable.customerId, customersTable.id),
+						)
+						.innerJoin(
+							usersTable,
+							eq(customersTable.userId, usersTable.id),
+						)
+						.where(
+							and(
+								eq(petTutorsTable.petId, petsTable.id),
+								ilike(usersTable.name, s),
+							),
+						),
+				),
+			)!,
+		);
+	}
+	return parts.length ? and(...parts) : undefined;
+}
 
 export const getCreatedPets = async (
 	monthName?: string,
@@ -64,9 +141,13 @@ export const getCreatedPets = async (
 			gte(petsTable.createdAt, startRange),
 		),
 		with: {
-			tutor: {
+			petTutors: {
 				with: {
-					user: true,
+					tutor: {
+						with: {
+							user: true,
+						},
+					},
 				},
 			},
 			breed: {
@@ -92,7 +173,7 @@ export const getPetById = async (id: string): Promise<PetsWithRelations> => {
 		where: eq(petsTable.id, id),
 		with: {
 			breed: { with: { specie: true } },
-			tutor: { with: { user: true } },
+			petTutors: { with: { tutor: { with: { user: true } } } },
 			medicalRecords: {
 				orderBy: desc(medicalRecordsTable.createdAt),
 				with: { doctor: { with: { user: true } } },
@@ -112,13 +193,11 @@ export const getPetById = async (id: string): Promise<PetsWithRelations> => {
 				},
 			},
 			vaccines: {
-				// 'doctor' aqui refere-se ao nome definido em 'vaccinesRelations'
 				with: { doctor: { with: { user: true } } },
 			},
 			pathologies: true,
 			attachments: true,
 			notes: {
-				// 'author' aqui refere-se ao nome definido em 'petNotesRelations'
 				with: { author: true },
 			},
 		},
@@ -126,53 +205,7 @@ export const getPetById = async (id: string): Promise<PetsWithRelations> => {
 
 	if (!pet) throw new Error('Pet não encontrado');
 
-	// O cast duplo (unknown -> Type) resolve problemas de complexidade do Drizzle
 	return pet as unknown as PetsWithRelations;
-};
-
-const getPetWithRelationsQuery = () => {
-	return db
-		.select({
-			pet: petsTable,
-			breed: breedsTable,
-			specie: speciesTable,
-			tutor: customersTable,
-			user: usersTable,
-			// Selecionamos o peso da tabela que faremos join
-			lastWeightGrams: petWeightsTable.weightInGrams,
-		})
-		.from(petsTable)
-		.innerJoin(breedsTable, eq(petsTable.breedId, breedsTable.id))
-		.innerJoin(speciesTable, eq(breedsTable.specieId, speciesTable.id))
-		.innerJoin(customersTable, eq(petsTable.customerId, customersTable.id))
-		.innerJoin(usersTable, eq(customersTable.userId, usersTable.id))
-		.leftJoin(medicalRecordsTable, eq(medicalRecordsTable.petId, petsTable.id))
-		.leftJoin(appointmentsTable, eq(appointmentsTable.petId, petsTable.id))
-		.leftJoin(vaccinesTable, eq(vaccinesTable.petId, petsTable.id))
-		.leftJoin(
-			petWeightsTable,
-			eq(
-				petWeightsTable.id,
-				db
-					.select({ id: petWeightsTable.id })
-					.from(petWeightsTable)
-					.where(eq(petWeightsTable.petId, petsTable.id))
-					.orderBy(desc(petWeightsTable.measuredAt))
-					.limit(1),
-			),
-		)
-		.leftJoin(pathologiesTable, eq(pathologiesTable.petId, petsTable.id))
-		.leftJoin(petAttachmentsTable, eq(petAttachmentsTable.petId, petsTable.id))
-		.leftJoin(petNotesTable, eq(petNotesTable.petId, petsTable.id))
-		.leftJoin(prescriptionsTable, eq(prescriptionsTable.petId, petsTable.id))
-		.groupBy(
-			petsTable.id,
-			breedsTable.id,
-			speciesTable.id,
-			customersTable.id,
-			usersTable.id,
-			petWeightsTable.id,
-		);
 };
 
 export const getPets = async (): Promise<PetsWithRelations[]> => {
@@ -186,20 +219,18 @@ export const getPets = async (): Promise<PetsWithRelations[]> => {
 
 	if (!dbUser) throw new Error('Usuário não encontrado no banco');
 
-	const conditions = [];
-	if (dbUser.role === 'customer' && dbUser.customer) {
-		conditions.push(eq(petsTable.customerId, dbUser.customer.id));
-	}
+	const filter = buildPetsListWhere(dbUser, undefined);
 
-	const data = await getPetWithRelationsQuery()
-		.where(conditions.length > 0 ? and(...conditions) : undefined)
-		.orderBy(asc(petsTable.name));
+	const data = await db.query.petsTable.findMany({
+		where: filter,
+		with: {
+			petTutors: { with: { tutor: { with: { user: true } } } },
+			breed: { with: { specie: true } },
+		},
+		orderBy: asc(petsTable.name),
+	});
 
-	return data.map((row) => ({
-		...row.pet,
-		breed: { ...row.breed, specie: row.specie },
-		tutor: { ...row.tutor, user: row.user },
-	}));
+	return data as PetsWithRelations[];
 };
 
 export const getPetsPaginated = async (
@@ -218,52 +249,32 @@ export const getPetsPaginated = async (
 	if (!dbUser) throw new Error('Usuário não encontrado no banco');
 
 	const offset = (page - 1) * limit;
-	const conditions = [];
+	const filter = buildPetsListWhere(dbUser, search);
 
-	if (dbUser?.role === 'customer' && dbUser.customer) {
-		conditions.push(eq(petsTable.customerId, dbUser.customer.id));
-	}
-
-	if (search) {
-		conditions.push(
-			or(
-				ilike(petsTable.name, `%${search}%`),
-				ilike(breedsTable.name, `%${search}%`),
-				ilike(speciesTable.name, `%${search}%`),
-				ilike(usersTable.name, `%${search}%`),
-				ilike(petsTable.color, `%${search}%`),
-			),
-		);
-	}
-
-	const filter = conditions.length > 0 ? and(...conditions) : undefined;
-
-	const data = await getPetWithRelationsQuery()
-		.where(filter)
-		.limit(limit)
-		.offset(offset)
-		.orderBy(asc(petsTable.name));
+	const data = await db.query.petsTable.findMany({
+		where: filter,
+		with: {
+			petTutors: { with: { tutor: { with: { user: true } } } },
+			breed: { with: { specie: true } },
+			weightHistory: {
+				orderBy: (w, { desc }) => [desc(w.measuredAt)],
+				limit: 1,
+			},
+		},
+		limit,
+		offset,
+		orderBy: asc(petsTable.name),
+	});
 
 	const totalCountResult = await db
 		.select({ value: countDistinct(petsTable.id) })
 		.from(petsTable)
-		.innerJoin(breedsTable, eq(petsTable.breedId, breedsTable.id))
-		.innerJoin(speciesTable, eq(breedsTable.specieId, speciesTable.id))
-		.innerJoin(customersTable, eq(petsTable.customerId, customersTable.id))
-		.innerJoin(usersTable, eq(customersTable.userId, usersTable.id))
 		.where(filter);
 
 	const totalCount = Number(totalCountResult[0]?.value ?? 0);
 
 	return {
-		data: data.map((row) => ({
-			...row.pet,
-			breed: { ...row.breed, specie: row.specie },
-			tutor: { ...row.tutor, user: row.user },
-			weightHistory: row.lastWeightGrams
-				? [{ weightInGrams: row.lastWeightGrams, measuredAt: new Date() }]
-				: [],
-		})),
+		data: data as PetsWithRelations[],
 		metadata: {
 			totalCount,
 			pageCount: Math.ceil(totalCount / limit),
@@ -279,8 +290,8 @@ export const upsertPet = actionClient
 		const authenticatedUser = await currentUser();
 		if (!authenticatedUser) throw new Error('Usuário não autenticado');
 
-		// 1. Identificamos se a intenção original é um cadastro ou edição
 		const isNewRegistration = !parsedInput.id;
+		const tutorIds = [...new Set(parsedInput.customerIds)];
 
 		const petResult = await db.transaction(async (tx) => {
 			const [insertedPet] = await tx
@@ -290,7 +301,6 @@ export const upsertPet = actionClient
 					name: parsedInput.name,
 					birthDate: format(parsedInput.birthDate, 'yyyy-MM-dd'),
 					breedId: parsedInput.breedId,
-					customerId: parsedInput.customerId,
 					sterile: parsedInput.sterile ?? false,
 					status: parsedInput.status ?? 'alive',
 					photo: parsedInput.photo,
@@ -303,7 +313,6 @@ export const upsertPet = actionClient
 						name: parsedInput.name,
 						birthDate: format(parsedInput.birthDate, 'yyyy-MM-dd'),
 						breedId: parsedInput.breedId,
-						customerId: parsedInput.customerId,
 						sterile: parsedInput.sterile ?? false,
 						status: parsedInput.status ?? 'alive',
 						photo: parsedInput.photo,
@@ -316,6 +325,19 @@ export const upsertPet = actionClient
 
 			if (!insertedPet) throw new Error('Erro ao salvar o pet');
 
+			await tx
+				.delete(petTutorsTable)
+				.where(eq(petTutorsTable.petId, insertedPet.id));
+
+			if (tutorIds.length > 0) {
+				await tx.insert(petTutorsTable).values(
+					tutorIds.map((customerId) => ({
+						petId: insertedPet.id,
+						customerId,
+					})),
+				);
+			}
+
 			if (parsedInput.weightInGrams) {
 				await tx.insert(petWeightsTable).values({
 					petId: insertedPet.id,
@@ -327,21 +349,27 @@ export const upsertPet = actionClient
 			return insertedPet;
 		});
 
-		// 2. Disparamos o e-mail condicionalmente
 		if (isNewRegistration) {
-			const tutor = await db.query.customersTable.findFirst({
-				where: eq(customersTable.id, petResult.customerId),
-				with: {
-					user: true,
-				},
-			});
-
-			if (tutor?.user?.email) {
-				await sendEmailAction({
-					to: tutor.user.email,
-					subject: 'Novo Pet Adicionado',
-					body: `Olá, ${tutor.user.name.substring(0, tutor.user.name.indexOf(' '))}! <br/> O pet ${petResult.name} foi adicionado ao seu cadastro.`,
+			const emailed = new Set<string>();
+			for (const customerId of tutorIds) {
+				const tutor = await db.query.customersTable.findFirst({
+					where: eq(customersTable.id, customerId),
+					with: {
+						user: true,
+					},
 				});
+
+				const email = tutor?.user?.email;
+				if (email && !emailed.has(email)) {
+					emailed.add(email);
+					const firstName =
+						tutor!.user!.name.split(/\s+/)[0] ?? tutor!.user!.name;
+					await sendEmailAction({
+						to: email,
+						subject: 'Novo Pet Adicionado',
+						body: `Olá, ${firstName}! <br/> O pet ${petResult.name} foi adicionado ao seu cadastro.`,
+					});
+				}
 			}
 		}
 
@@ -382,9 +410,9 @@ export const getPetHistory = async (petId: string) => {
 				orderBy: desc(petWeightsTable.measuredAt),
 			},
 			appointments: {
-				orderBy: desc(appointmentsTable.scheduledAt), // Adicionado ordem
+				orderBy: desc(appointmentsTable.scheduledAt),
 				with: {
-					doctor: { with: { user: true } }, // ESSENCIAL: Faltava isso aqui
+					doctor: { with: { user: true } },
 					items: { with: { service: true } },
 				},
 			},
@@ -399,8 +427,8 @@ export const getPetHistory = async (petId: string) => {
 			breed: {
 				with: { specie: true },
 			},
-			tutor: {
-				with: { user: true },
+			petTutors: {
+				with: { tutor: { with: { user: true } } },
 			},
 		},
 	});

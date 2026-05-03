@@ -3,7 +3,10 @@
 import { monthNames } from '@/api/config/consts';
 import { AppointmentsWithRelations } from '@/api/schema/appointments.schema';
 import { CustomersWithRelations } from '@/api/schema/customers.schema';
-import { PetsWithRelations } from '@/api/schema/pets.schema';
+import {
+	formatPetTutorNames,
+	PetsWithRelations,
+} from '@/api/schema/pets.schema';
 import { ShiftsWithRelations } from '@/api/schema/shifts.schema';
 import { Button } from '@/components/ui/button';
 import {
@@ -409,14 +412,18 @@ const DashboardCards = ({
 																<h2 className='text-sm font-bold'>
 																	{pet.name}
 																</h2>
-																<p className='text-xs'>{pet.tutor.user.name}</p>
+																<p className='text-xs'>
+																	{formatPetTutorNames(pet)}
+																</p>
 															</div>
 														</div>
 													</div>
 												))
 										) : (
-											<div>
-												<h1>Nenhum pet cadastrado.</h1>
+											<div className='flex items-center justify-center p-3 border rounded-lg bg-muted/5'>
+												<p className='text-center text-muted-foreground'>
+													Nenhum pet cadastrado.
+												</p>
 											</div>
 										)}
 									</div>
@@ -462,8 +469,10 @@ const DashboardCards = ({
 													</div>
 												))
 										) : (
-											<div>
-												<h1>Nenhum cliente cadastrado.</h1>
+											<div className='flex items-center justify-center p-3 border rounded-lg bg-muted/5'>
+												<p className='text-center text-muted-foreground'>
+													Nenhum cliente cadastrado.
+												</p>
 											</div>
 										)}
 									</div>

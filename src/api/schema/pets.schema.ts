@@ -17,13 +17,17 @@ import {
 } from '@/db/schema';
 import z from 'zod';
 
+export type PetTutorLink = {
+	tutor: typeof customersTable.$inferSelect & {
+		user: typeof usersTable.$inferSelect;
+	};
+};
+
 export type PetsWithRelations = typeof petsTable.$inferSelect & {
 	breed: typeof breedsTable.$inferSelect & {
 		specie: typeof speciesTable.$inferSelect;
 	};
-	tutor: typeof customersTable.$inferSelect & {
-		user: typeof usersTable.$inferSelect;
-	};
+	petTutors: PetTutorLink[];
 	medicalRecords?: (typeof medicalRecordsTable.$inferSelect & {
 		doctor: typeof doctorsTable.$inferSelect & {
 			user: typeof usersTable.$inferSelect;
@@ -65,13 +69,27 @@ export type PetsWithRelations = typeof petsTable.$inferSelect & {
 	weightInGrams?: number;
 };
 
+/** Nomes dos tutores para exibição (pet carregado com `petTutors.tutor.user`). */
+export function formatPetTutorNames(
+	pet: Pick<PetsWithRelations, 'petTutors'>,
+): string {
+	return (
+		pet.petTutors
+			?.map((pt) => pt.tutor.user.name)
+			.filter(Boolean)
+			.join(', ') ?? ''
+	);
+}
+
 export const createPetWithTutorAndBreedSchema = z.object({
 	id: z.uuid().optional().nullable(), // uuid() do zod costuma ser .string().uuid()
 	name: z.string().min(1, { message: 'Nome é obrigatório' }),
 	birthDate: z.date({ message: 'Data de nascimento é obrigatória' }),
 	breedId: z.uuid({ message: 'Raça inválida' }),
 	specieId: z.uuid({ message: 'Espécie inválida' }),
-	customerId: z.uuid({ message: 'Tutor inválido' }),
+	customerIds: z
+		.array(z.uuid({ message: 'Tutor inválido' }))
+		.min(1, { message: 'Selecione pelo menos um tutor' }),
 	color: z.string().min(1, { message: 'Pelagem é obrigatória' }),
 	gender: z.enum(['male', 'female'], { message: 'Selecione uma das opções' }), // Removido .default()
 	sterile: z.boolean({ message: 'Selecione uma das opções' }), // Removido .default()

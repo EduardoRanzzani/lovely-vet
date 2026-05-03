@@ -131,9 +131,6 @@ export const petsTable = pgTable('pets', {
 	breedId: uuid('breed_id')
 		.notNull()
 		.references(() => breedsTable.id),
-	customerId: uuid('customer_id')
-		.notNull()
-		.references(() => customersTable.id, { onDelete: 'cascade' }),
 	color: text('color').notNull(),
 	gender: sexEnum('gender').notNull(),
 	sterile: boolean('sterile').default(false).notNull(),
@@ -145,6 +142,23 @@ export const petsTable = pgTable('pets', {
 		.$onUpdate(() => new Date())
 		.notNull(),
 });
+
+// Pets ↔ Tutores (clientes): many-to-many
+export const petTutorsTable = pgTable(
+	'pet_tutors',
+	{
+		petId: uuid('pet_id')
+			.notNull()
+			.references(() => petsTable.id, { onDelete: 'cascade' }),
+		customerId: uuid('customer_id')
+			.notNull()
+			.references(() => customersTable.id, { onDelete: 'cascade' }),
+	},
+	(table) => ({
+		pk: primaryKey({ columns: [table.petId, table.customerId] }),
+		customerIdx: index('pet_tutors_customer_id_idx').on(table.customerId),
+	}),
+);
 
 // Histórico de pesos
 export const petWeightsTable = pgTable('pet_weights', {
@@ -374,7 +388,7 @@ export const customersRelations = relations(
 			fields: [customersTable.userId],
 			references: [usersTable.id],
 		}),
-		pets: many(petsTable),
+		petTutors: many(petTutorsTable),
 	}),
 );
 
@@ -398,15 +412,23 @@ export const servicesRelations = relations(servicesTable, ({ one }) => ({
 	}),
 }));
 
+export const petTutorsRelations = relations(petTutorsTable, ({ one }) => ({
+	pet: one(petsTable, {
+		fields: [petTutorsTable.petId],
+		references: [petsTable.id],
+	}),
+	tutor: one(customersTable, {
+		fields: [petTutorsTable.customerId],
+		references: [customersTable.id],
+	}),
+}));
+
 export const petsRelations = relations(petsTable, ({ one, many }) => ({
 	breed: one(breedsTable, {
 		fields: [petsTable.breedId],
 		references: [breedsTable.id],
 	}),
-	tutor: one(customersTable, {
-		fields: [petsTable.customerId],
-		references: [customersTable.id],
-	}),
+	petTutors: many(petTutorsTable),
 	medicalRecords: many(medicalRecordsTable),
 	appointments: many(appointmentsTable),
 	weightHistory: many(petWeightsTable),

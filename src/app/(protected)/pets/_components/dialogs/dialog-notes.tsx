@@ -82,8 +82,8 @@ const DialogNotes = ({ petId }: DialogNotesProps) => {
 				<DialogHeader>
 					<DialogTitle>Nova Observação</DialogTitle>
 					<DialogDescription>
-						Descreva abaixo as observações do paciente (não será exibido para o
-						tutor)
+						Descreva abaixo as observações do paciente (não será exibido para
+						os tutores)
 					</DialogDescription>
 				</DialogHeader>
 

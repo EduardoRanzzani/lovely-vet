@@ -17,9 +17,13 @@ export const getPetWeights = async (): Promise<PetWeightWithRelations[]> => {
 							specie: true,
 						},
 					},
-					tutor: {
+					petTutors: {
 						with: {
-							user: true,
+							tutor: {
+								with: {
+									user: true,
+								},
+							},
 						},
 					},
 				},

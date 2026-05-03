@@ -2,7 +2,10 @@
 import { deleteTimelineItem } from '@/api/actions/timeline.actions';
 import { BreedsWithRelations } from '@/api/schema/breeds.schema';
 import { CustomersWithRelations } from '@/api/schema/customers.schema';
-import { PetsWithRelations } from '@/api/schema/pets.schema';
+import {
+	formatPetTutorNames,
+	PetsWithRelations,
+} from '@/api/schema/pets.schema';
 import { Species } from '@/api/schema/species.schema';
 import { TimelineItem } from '@/api/schema/timeline.schema';
 import { calculateAge } from '@/api/util';
@@ -69,11 +72,16 @@ const PetDetailsClient = ({
 	);
 
 	const age = calculateAge(new Date(pet.birthDate));
-	const fullAddress = `${pet.tutor.address}, ${pet.tutor.addressNumber} - ${pet.tutor.neighborhood}, ${pet.tutor.city} - ${pet.tutor.state}`;
+	const primaryTutor = pet.petTutors[0]?.tutor;
+	const fullAddress = primaryTutor
+		? `${primaryTutor.address}, ${primaryTutor.addressNumber} - ${primaryTutor.neighborhood}, ${primaryTutor.city} - ${primaryTutor.state}`
+		: '';
 	const lastWeightGrams = pet.weightHistory?.[0]?.weightInGrams ?? 0;
 	const lastWeightKg = lastWeightGrams / 1000;
 
-	const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(fullAddress)}`;
+	const googleMapsUrl = fullAddress
+		? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(fullAddress)}`
+		: '';
 
 	const tabOptions = [
 		{ id: 'history', label: 'Histórico', icon: GalleryHorizontalIcon },
@@ -290,26 +298,28 @@ const PetDetailsClient = ({
 
 						<p className='col-span-2 w-full'>
 							<span className='font-semibold text-muted-foreground'>
-								Tutor:
+								Tutor(es):
 							</span>{' '}
-							{pet.tutor.user.name}
+							{formatPetTutorNames(pet)}
 						</p>
 
 						<p className='col-span-2'>
 							<span className='font-semibold text-muted-foreground'>
 								Endereço:
 							</span>{' '}
-							{fullAddress}
+							{fullAddress || '—'}
 						</p>
 
-						<div className='col-span-2 pt-2'>
-							<Button asChild variant='outline' className='w-full gap-2'>
-								<Link href={googleMapsUrl} target='_blank'>
-									<GoogleMapsIcon className='w-4 h-4' />
-									Abrir no Google Maps
-								</Link>
-							</Button>
-						</div>
+						{googleMapsUrl ? (
+							<div className='col-span-2 pt-2'>
+								<Button asChild variant='outline' className='w-full gap-2'>
+									<Link href={googleMapsUrl} target='_blank'>
+										<GoogleMapsIcon className='w-4 h-4' />
+										Abrir no Google Maps
+									</Link>
+								</Button>
+							</div>
+						) : null}
 					</div>
 				</div>
 			</div>
