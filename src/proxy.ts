@@ -20,6 +20,7 @@ const rolePermissions = {
 		'/calculators',
 		'/shifts',
 		'/messages',
+		'/admin',
 	],
 	doctor: [
 		'/dashboard',

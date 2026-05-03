@@ -52,7 +52,7 @@ const DialogNotes = ({ petId }: DialogNotesProps) => {
 			form.reset();
 		},
 		onError: (err) => {
-			console.error('Erro ao salvar a observação:', err);
+			console.error('Erro ao salvar a observação:', { err });
 			toast.error('Ocorreu um erro ao salvar a observação.');
 		},
 	});
@@ -82,8 +82,8 @@ const DialogNotes = ({ petId }: DialogNotesProps) => {
 				<DialogHeader>
 					<DialogTitle>Nova Observação</DialogTitle>
 					<DialogDescription>
-						Descreva abaixo as observações do paciente (não será exibido para
-						os tutores)
+						Descreva abaixo as observações do paciente (não será exibido para os
+						tutores)
 					</DialogDescription>
 				</DialogHeader>
 
@@ -92,6 +92,8 @@ const DialogNotes = ({ petId }: DialogNotesProps) => {
 						onSubmit={form.handleSubmit(formSubmit)}
 						className='flex flex-col gap-2'
 					>
+						<input type='hidden' name='id' {...form.register} />
+						<input type='hidden' name='petId' value={petId} />
 						<TextareaForm
 							register={form.register}
 							name='content'

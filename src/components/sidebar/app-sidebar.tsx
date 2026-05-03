@@ -23,6 +23,7 @@ import {
 	LucideIcon,
 	MessageSquareIcon,
 	PawPrintIcon,
+	ShieldUserIcon,
 	StethoscopeIcon,
 	UsersRoundIcon,
 } from 'lucide-react';
@@ -97,6 +98,12 @@ const AppSidebar = () => {
 	];
 
 	const helpers: SidebarItem[] = [
+		{
+			title: 'Alterar Cadastro',
+			url: '/admin',
+			icon: ShieldUserIcon,
+			roles: ['admin'],
+		},
 		{
 			title: 'Calculadoras',
 			url: '/calculators',

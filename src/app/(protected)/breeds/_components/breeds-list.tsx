@@ -9,14 +9,15 @@ import DeleteAlertButton from '@/components/list/delete-alert-dialog';
 import EditButton from '@/components/list/edit-button';
 import SearchInput from '@/components/list/search-input';
 import TableComponent from '@/components/list/table-component';
+import LoadingDialog from '@/components/ui/loading';
 import { TableCell, TableRow } from '@/components/ui/table';
 import { handleNavigation } from '@/lib/utils';
+import { CatIcon, DogIcon, PawPrintIcon } from 'lucide-react';
 import { useAction } from 'next-safe-action/hooks';
 import { useSearchParams } from 'next/navigation';
 import { use } from 'react';
 import { toast } from 'sonner';
 import BreedFormClient from './breed-form';
-import LoadingDialog from '@/components/ui/loading';
 
 interface BreedsListClientProps {
 	breeds: Promise<PaginatedData<BreedsWithRelations>>;
@@ -60,7 +61,20 @@ const BreedsListClient = ({ breeds, species }: BreedsListClientProps) => {
 	const renderRow = (breed: BreedsWithRelations) => {
 		return (
 			<TableRow key={breed.id}>
-				<TableCell>{breed.name}</TableCell>
+				<TableCell>
+					<div className='flex items-center gap-4'>
+						<span className='rounded-full border p-2 w-10 h-10'>
+							{breed.specie.name === 'Canino' ? (
+								<DogIcon />
+							) : breed.specie.name === 'Felino' ? (
+								<CatIcon />
+							) : (
+								<PawPrintIcon />
+							)}
+						</span>
+						{breed.name}
+					</div>
+				</TableCell>
 				<TableCell>{breed.specie.name}</TableCell>
 				<TableCell className='w-20 space-x-2'>
 					<EditButton
@@ -84,10 +98,26 @@ const BreedsListClient = ({ breeds, species }: BreedsListClientProps) => {
 		return (
 			<div key={breed.id} className='flex flex-col gap-4'>
 				<div className='flex items-center justify-between'>
-					<span className='flex flex-col gap-2'>
-						<h3 className='font-bold'>{breed.name}</h3>
-						<p className='text-xs text-muted-foreground'>{breed.specie.name}</p>
-					</span>
+					<div className='flex items-center gap-4'>
+						<div className='flex items-center gap-4'>
+							<span className='rounded-full border p-2 w-12 h-12 flex items-center justify-center'>
+								{breed.specie.name === 'Canino' ? (
+									<DogIcon className='h-12 w-12' />
+								) : breed.specie.name === 'Felino' ? (
+									<CatIcon className='h-12 w-12' />
+								) : (
+									<PawPrintIcon className='h-12 w-12' />
+								)}
+							</span>
+						</div>
+
+						<div className='flex flex-col justify-center'>
+							{breed.name}
+							<p className='text-xs text-muted-foreground'>
+								{breed.specie.name}
+							</p>
+						</div>
+					</div>
 
 					<div className='flex flex-col gap-2'>
 						<EditButton

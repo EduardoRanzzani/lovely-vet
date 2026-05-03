@@ -9,13 +9,13 @@ import {
 	PetsWithRelations,
 } from '@/api/schema/pets.schema';
 import { Species } from '@/api/schema/species.schema';
-import { calculateAge, getInitials } from '@/api/util';
+import { calculateAge } from '@/api/util';
 import { WhatsappIcon } from '@/components/icons/icon-whatsapp';
 import AddButton from '@/components/list/add-button';
 import DeleteAlertButton from '@/components/list/delete-alert-dialog';
 import SearchInput from '@/components/list/search-input';
 import TableComponent from '@/components/list/table-component';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Avatar, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge'; // Opcional: para status ou gênero
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';

@@ -25,9 +25,10 @@ import {
 	eq,
 	exists,
 	gte,
+	inArray,
 	ilike,
 	lte,
-	or,
+	or
 } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 import z from 'zod';
@@ -39,22 +40,18 @@ import {
 import { sendEmailAction } from './emails.actions';
 
 function buildPetsListWhere(
-	dbUser: { role: string; customer?: { id: string } | null },
+	dbUser: { role: string; customer?: { id: string; } | null; },
 	search?: string,
 ): SQL | undefined {
 	const parts: SQL[] = [];
 	if (dbUser.role === 'customer' && dbUser.customer) {
 		parts.push(
-			exists(
+			inArray(
+				petsTable.id,
 				db
-					.select()
+					.select({ petId: petTutorsTable.petId })
 					.from(petTutorsTable)
-					.where(
-						and(
-							eq(petTutorsTable.petId, petsTable.id),
-							eq(petTutorsTable.customerId, dbUser.customer.id),
-						),
-					),
+					.where(eq(petTutorsTable.customerId, dbUser.customer.id)),
 			),
 		);
 	}

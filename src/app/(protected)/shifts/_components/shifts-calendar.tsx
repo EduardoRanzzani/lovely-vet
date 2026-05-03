@@ -118,16 +118,22 @@ const ShiftsCalendarClient = ({
 		isCurrentMonth: boolean,
 		onEdit: (shift: ShiftsWithRelations) => void,
 	) => {
-		const dayShifts = shifts.filter((shift) => {
-			const start = new Date(shift.startTime);
-			const end = new Date(shift.endTime);
+		const dayShifts = shifts
+			.filter((shift) => {
+				const start = new Date(shift.startTime);
+				const end = new Date(shift.endTime);
 
-			// Verifica se o dia atual do calendário está entre o início e o fim do plantão
-			return isWithinInterval(date, {
-				start: startOfDay(start),
-				end: endOfDay(end),
+				// Verifica se o dia atual do calendário está entre o início e o fim do plantão
+				return isWithinInterval(date, {
+					start: startOfDay(start),
+					end: endOfDay(end),
+				});
+			})
+			.sort((a, b) => {
+				const timeA = new Date(a.startTime).getTime();
+				const timeB = new Date(b.startTime).getTime();
+				return timeA - timeB;
 			});
-		});
 
 		return (
 			<div

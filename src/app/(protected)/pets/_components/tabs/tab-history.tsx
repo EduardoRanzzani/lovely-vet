@@ -65,7 +65,7 @@ const TabHistory = ({
 					<DialogNotes petId={petId} />
 				</div>
 
-				<div className='flex-1 w-full border p-6 rounded-xl bg-muted/20 max-h-70 overflow-hidden'>
+				<div className='flex-1 w-full border p-6 rounded-xl bg-muted/20 max-h-100'>
 					<div className='flex items-center justify-between mb-2 pb-4 border-b'>
 						<h3 className='font-bold text-lg'>Histórico Clínico</h3>
 						<Badge
@@ -77,7 +77,7 @@ const TabHistory = ({
 						</Badge>
 					</div>
 
-					<div className='max-h-70 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-muted pb-20'>
+					<div className='pr-2 pb-20'>
 						<PetTimelineClient
 							historyEvents={historyEvents}
 							canDelete={canDelete}
