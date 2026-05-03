@@ -298,22 +298,25 @@ const PetsListClient = ({
 				<Separator />
 
 				<div className='flex flex-col gap-2'>
-					<p className='flex gap-2 items-center'>
+					<div className='flex gap-2 items-center'>
 						<span className='text-sm font-semibold'>
 							<UserRoundIcon className='w-4 h-4' />
 						</span>
 						<span className='flex flex-wrap items-center text-sm gap-4'>
-							Tutor(es): {formatPetTutorNames(pet)}
-							{whatsappUrl ? (
-								<Button asChild variant={'outline'}>
-									<Link target='_blank' href={whatsappUrl}>
-										<WhatsappIcon />
-										Conversar
-									</Link>
-								</Button>
-							) : null}
+							{pet.petTutors.length > 1 ? 'Tutores: ' : 'Tutor: '}
+							{formatPetTutorNames(pet)}
 						</span>
-					</p>
+					</div>
+					<div>
+						{whatsappUrl ? (
+							<Button asChild variant={'outline'} className='w-full'>
+								<Link target='_blank' href={whatsappUrl}>
+									<WhatsappIcon />
+									Conversar
+								</Link>
+							</Button>
+						) : null}
+					</div>
 				</div>
 			</div>
 		);

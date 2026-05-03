@@ -75,6 +75,7 @@ const DashboardCards = ({
 	const nonPaidAmountInCents = nonPaidShifts.reduce((acc, shift) => {
 		return acc + (shift.amountInCents ?? 0);
 	}, 0);
+
 	const nonPaidAppointmentsAmountInCents = nonPaidAppointments.reduce(
 		(acc, appointment) => {
 			return acc + (appointment.totalPriceInCents ?? 0);
@@ -198,7 +199,9 @@ const DashboardCards = ({
 					<CardDescription>
 						<h1 className='text-center font-bold text-3xl'>
 							<Dialog>
-								<DialogTrigger>{shifts.length}</DialogTrigger>
+								<DialogTrigger className='font-bold cursor-pointer'>
+									{shifts.length}
+								</DialogTrigger>
 								<DialogContent>
 									<DialogTitle>Valores por Clínica</DialogTitle>
 									<div className='flex flex-col gap-3 mt-4'>
@@ -257,7 +260,9 @@ const DashboardCards = ({
 					<CardDescription>
 						<h1 className='text-center font-bold text-3xl'>
 							<Dialog>
-								<DialogTrigger>{nonPaidShifts.length}</DialogTrigger>
+								<DialogTrigger className='font-bold cursor-pointer'>
+									{nonPaidShifts.length}
+								</DialogTrigger>
 								<DialogContent>
 									<DialogTitle>Pendências por Clínica</DialogTitle>
 									<div className='flex flex-col gap-3 mt-4'>
@@ -382,7 +387,9 @@ const DashboardCards = ({
 					<CardDescription>
 						<h1 className='text-center font-bold text-3xl'>
 							<Dialog>
-								<DialogTrigger>{createdPets.length}</DialogTrigger>
+								<DialogTrigger className='font-bold cursor-pointer'>
+									{createdPets.length}
+								</DialogTrigger>
 								<DialogContent>
 									<DialogTitle>Pets Cadastrados</DialogTitle>
 									<div className='flex flex-col gap-4 overflow-scroll max-h-100'>
@@ -440,7 +447,9 @@ const DashboardCards = ({
 					<CardDescription>
 						<h1 className='flex items-center justify-center font-bold text-3xl gap-4'>
 							<Dialog>
-								<DialogTrigger>{createdCustomers.length}</DialogTrigger>
+								<DialogTrigger className='font-bold cursor-pointer'>
+									{createdCustomers.length}
+								</DialogTrigger>
 								<DialogContent>
 									<DialogTitle>Clientes Cadastrados</DialogTitle>
 									<div className='flex flex-col gap-4 overflow-scroll max-h-100'>

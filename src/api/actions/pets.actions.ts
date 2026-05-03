@@ -12,11 +12,11 @@ import {
 	prescriptionsTable,
 	speciesTable,
 	usersTable,
-	vaccinesTable,
 } from '@/db/schema';
 import { actionClient } from '@/lib/next-safe-action';
 import { currentUser } from '@clerk/nextjs/server';
 import { endOfMonth, format, startOfMonth } from 'date-fns';
+import type { SQL } from 'drizzle-orm';
 import {
 	and,
 	asc,
@@ -29,7 +29,6 @@ import {
 	lte,
 	or,
 } from 'drizzle-orm';
-import type { SQL } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 import z from 'zod';
 import { monthNames, PaginatedData } from '../config/consts';
@@ -80,10 +79,7 @@ function buildPetsListWhere(
 					db
 						.select()
 						.from(breedsTable)
-						.innerJoin(
-							speciesTable,
-							eq(breedsTable.specieId, speciesTable.id),
-						)
+						.innerJoin(speciesTable, eq(breedsTable.specieId, speciesTable.id))
 						.where(
 							and(
 								eq(breedsTable.id, petsTable.breedId),
@@ -99,10 +95,7 @@ function buildPetsListWhere(
 							customersTable,
 							eq(petTutorsTable.customerId, customersTable.id),
 						)
-						.innerJoin(
-							usersTable,
-							eq(customersTable.userId, usersTable.id),
-						)
+						.innerJoin(usersTable, eq(customersTable.userId, usersTable.id))
 						.where(
 							and(
 								eq(petTutorsTable.petId, petsTable.id),

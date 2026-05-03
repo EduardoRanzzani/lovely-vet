@@ -1,9 +1,10 @@
 import {
+	ChevronFirstIcon,
+	ChevronLast,
 	ChevronLeft,
 	ChevronRight,
-	ChevronsLeft,
-	ChevronsRight,
 } from 'lucide-react';
+import { Button } from '../ui/button';
 
 interface PaginationProps {
 	currentPage: number;
@@ -70,61 +71,66 @@ const Pagination = ({
 			{/* Botões */}
 			<div className='flex items-center space-x-1'>
 				{/* Primeira */}
-				<button
-					onClick={() => onPageChange(1)}
+				<Button
+					variant={'outline'}
 					disabled={currentPage === 1}
+					onClick={() => onPageChange(1)}
 					className='p-2 rounded-md bg-gray-100 disabled:opacity-50 hover:bg-gray-200'
 				>
-					<ChevronsLeft size={16} />
-				</button>
+					<ChevronFirstIcon size={16} />
+				</Button>
 
 				{/* Anterior */}
-				<button
+				<Button
+					variant={'outline'}
 					onClick={() => onPageChange(currentPage - 1)}
 					disabled={currentPage === 1}
 					className='p-2 rounded-md bg-gray-100 disabled:opacity-50 hover:bg-gray-200'
 				>
 					<ChevronLeft size={16} />
-				</button>
+				</Button>
 
 				{/* Páginas */}
 				{generatePages().map((page, idx) =>
 					page === '...' ? (
-						<span key={idx} className='px-3 py-1 text-gray-400 select-none'>
+						<span key={idx} className='p-2 text-gray-400 select-none'>
 							...
 						</span>
 					) : (
-						<button
+						<Button
 							key={idx}
+							variant={'outline'}
 							onClick={() => onPageChange(Number(page))}
-							className={`px-3 py-1 rounded-md ${
+							className={`px-3 py-2 rounded-md ${
 								page === currentPage
 									? 'bg-primary font-bold'
 									: 'bg-zinc-100 hover:bg-gray-200'
 							}`}
 						>
 							{page}
-						</button>
+						</Button>
 					),
 				)}
 
 				{/* Próxima */}
-				<button
+				<Button
+					variant={'outline'}
 					onClick={() => onPageChange(currentPage + 1)}
 					disabled={currentPage === totalPages}
 					className='p-2 rounded-md bg-gray-100 disabled:opacity-50 hover:bg-gray-200'
 				>
 					<ChevronRight size={16} />
-				</button>
+				</Button>
 
 				{/* Última */}
-				<button
+				<Button
+					variant={'outline'}
 					onClick={() => onPageChange(totalPages)}
 					disabled={currentPage === totalPages}
 					className='p-2 rounded-md bg-gray-100 disabled:opacity-50 hover:bg-gray-200'
 				>
-					<ChevronsRight size={16} />
-				</button>
+					<ChevronLast size={16} />
+				</Button>
 			</div>
 		</div>
 	);
