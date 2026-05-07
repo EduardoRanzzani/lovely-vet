@@ -200,7 +200,11 @@ const DashboardCards = ({
 		}
 
 		return (
-			<Accordion type='multiple' className='w-full flex flex-col gap-2'>
+			<Accordion
+				type='single'
+				className='w-full flex flex-col gap-2'
+				collapsible
+			>
 				{entries.map(([clinicName, data]) => (
 					<AccordionItem
 						key={clinicName}
@@ -309,7 +313,7 @@ const DashboardCards = ({
 								</DialogTrigger>
 								<DialogContent>
 									<DialogTitle>Valores por Clínica</DialogTitle>
-									<div className='flex flex-col gap-3 mt-2 max-h-[60vh] overflow-y-auto'>
+									<div className='flex flex-col gap-3'>
 										{RenderClinicAccordion(allShiftsGrouped)}
 									</div>
 									<div className='flex justify-end w-full border rounded-lg bg-muted/10 p-3 gap-4'>
@@ -343,7 +347,7 @@ const DashboardCards = ({
 								</DialogTrigger>
 								<DialogContent className='sm:max-w-md'>
 									<DialogTitle>Pendências por Clínica</DialogTitle>
-									<div className='flex flex-col gap-3 mt-4 max-h-[60vh] overflow-y-auto'>
+									<div className='flex flex-col gap-3'>
 										{RenderClinicAccordion(nonPaidShiftsGrouped)}
 									</div>
 									<div className='flex justify-end w-full border rounded-lg bg-muted/10 p-3 gap-4 mt-2'>

@@ -205,6 +205,7 @@ const AppointmentsListClient = ({
 
 					<EditButton
 						tooltip={'Editar agendamento'}
+						disabled={appointment.status !== 'pending'}
 						renderForm={(close) => (
 							<AppointmentFormClient
 								appointment={appointment}
@@ -290,7 +291,9 @@ const AppointmentsListClient = ({
 						<span className='text-sm font-semibold'>
 							<UserRoundIcon className='w-4 h-4' />
 						</span>
-						<span className='text-sm'>{formatPetTutorNames(appointment.pet)}</span>
+						<span className='text-sm'>
+							{formatPetTutorNames(appointment.pet)}
+						</span>
 					</p>
 					<p className='flex items-center gap-4'>
 						<span className='text-sm font-semibold'>

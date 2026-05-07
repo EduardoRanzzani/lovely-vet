@@ -23,7 +23,7 @@ import {
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useUser } from '@clerk/nextjs';
-import { format } from 'date-fns';
+import { format, formatDate } from 'date-fns';
 import {
 	CalendarIcon,
 	DropletIcon,
@@ -132,14 +132,16 @@ const PetDetailsClient = ({
 		...(pet.appointments?.map((a) => ({
 			type: 'appointment' as const,
 			id: a.id,
-			date: new Date(a.scheduledAt),
+			date: new Date(a.createdAt),
 			title: 'Agendamento',
 			doctor: a.doctor?.user?.name || 'Não atribuído',
 			avatarPerson: a.doctor?.user
 				? toTimelinePerson(a.doctor.user)
 				: undefined,
 			content:
-				a.items?.map((i) => i.service.name).join(', ') || 'Nenhum serviço',
+				a.items?.map((i) => i.service.name).join(', ') +
+					' - ' +
+					formatDate(a.scheduledAt, 'dd/MM/yyyy HH:mm') || 'Nenhum serviço',
 			icon: <CalendarIcon className='w-5 h-5 text-accent-foreground' />,
 			color: 'bg-appointment/30',
 		})) || []),
