@@ -8,6 +8,12 @@ import {
 	PetsWithRelations,
 } from '@/api/schema/pets.schema';
 import { ShiftsWithRelations } from '@/api/schema/shifts.schema';
+import {
+	Accordion,
+	AccordionContent,
+	AccordionItem,
+	AccordionTrigger,
+} from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
 import {
 	Card,
@@ -144,6 +150,105 @@ const DashboardCards = ({
 		router.push(`${pathname}?${params.toString()}`);
 	};
 
+	const groupShiftsByClinic = (shiftsArray: ShiftsWithRelations[]) => {
+		return shiftsArray.reduce(
+			(acc, shift) => {
+				const clinicName = shift.clinicName || 'Clínica não identificada';
+				const amount = shift.amountInCents ?? 0;
+				const requester = shift.requesterName?.trim() || 'Escala Fixa';
+
+				if (!acc[clinicName]) {
+					acc[clinicName] = { count: 0, total: 0, requesters: {} };
+				}
+
+				acc[clinicName].count += 1;
+				acc[clinicName].total += amount;
+
+				if (!acc[clinicName].requesters[requester]) {
+					acc[clinicName].requesters[requester] = { count: 0, total: 0 };
+				}
+				acc[clinicName].requesters[requester].count += 1;
+				acc[clinicName].requesters[requester].total += amount;
+
+				return acc;
+			},
+			{} as Record<
+				string,
+				{
+					count: number;
+					total: number;
+					requesters: Record<string, { count: number; total: number }>;
+				}
+			>,
+		);
+	};
+
+	const allShiftsGrouped = groupShiftsByClinic(shifts);
+	const nonPaidShiftsGrouped = groupShiftsByClinic(nonPaidShifts);
+
+	const RenderClinicAccordion = (
+		groupedData: ReturnType<typeof groupShiftsByClinic>,
+	) => {
+		const entries = Object.entries(groupedData);
+
+		if (entries.length === 0) {
+			return (
+				<div className='flex items-center justify-center p-3 border rounded-lg bg-muted/5'>
+					<p className='text-center text-muted-foreground'>Tudo em dia!</p>
+				</div>
+			);
+		}
+
+		return (
+			<Accordion type='multiple' className='w-full flex flex-col gap-2'>
+				{entries.map(([clinicName, data]) => (
+					<AccordionItem
+						key={clinicName}
+						value={clinicName}
+						className='border rounded-lg px-3 bg-muted/5'
+					>
+						<AccordionTrigger className='hover:no-underline py-3'>
+							<div className='flex items-center justify-between w-full pr-4'>
+								<div className='flex flex-col text-left'>
+									<span className='text-sm font-bold'>{clinicName}</span>
+									<span className='text-xs text-muted-foreground'>
+										{data.count} {data.count === 1 ? 'plantão' : 'plantões'}
+									</span>
+								</div>
+								<span className='font-mono font-semibold text-sm'>
+									{showValues ? formatCurrencyFromCents(data.total) : '••••'}
+								</span>
+							</div>
+						</AccordionTrigger>
+						<AccordionContent className='flex flex-col gap-2 pt-0 pb-3'>
+							<div className='text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-1 border-t pt-2'>
+								Solicitantes
+							</div>
+							{Object.entries(data.requesters).map(([requester, reqData]) => (
+								<div
+									key={requester}
+									className='flex justify-between items-center pl-2 border-l-2 border-primary/20'
+								>
+									<div className='flex flex-row gap-2 items-center'>
+										<span className='text-xs text-muted-foreground'>
+											{reqData.count}x
+										</span>
+										<span className='text-xs font-medium'>{requester}</span>
+									</div>
+									<span className='text-xs font-mono'>
+										{showValues
+											? formatCurrencyFromCents(reqData.total)
+											: '••••'}
+									</span>
+								</div>
+							))}
+						</AccordionContent>
+					</AccordionItem>
+				))}
+			</Accordion>
+		);
+	};
+
 	return (
 		<div className='flex flex-col gap-4 border rounded-lg p-4'>
 			<div className='flex items-center justify-between p-4 border-b bg-muted/10'>
@@ -204,48 +309,21 @@ const DashboardCards = ({
 								</DialogTrigger>
 								<DialogContent>
 									<DialogTitle>Valores por Clínica</DialogTitle>
-									<div className='flex flex-col gap-3 mt-4'>
-										{shiftsBreakdown.length > 0 ? (
-											shiftsBreakdown.map((clinic) => (
-												<div
-													key={clinic.name}
-													className='flex items-center justify-between p-3 border rounded-lg bg-muted/5'
-												>
-													<div className='flex flex-col'>
-														<span className='text-sm font-bold'>
-															{clinic.name}
-														</span>
-														<span className='text-xs text-muted-foreground'>
-															{clinic.count}{' '}
-															{clinic.count === 1 ? 'plantão' : 'plantões'}
-														</span>
-													</div>
-													<span className='font-mono font-semibold'>
-														{showValues
-															? formatCurrencyFromCents(clinic.total)
-															: '••••'}
-													</span>
-												</div>
-											))
-										) : (
-											<div className='flex items-center justify-center p-3 border rounded-lg bg-muted/5'>
-												<p className='text-center text-muted-foreground'>
-													Tudo em dia!
-												</p>
-											</div>
-										)}
-										<div className='flex justify-end w-full border rounded-lg bg-muted/5 p-3 gap-4'>
-											<h1 className='font-bold'>Total:</h1>
-											<h1 className='font-mono font-semibold'>
-												{showValues
-													? formatCurrencyFromCents(
-															shifts.reduce((acc, shift) => {
-																return acc + (shift.amountInCents ?? 0);
-															}, 0),
-														)
-													: '••••'}
-											</h1>
-										</div>
+									<div className='flex flex-col gap-3 mt-2 max-h-[60vh] overflow-y-auto'>
+										{RenderClinicAccordion(allShiftsGrouped)}
+									</div>
+									<div className='flex justify-end w-full border rounded-lg bg-muted/10 p-3 gap-4'>
+										<h1 className='font-bold'>Total:</h1>
+										<h1 className='font-mono font-semibold'>
+											{showValues
+												? formatCurrencyFromCents(
+														shifts.reduce(
+															(acc, s) => acc + (s.amountInCents ?? 0),
+															0,
+														),
+													)
+												: '••••'}
+										</h1>
 									</div>
 								</DialogContent>
 							</Dialog>
@@ -263,50 +341,18 @@ const DashboardCards = ({
 								<DialogTrigger className='font-bold cursor-pointer'>
 									{nonPaidShifts.length}
 								</DialogTrigger>
-								<DialogContent>
+								<DialogContent className='sm:max-w-md'>
 									<DialogTitle>Pendências por Clínica</DialogTitle>
-									<div className='flex flex-col gap-3 mt-4'>
-										{clinicBreakdown.length > 0 ? (
-											clinicBreakdown.map((clinic) => (
-												<div
-													key={clinic.name}
-													className='flex items-center justify-between p-3 border rounded-lg bg-muted/5'
-												>
-													<div className='flex flex-col'>
-														<span className='text-sm font-bold'>
-															{clinic.name}
-														</span>
-														<span className='text-xs text-muted-foreground'>
-															{clinic.count}{' '}
-															{clinic.count === 1 ? 'plantão' : 'plantões'}
-														</span>
-													</div>
-													<span className='font-mono font-semibold'>
-														{showValues
-															? formatCurrencyFromCents(clinic.total)
-															: '••••'}
-													</span>
-												</div>
-											))
-										) : (
-											<div className='flex items-center justify-center p-3 border rounded-lg bg-muted/5'>
-												<p className='text-center text-muted-foreground'>
-													Tudo em dia!
-												</p>
-											</div>
-										)}
-										<div className='flex justify-end w-full border rounded-lg bg-muted/5 p-3 gap-4'>
-											<h1 className='font-bold'>Total:</h1>
-											<h1 className='font-mono font-semibold'>
-												{showValues
-													? formatCurrencyFromCents(
-															clinicBreakdown.reduce((acc, clinic) => {
-																return acc + (clinic.total ?? 0);
-															}, 0),
-														)
-													: '••••'}
-											</h1>
-										</div>
+									<div className='flex flex-col gap-3 mt-4 max-h-[60vh] overflow-y-auto'>
+										{RenderClinicAccordion(nonPaidShiftsGrouped)}
+									</div>
+									<div className='flex justify-end w-full border rounded-lg bg-muted/10 p-3 gap-4 mt-2'>
+										<h1 className='font-bold'>Total Pendente:</h1>
+										<h1 className='font-mono font-semibold'>
+											{showValues
+												? formatCurrencyFromCents(nonPaidAmountInCents)
+												: '••••'}
+										</h1>
 									</div>
 								</DialogContent>
 							</Dialog>

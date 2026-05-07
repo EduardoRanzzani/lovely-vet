@@ -38,10 +38,8 @@ export const usersTable = pgTable('users', {
 	name: text('name').notNull(),
 	email: text('email').notNull().unique(),
 	image: text('image'),
-	// Clerk ID opcional para permitir cadastro manual prévio
 	clerkUserId: text('clerk_user_id').unique(),
 	role: userRoleEnum('role').default('customer').notNull(),
-	// Flag para sua dialog de "finalizar cadastro" no dashboard
 	isRegistrationComplete: boolean('is_registration_complete')
 		.default(false)
 		.notNull(),
@@ -55,9 +53,7 @@ export const usersTable = pgTable('users', {
 // Veterinários
 export const doctorsTable = pgTable('doctors', {
 	id: uuid('id').primaryKey().defaultRandom(),
-	userId: uuid('user_id')
-		.notNull()
-		.references(() => usersTable.id, { onDelete: 'cascade' }),
+	userId: uuid('user_id').notNull().references(() => usersTable.id),
 	phone: text('phone').notNull(),
 	cpf: text('cpf').notNull().unique(),
 	gender: sexEnum('gender').notNull(),
@@ -79,9 +75,7 @@ export const doctorsTable = pgTable('doctors', {
 // Clientes
 export const customersTable = pgTable('customers', {
 	id: uuid('id').primaryKey().defaultRandom(),
-	userId: uuid('user_id')
-		.notNull()
-		.references(() => usersTable.id, { onDelete: 'cascade' }),
+	userId: uuid('user_id').notNull().references(() => usersTable.id),
 	phone: text('phone').notNull(),
 	cpf: text('cpf').notNull().unique(),
 	gender: sexEnum('gender').notNull(),
@@ -113,9 +107,7 @@ export const speciesTable = pgTable('species', {
 export const breedsTable = pgTable('breeds', {
 	id: uuid('id').primaryKey().defaultRandom(),
 	name: text('name').notNull(),
-	specieId: uuid('specie_id')
-		.notNull()
-		.references(() => speciesTable.id, { onDelete: 'cascade' }),
+	specieId: uuid('specie_id').notNull().references(() => speciesTable.id),
 	createdAt: timestamp('created_at').defaultNow().notNull(),
 	updatedAt: timestamp('updated_at')
 		.defaultNow()
@@ -144,30 +136,21 @@ export const petsTable = pgTable('pets', {
 });
 
 // Pets ↔ Tutores (clientes): many-to-many
-export const petTutorsTable = pgTable(
-	'pet_tutors',
-	{
-		petId: uuid('pet_id')
-			.notNull()
-			.references(() => petsTable.id, { onDelete: 'cascade' }),
-		customerId: uuid('customer_id')
-			.notNull()
-			.references(() => customersTable.id, { onDelete: 'cascade' }),
-	},
-	(table) => ({
-		pk: primaryKey({ columns: [table.petId, table.customerId] }),
-		customerIdx: index('pet_tutors_customer_id_idx').on(table.customerId),
-	}),
+export const petTutorsTable = pgTable('pet_tutors', {
+	petId: uuid('pet_id').notNull().references(() => petsTable.id),
+	customerId: uuid('customer_id').notNull().references(() => customersTable.id),
+}, (table) => ({
+	pk: primaryKey({ columns: [table.petId, table.customerId] }),
+	customerIdx: index('pet_tutors_customer_id_idx').on(table.customerId),
+}),
 );
 
 // Histórico de pesos
 export const petWeightsTable = pgTable('pet_weights', {
 	id: uuid('id').primaryKey().defaultRandom(),
-	petId: uuid('pet_id')
-		.notNull()
-		.references(() => petsTable.id, { onDelete: 'cascade' }),
+	petId: uuid('pet_id').notNull().references(() => petsTable.id),
 	weightInGrams: integer('weight_in_grams').notNull(),
-	authorId: uuid('user_id').references(() => usersTable.id),
+	authorId: uuid('user_id').notNull().references(() => usersTable.id),
 	measuredAt: timestamp('measured_at').defaultNow().notNull(),
 	createdAt: timestamp('created_at').defaultNow().notNull(),
 });
@@ -175,9 +158,7 @@ export const petWeightsTable = pgTable('pet_weights', {
 // Documentos e Exames (Anexos)
 export const petAttachmentsTable = pgTable('pet_attachments', {
 	id: uuid('id').primaryKey().defaultRandom(),
-	petId: uuid('pet_id')
-		.notNull()
-		.references(() => petsTable.id, { onDelete: 'cascade' }),
+	petId: uuid('pet_id').notNull().references(() => petsTable.id),
 	name: text('name').notNull(), // Ex: "Hemograma Completo"
 	url: text('url').notNull(), // URL do S3/Uploadthing
 	type: text('type').notNull(), // 'exam', 'document', 'image'
@@ -190,13 +171,9 @@ export const petAttachmentsTable = pgTable('pet_attachments', {
 // Observações / Notas Gerais (que não são prontuários)
 export const petNotesTable = pgTable('pet_notes', {
 	id: uuid('id').primaryKey().defaultRandom(),
-	petId: uuid('pet_id')
-		.notNull()
-		.references(() => petsTable.id, { onDelete: 'cascade' }),
+	petId: uuid('pet_id').notNull().references(() => petsTable.id),
 	content: text('content').notNull(),
-	authorId: uuid('author_id')
-		.notNull()
-		.references(() => usersTable.id),
+	authorId: uuid('author_id').notNull().references(() => usersTable.id),
 	createdAt: timestamp('created_at').defaultNow().notNull(),
 });
 
@@ -207,9 +184,7 @@ export const servicesTable = pgTable('services', {
 	description: text('description'),
 	priceInCents: integer('price_in_cents').notNull(),
 	durationMinutes: integer('duration_minutes').default(30).notNull(),
-	specieId: uuid('specie_id').references(() => speciesTable.id, {
-		onDelete: 'cascade',
-	}),
+	specieId: uuid('specie_id').references(() => speciesTable.id),
 	createdAt: timestamp('created_at').defaultNow().notNull(),
 	updatedAt: timestamp('updated_at')
 		.defaultNow()
@@ -218,44 +193,32 @@ export const servicesTable = pgTable('services', {
 });
 
 // Agendamentos
-export const appointmentsTable = pgTable(
-	'appointments',
-	{
-		id: uuid('id').primaryKey().defaultRandom(),
-		petId: uuid('pet_id')
-			.notNull()
-			.references(() => petsTable.id),
-		doctorId: uuid('doctor_id')
-			.notNull()
-			.references(() => doctorsTable.id),
-		scheduledAt: timestamp('scheduled_at').notNull(),
-		status: appointmentStatusEnum('status').default('pending').notNull(),
-		notes: text('notes'),
-		totalPriceInCents: integer('total_price_in_cents').notNull(),
-		isPaid: boolean('is_paid').default(false).notNull(),
-		createdAt: timestamp('created_at').defaultNow().notNull(),
-		updatedAt: timestamp('updated_at')
-			.defaultNow()
-			.$onUpdate(() => new Date())
-			.notNull(),
-	},
+export const appointmentsTable = pgTable('appointments', {
+	id: uuid('id').primaryKey().defaultRandom(),
+	petId: uuid('pet_id').notNull().references(() => petsTable.id),
+	doctorId: uuid('doctor_id').notNull().references(() => doctorsTable.id),
+	scheduledAt: timestamp('scheduled_at').notNull(),
+	status: appointmentStatusEnum('status').default('pending').notNull(),
+	notes: text('notes'),
+	totalPriceInCents: integer('total_price_in_cents').notNull(),
+	isPaid: boolean('is_paid').default(false).notNull(),
+	createdAt: timestamp('created_at').defaultNow().notNull(),
+	updatedAt: timestamp('updated_at')
+		.defaultNow()
+		.$onUpdate(() => new Date())
+		.notNull(),
+},
 	(table) => ({
 		scheduledIdx: index('scheduled_at_idx').on(table.scheduledAt),
 	}),
 );
 
 // Tabela Many-to-Many para múltiplos serviços por atendimento
-export const appointmentItemsTable = pgTable(
-	'appointment_items',
-	{
-		appointmentId: uuid('appointment_id')
-			.notNull()
-			.references(() => appointmentsTable.id, { onDelete: 'cascade' }),
-		serviceId: uuid('service_id')
-			.notNull()
-			.references(() => servicesTable.id),
-		priceAtTimeInCents: integer('price_at_time_in_cents').notNull(),
-	},
+export const appointmentItemsTable = pgTable('appointment_items', {
+	appointmentId: uuid('appointment_id').notNull().references(() => appointmentsTable.id),
+	serviceId: uuid('service_id').notNull().references(() => servicesTable.id),
+	priceAtTimeInCents: integer('price_at_time_in_cents').notNull(),
+},
 	(table) => ({
 		pk: primaryKey({ columns: [table.appointmentId, table.serviceId] }),
 	}),
@@ -265,12 +228,8 @@ export const appointmentItemsTable = pgTable(
 export const medicalRecordsTable = pgTable('medical_records', {
 	id: uuid('id').primaryKey().defaultRandom(),
 	appointmentId: uuid('appointment_id').references(() => appointmentsTable.id),
-	petId: uuid('pet_id')
-		.notNull()
-		.references(() => petsTable.id),
-	doctorId: uuid('doctor_id')
-		.notNull()
-		.references(() => doctorsTable.id),
+	petId: uuid('pet_id').notNull().references(() => petsTable.id),
+	doctorId: uuid('doctor_id').notNull().references(() => doctorsTable.id),
 	diagnosis: text('diagnosis').notNull(),
 	treatmentPlan: text('treatment_plan'),
 	weightAtTimeInGrams: integer('weight_at_time_in_grams'),
@@ -287,9 +246,7 @@ export const prescriptionTemplatesTable = pgTable('prescription_templates', {
 	id: uuid('id').primaryKey().defaultRandom(),
 	title: text('title').notNull(), // Ex: "Vermífugo Padrão", "Pós-Cirúrgico Castração"
 	content: text('content').notNull(), // O corpo do texto da receita
-	doctorId: uuid('doctor_id')
-		.notNull()
-		.references(() => doctorsTable.id, { onDelete: 'cascade' }),
+	doctorId: uuid('doctor_id').notNull().references(() => doctorsTable.id),
 	createdAt: timestamp('created_at').defaultNow().notNull(),
 	updatedAt: timestamp('updated_at')
 		.defaultNow()
@@ -300,13 +257,9 @@ export const prescriptionTemplatesTable = pgTable('prescription_templates', {
 // Receitas
 export const prescriptionsTable = pgTable('prescriptions', {
 	id: uuid('id').primaryKey().defaultRandom(),
-	petId: uuid('pet_id')
-		.notNull()
-		.references(() => petsTable.id, { onDelete: 'cascade' }),
-	doctorId: uuid('doctor_id').notNull(),
-	appointmentId: uuid('appointment_id').references(() => appointmentsTable.id, {
-		onDelete: 'set null',
-	}),
+	petId: uuid('pet_id').notNull().references(() => petsTable.id),
+	doctorId: uuid('doctor_id').notNull().references(() => doctorsTable.id),
+	appointmentId: uuid('appointment_id').references(() => appointmentsTable.id),
 	content: text('content').notNull(), // O texto final da receita (editado ou do template)
 	issuedAt: timestamp('issued_at').defaultNow().notNull(),
 	createdAt: timestamp('created_at').defaultNow().notNull(),
@@ -319,9 +272,7 @@ export const prescriptionsTable = pgTable('prescriptions', {
 // Plantões
 export const shiftsTable = pgTable('shifts', {
 	id: uuid('id').primaryKey().defaultRandom(),
-	doctorId: uuid('doctor_id')
-		.notNull()
-		.references(() => doctorsTable.id, { onDelete: 'cascade' }),
+	doctorId: uuid('doctor_id').notNull().references(() => doctorsTable.id),
 	clinicName: text('clinic_name').notNull(),
 	startTime: timestamp('start_time').notNull(),
 	endTime: timestamp('end_time').notNull(),
@@ -338,28 +289,25 @@ export const shiftsTable = pgTable('shifts', {
 // Vacinas
 export const vaccinesTable = pgTable('vaccines', {
 	id: uuid('id').primaryKey().defaultRandom(),
-	petId: uuid('pet_id')
-		.notNull()
-		.references(() => petsTable.id, { onDelete: 'cascade' }),
+	petId: uuid('pet_id').notNull().references(() => petsTable.id),
 	name: text('name').notNull(), // Ex: "V10", "Raiva"
 	applicationDate: date('application_date').notNull(),
 	nextDoseDate: date('next_dose_date'), // Importante para o dashboard/agenda
 	lotNumber: text('lot_number'),
 	manufacturer: text('manufacturer'),
-	appliedById: uuid('applied_by_id').references(() => doctorsTable.id),
+	doctorId: uuid('doctor_id').notNull().references(() => doctorsTable.id),
 	createdAt: timestamp('created_at').defaultNow().notNull(),
 });
 
 // Patologias / Condições Crônicas
 export const pathologiesTable = pgTable('pathologies', {
 	id: uuid('id').primaryKey().defaultRandom(),
-	petId: uuid('pet_id')
-		.notNull()
-		.references(() => petsTable.id, { onDelete: 'cascade' }),
+	petId: uuid('pet_id').notNull().references(() => petsTable.id),
 	name: text('name').notNull(),
 	description: text('description'),
-	status: text('status').default('active').notNull(), // active, resolved, chronic
+	status: text('status').default('active').notNull(),
 	diagnosedAt: date('diagnosed_at').notNull(),
+	doctorId: uuid('doctor_id').notNull().references(() => doctorsTable.id),
 	createdAt: timestamp('created_at').defaultNow().notNull(),
 });
 
@@ -546,7 +494,7 @@ export const vaccinesRelations = relations(vaccinesTable, ({ one }) => ({
 		references: [petsTable.id],
 	}),
 	doctor: one(doctorsTable, {
-		fields: [vaccinesTable.appliedById],
+		fields: [vaccinesTable.doctorId],
 		references: [doctorsTable.id],
 	}),
 }));
@@ -556,6 +504,10 @@ export const pathologiesRelations = relations(pathologiesTable, ({ one }) => ({
 		fields: [pathologiesTable.petId],
 		references: [petsTable.id],
 	}),
+	doctor: one(doctorsTable, {
+		fields: [pathologiesTable.doctorId],
+		references: [doctorsTable.id],
+	}),
 }));
 
 export const petAttachmentsRelations = relations(
@@ -564,6 +516,10 @@ export const petAttachmentsRelations = relations(
 		pet: one(petsTable, {
 			fields: [petAttachmentsTable.petId],
 			references: [petsTable.id],
+		}),
+		author: one(usersTable, {
+			fields: [petAttachmentsTable.authorId],
+			references: [usersTable.id],
 		}),
 	}),
 );

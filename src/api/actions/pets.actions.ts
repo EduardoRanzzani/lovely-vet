@@ -162,6 +162,7 @@ export const getPetById = async (id: string): Promise<PetsWithRelations> => {
 			},
 			weightHistory: {
 				orderBy: desc(petWeightsTable.measuredAt),
+				with: { author: true },
 			},
 			appointments: {
 				orderBy: desc(appointmentsTable.scheduledAt),
@@ -173,8 +174,12 @@ export const getPetById = async (id: string): Promise<PetsWithRelations> => {
 			vaccines: {
 				with: { doctor: { with: { user: true } } },
 			},
-			pathologies: true,
-			attachments: true,
+			pathologies: {
+				with: { doctor: { with: { user: true } } },
+			},
+			attachments: {
+				with: { author: true },
+			},
 			notes: {
 				with: { author: true },
 			},
@@ -322,10 +327,13 @@ export const upsertPet = actionClient
 			}
 
 			if (parsedInput.weightInGrams) {
+				if (!authorId) {
+					throw new Error('Usuário autenticado não encontrado para registrar o peso');
+				}
 				await tx.insert(petWeightsTable).values({
 					petId: insertedPet.id,
 					weightInGrams: Math.round(parsedInput.weightInGrams * 1000),
-					authorId: authorId,
+					authorId,
 					measuredAt: new Date(),
 				});
 			}
@@ -392,6 +400,7 @@ export const getPetHistory = async (petId: string) => {
 			},
 			weightHistory: {
 				orderBy: desc(petWeightsTable.measuredAt),
+				with: { author: true },
 			},
 			appointments: {
 				orderBy: desc(appointmentsTable.scheduledAt),
@@ -403,8 +412,12 @@ export const getPetHistory = async (petId: string) => {
 			vaccines: {
 				with: { doctor: { with: { user: true } } },
 			},
-			pathologies: true,
-			attachments: true,
+			pathologies: {
+				with: { doctor: { with: { user: true } } },
+			},
+			attachments: {
+				with: { author: true },
+			},
 			notes: {
 				with: { author: true },
 			},

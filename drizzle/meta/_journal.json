@@ -148,6 +148,20 @@
       "when": 1777848404077,
       "tag": "0020_nosy_mandroid",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1777850505290,
+      "tag": "0021_lumpy_rogue",
+      "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "7",
+      "when": 1777850557677,
+      "tag": "0022_complete_morbius",
+      "breakpoints": true
     }
   ]
 }

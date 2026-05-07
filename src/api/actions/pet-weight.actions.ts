@@ -65,14 +65,14 @@ export const insertPetWeight = actionClient
 			where: eq(usersTable.clerkUserId, authenticatedUser.id),
 		});
 		const authorId = user?.id;
-
-		console.log('parsedInput', parsedInput);
+		if (!authorId) {
+			throw new Error('Usuário autenticado não encontrado para registrar o peso');
+		}
 
 		await db.insert(petWeightsTable).values({
-			id: parsedInput.id ?? undefined,
 			petId: parsedInput.petId!,
 			weightInGrams: Math.round(parsedInput.weightInGrams * 1000),
-			authorId: authorId,
+			authorId,
 			measuredAt: new Date(),
 			createdAt: new Date(),
 		});

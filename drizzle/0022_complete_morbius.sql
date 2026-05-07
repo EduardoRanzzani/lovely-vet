@@ -1,0 +1,1 @@
+ALTER TABLE "services" ALTER COLUMN "specie_id" DROP NOT NULL;

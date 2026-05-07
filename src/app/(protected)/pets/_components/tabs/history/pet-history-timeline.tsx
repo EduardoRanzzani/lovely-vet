@@ -20,13 +20,13 @@ const PetTimelineClient = ({
 			{historyEvents.length > 0 ? (
 				historyEvents.map((event, idx) => (
 					<HistoryItem
-						key={idx}
+						key={event.id ?? `ev-${idx}`}
 						title={event.title}
-						subtitle={event.doctor}
 						date={event.date}
 						icon={event.icon}
 						colorClass={event.color}
 						content={event.content}
+						avatarPerson={event.avatarPerson}
 						canDelete={canDelete}
 						onDelete={() => onDelete(event)}
 					/>

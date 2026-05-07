@@ -8,6 +8,7 @@ import {
 	pathologiesTable,
 	petAttachmentsTable,
 	petNotesTable,
+	petWeightsTable,
 	petsTable,
 	prescriptionsTable,
 	servicesTable,
@@ -41,22 +42,22 @@ export type PetsWithRelations = typeof petsTable.$inferSelect & {
 			service: typeof servicesTable.$inferSelect;
 		})[];
 	})[];
-	weightHistory?: {
-		id?: string; // Opcional para suportar a listagem
-		petId?: string; // Opcional
-		weightInGrams: number;
-		measuredAt: Date;
-		createdAt?: Date; // Opcional
-	}[];
-	vaccines?: (typeof vaccinesTable.$inferSelect & {
-		doctor:
-			| (typeof doctorsTable.$inferSelect & {
-					user: typeof usersTable.$inferSelect;
-			  })
-			| null;
+	weightHistory?: (typeof petWeightsTable.$inferSelect & {
+		author?: typeof usersTable.$inferSelect;
 	})[];
-	pathologies?: (typeof pathologiesTable.$inferSelect)[];
-	attachments?: (typeof petAttachmentsTable.$inferSelect)[];
+	vaccines?: (typeof vaccinesTable.$inferSelect & {
+		doctor: typeof doctorsTable.$inferSelect & {
+			user: typeof usersTable.$inferSelect;
+		};
+	})[];
+	pathologies?: (typeof pathologiesTable.$inferSelect & {
+		doctor: typeof doctorsTable.$inferSelect & {
+			user: typeof usersTable.$inferSelect;
+		};
+	})[];
+	attachments?: (typeof petAttachmentsTable.$inferSelect & {
+		author: typeof usersTable.$inferSelect;
+	})[];
 	// CORREÇÃO: No schema, a relação se chama 'author'
 	notes?: (typeof petNotesTable.$inferSelect & {
 		author: typeof usersTable.$inferSelect;

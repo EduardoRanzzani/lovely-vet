@@ -7,7 +7,7 @@ import {
 	PetsWithRelations,
 } from '@/api/schema/pets.schema';
 import { Species } from '@/api/schema/species.schema';
-import { TimelineItem } from '@/api/schema/timeline.schema';
+import { TimelineItem, toTimelinePerson } from '@/api/schema/timeline.schema';
 import { calculateAge } from '@/api/util';
 import { GoogleMapsIcon } from '@/components/icons/icon-googlemaps';
 import EditButton from '@/components/list/edit-button';
@@ -102,6 +102,7 @@ const PetDetailsClient = ({
 			date: new Date(mr.createdAt),
 			title: 'Atendimento Clínico',
 			doctor: mr.doctor.user.name,
+			avatarPerson: toTimelinePerson(mr.doctor.user),
 			content: mr.diagnosis,
 			icon: <StethoscopeIcon className='w-5 h-5 text-accent-foreground' />,
 			color: 'bg-pathology/30',
@@ -111,6 +112,8 @@ const PetDetailsClient = ({
 			id: p.id,
 			date: new Date(p.issuedAt),
 			title: 'Receita Emitida',
+			doctor: p.doctor.user.name,
+			avatarPerson: toTimelinePerson(p.doctor.user),
 			content: p.content,
 			icon: <SquarePenIcon className='w-5 h-5 text-accent-foreground' />,
 			color: 'bg-prescription/30',
@@ -120,6 +123,8 @@ const PetDetailsClient = ({
 			id: w.id,
 			date: new Date(w.measuredAt),
 			title: 'Pesagem',
+			doctor: w.author?.name ?? '',
+			avatarPerson: w.author ? toTimelinePerson(w.author) : undefined,
 			content: `Peso registrado: ${(w.weightInGrams / 1000).toFixed(2)}kg`,
 			icon: <ScaleIcon className='w-5 h-5 text-accent-foreground' />,
 			color: 'bg-weight/30',
@@ -130,6 +135,9 @@ const PetDetailsClient = ({
 			date: new Date(a.scheduledAt),
 			title: 'Agendamento',
 			doctor: a.doctor?.user?.name || 'Não atribuído',
+			avatarPerson: a.doctor?.user
+				? toTimelinePerson(a.doctor.user)
+				: undefined,
 			content:
 				a.items?.map((i) => i.service.name).join(', ') || 'Nenhum serviço',
 			icon: <CalendarIcon className='w-5 h-5 text-accent-foreground' />,
@@ -141,6 +149,9 @@ const PetDetailsClient = ({
 			date: new Date(v.applicationDate),
 			title: 'Vacina',
 			doctor: v.doctor?.user?.name || 'Não atribuído',
+			avatarPerson: v.doctor?.user
+				? toTimelinePerson(v.doctor.user)
+				: undefined,
 			content: v.name,
 			icon: <SyringeIcon className='w-5 h-5 text-accent-foreground' />,
 			color: 'bg-vaccine/30',
@@ -150,7 +161,8 @@ const PetDetailsClient = ({
 			id: p.id,
 			date: new Date(p.diagnosedAt),
 			title: 'Patologia',
-			doctor: '',
+			doctor: p.doctor.user.name,
+			avatarPerson: toTimelinePerson(p.doctor.user),
 			content: p.name,
 			icon: <StethoscopeIcon className='w-5 h-5 text-accent-foreground' />,
 			color: 'bg-pathology/30',
@@ -160,7 +172,8 @@ const PetDetailsClient = ({
 			id: a.id,
 			date: new Date(a.createdAt),
 			title: 'Anexo',
-			doctor: '',
+			doctor: a.author.name,
+			avatarPerson: toTimelinePerson(a.author),
 			content: a.name,
 			icon: <FileIcon className='w-5 h-5 text-accent-foreground' />,
 			color: 'bg-document/30',
@@ -170,7 +183,8 @@ const PetDetailsClient = ({
 			id: n.id,
 			date: new Date(n.createdAt),
 			title: 'Observação',
-			doctor: '',
+			doctor: n.author.name,
+			avatarPerson: toTimelinePerson(n.author),
 			content: n.content,
 			icon: <MessageCircleIcon className='w-5 h-5 text-accent-foreground' />,
 			color: 'bg-notes/80',

@@ -1,5 +1,24 @@
 import z from 'zod';
 
+/** Dados de `users` para avatar e legenda (author ou user do médico). */
+export type TimelineItemPerson = {
+	name: string;
+	email?: string | null;
+	image?: string | null;
+};
+
+export function toTimelinePerson(user: {
+	name: string;
+	email?: string | null;
+	image?: string | null;
+}): TimelineItemPerson {
+	return {
+		name: user.name,
+		email: user.email ?? null,
+		image: user.image ?? null,
+	};
+}
+
 export interface TimelineItem {
 	type:
 		| 'record'
@@ -13,7 +32,10 @@ export interface TimelineItem {
 	id?: string;
 	date: Date;
 	title: string;
+	/** Nome exibido como subtítulo (ex.: responsável pelo registro). */
 	doctor?: string;
+	/** Quem aparece no avatar: author quando existir; caso contrário user do médico. */
+	avatarPerson?: TimelineItemPerson;
 	content: string;
 	icon: React.ReactNode;
 	color: string;
