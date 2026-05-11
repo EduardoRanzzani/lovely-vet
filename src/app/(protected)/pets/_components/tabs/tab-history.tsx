@@ -7,10 +7,10 @@ import {
 	FlaskConicalIcon,
 	SquarePenIcon,
 	StethoscopeIcon,
-	SyringeIcon,
 } from 'lucide-react';
 import DialogNotes from '../dialogs/dialog-notes';
 import DialogServices from '../dialogs/dialog-services';
+import DialogVaccine from '../dialogs/dialog-vaccine';
 import DialogWeight from '../dialogs/dialog-weight';
 import PetTimelineClient from './history/pet-history-timeline';
 
@@ -49,10 +49,7 @@ const TabHistory = ({
 						<FlaskConicalIcon /> Exame
 					</Button>
 
-					<Button className='bg-vaccine hover:bg-vaccine/80'>
-						<SyringeIcon />
-						Vacina
-					</Button>
+					<DialogVaccine petId={petId} />
 
 					<Button className='bg-prescription hover:bg-prescription/80'>
 						<SquarePenIcon />

@@ -66,9 +66,6 @@ const DialogWeight = ({ petId }: DialogWeightProps) => {
 		}
 	};
 
-	console.log('petid', petId);
-	console.log(form.formState.errors);
-
 	return (
 		<Dialog open={open} onOpenChange={handleOpenChange}>
 			<DialogTrigger asChild>
@@ -79,8 +76,8 @@ const DialogWeight = ({ petId }: DialogWeightProps) => {
 			</DialogTrigger>
 
 			<DialogContent
-				showCloseButton={false}
 				onInteractOutside={(e) => e.preventDefault()}
+				showCloseButton={false}
 			>
 				<DialogHeader>
 					<DialogTitle>Novo Peso</DialogTitle>

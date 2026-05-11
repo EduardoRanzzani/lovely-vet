@@ -12,8 +12,8 @@ import {
 import { Form } from '@/components/ui/form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { BanIcon, BriefcaseMedicalIcon, SaveIcon } from 'lucide-react';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { toast } from 'sonner';
 import z from 'zod';
 
 interface DialogServicesProps {
@@ -27,16 +27,45 @@ const formSchema = z.object({
 type FormSchema = z.infer<typeof formSchema>;
 
 const DialogServices = ({ petId }: DialogServicesProps) => {
+	const [open, setOpen] = useState<boolean>(false);
+
 	const form = useForm<FormSchema>({
 		resolver: zodResolver(formSchema),
+		defaultValues: {
+			test: '',
+		},
 	});
 
 	const formSubmit = (data: FormSchema) => {
-		toast.success(JSON.stringify(data));
+		// insertServiceAction.execute({
+		// 	...data,
+		// 	petId: petId,
+		// });
+
+		console.log('');
+	};
+
+	// const insertServiceAction = useAction(insertService, {
+	// 	onSuccess: () => {
+	// 		toast.success('Atendimento salvo com sucesso!');
+	// 		setOpen(false);
+	// 		form.reset();
+	// 	},
+	// 	onError: (err) => {
+	// 		console.error('Erro ao salvar o atendimento:', { err });
+	// 		toast.error('Ocorreu um erro ao salvar o atendimento.');
+	// 	},
+	// });
+
+	const handleOpenChange = (newOpen: boolean) => {
+		setOpen(newOpen);
+		if (!newOpen) {
+			form.reset();
+		}
 	};
 
 	return (
-		<Dialog>
+		<Dialog open={open} onOpenChange={handleOpenChange}>
 			<DialogTrigger asChild>
 				<Button className='bg-appointment hover:bg-appointment/80'>
 					<BriefcaseMedicalIcon />
@@ -47,20 +76,19 @@ const DialogServices = ({ petId }: DialogServicesProps) => {
 			<DialogContent
 				onInteractOutside={(e) => e.preventDefault()}
 				showCloseButton={false}
-				className='max-w-lg'
 			>
+				<DialogHeader>
+					<DialogTitle>Registrar Atendimento</DialogTitle>
+					<DialogDescription>
+						Preencha as informações do atendimento realizado
+					</DialogDescription>
+				</DialogHeader>
+
 				<Form {...form}>
 					<form
 						onSubmit={form.handleSubmit(formSubmit)}
 						className='flex flex-col gap-2'
 					>
-						<DialogHeader>
-							<DialogTitle>Registrar Atendimento</DialogTitle>
-							<DialogDescription>
-								Preencha as informações do atendimento realizado
-							</DialogDescription>
-						</DialogHeader>
-
 						<DialogFooter>
 							<div className='flex flex-col lg:flex-row gap-4 w-full mt-4'>
 								<DialogClose asChild>
@@ -96,6 +124,8 @@ const DialogServices = ({ petId }: DialogServicesProps) => {
 					</form>
 				</Form>
 			</DialogContent>
+
+			{/* {insertServiceAction.isPending && <LoadingDialog />} */}
 		</Dialog>
 	);
 };

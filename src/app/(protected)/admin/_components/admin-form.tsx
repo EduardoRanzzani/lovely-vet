@@ -26,11 +26,11 @@ const AdminFormClient = () => {
 	});
 
 	return (
-		<div className='flex flex-col gap-4 w-200'>
+		<div className='flex flex-col gap-4'>
 			<h1 className='text-2xl font-bold'>Mudar cadastro</h1>
 			<p>Alterar o id de usuário para acessar itens de dev/prod</p>
 
-			<div className='flex gap-4'>
+			<div className='flex flex-col xl:flex-row gap-4 w-full'>
 				<Button className='flex-1' onClick={changeToProd}>
 					{changeUserIdAction.isPending ? (
 						<>
