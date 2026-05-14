@@ -21,6 +21,7 @@ const rolePermissions = {
 		'/shifts',
 		'/messages',
 		'/admin',
+		'/clinics',
 	],
 	doctor: [
 		'/dashboard',
@@ -33,6 +34,7 @@ const rolePermissions = {
 		'/prescriptions-template',
 		'/calculators',
 		'/shifts',
+		'/clinics',
 	],
 	customer: ['/dashboard', '/pets', '/appointments'],
 };

@@ -55,6 +55,7 @@ export const getLastPetWeight = async (
 
 	return lastWeight as PetWeight;
 };
+
 export const insertPetWeight = actionClient
 	.schema(createPetWeightSchema)
 	.action(async ({ parsedInput }) => {
@@ -66,7 +67,9 @@ export const insertPetWeight = actionClient
 		});
 		const authorId = user?.id;
 		if (!authorId) {
-			throw new Error('Usuário autenticado não encontrado para registrar o peso');
+			throw new Error(
+				'Usuário autenticado não encontrado para registrar o peso',
+			);
 		}
 
 		await db.insert(petWeightsTable).values({

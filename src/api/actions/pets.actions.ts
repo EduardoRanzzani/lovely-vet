@@ -23,10 +23,9 @@ import {
 	countDistinct,
 	desc,
 	eq,
-	exists,
 	gte,
-	inArray,
 	ilike,
+	inArray,
 	lte,
 	or,
 } from 'drizzle-orm';
@@ -328,7 +327,9 @@ export const upsertPet = actionClient
 
 			if (parsedInput.weightInGrams) {
 				if (!authorId) {
-					throw new Error('Usuário autenticado não encontrado para registrar o peso');
+					throw new Error(
+						'Usuário autenticado não encontrado para registrar o peso',
+					);
 				}
 				await tx.insert(petWeightsTable).values({
 					petId: insertedPet.id,

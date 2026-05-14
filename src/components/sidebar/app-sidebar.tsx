@@ -105,6 +105,12 @@ const AppSidebar = () => {
 			roles: ['admin'],
 		},
 		{
+			title: 'Clínicas',
+			url: '/clinics',
+			icon: HospitalIcon,
+			roles: ['admin', 'doctor'],
+		},
+		{
 			title: 'Calculadoras',
 			url: '/calculators',
 			icon: CalculatorIcon,

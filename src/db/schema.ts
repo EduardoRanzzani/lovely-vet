@@ -320,6 +320,9 @@ export const shiftsTable = pgTable('shifts', {
 	doctorId: uuid('doctor_id')
 		.notNull()
 		.references(() => doctorsTable.id),
+	clinicId: uuid('clinic_id').references(() => clinicsTable.id, {
+		onDelete: 'set null',
+	}),
 	clinicName: text('clinic_name').notNull(),
 	startTime: timestamp('start_time').notNull(),
 	endTime: timestamp('end_time').notNull(),
@@ -364,6 +367,25 @@ export const pathologiesTable = pgTable('pathologies', {
 		.notNull()
 		.references(() => doctorsTable.id),
 	createdAt: timestamp('created_at').defaultNow().notNull(),
+});
+
+export const clinicsTable = pgTable('clinics', {
+	id: uuid('id').primaryKey().defaultRandom(),
+	name: text('name').notNull(),
+	phone: text('phone'),
+	defaultShiftPriceInCents: integer('default_shift_price_in_cents').notNull(),
+	isActive: boolean('is_active').default(true).notNull(),
+	postalCode: text('postal_code').notNull(),
+	address: text('address').notNull(),
+	addressNumber: text('address_number').notNull().default('S/N'),
+	neighborhood: text('neighborhood').notNull(),
+	city: text('city').notNull(),
+	state: text('state').notNull().default('MS'),
+	createdAt: timestamp('created_at').defaultNow().notNull(),
+	updatedAt: timestamp('updated_at')
+		.defaultNow()
+		.$onUpdate(() => new Date())
+		.notNull(),
 });
 
 // --- RELATIONS ---
@@ -541,6 +563,10 @@ export const shiftsRelations = relations(shiftsTable, ({ one }) => ({
 		fields: [shiftsTable.doctorId],
 		references: [doctorsTable.id],
 	}),
+	clinic: one(clinicsTable, {
+		fields: [shiftsTable.clinicId],
+		references: [clinicsTable.id],
+	}),
 }));
 
 export const vaccinesRelations = relations(vaccinesTable, ({ one }) => ({
@@ -588,4 +614,8 @@ export const petNotesRelations = relations(petNotesTable, ({ one }) => ({
 		fields: [petNotesTable.authorId],
 		references: [usersTable.id],
 	}),
+}));
+
+export const clinicsRelations = relations(clinicsTable, ({ many }) => ({
+	shifts: many(shiftsTable),
 }));

@@ -12,4 +12,5 @@ export type ViaCepResponse = {
 	gia: string;
 	ddd: string;
 	siafi: string;
+	erro?: string;
 };

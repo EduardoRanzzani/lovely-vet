@@ -24,7 +24,6 @@ import {
 import { handleNavigation } from '@/lib/utils';
 import { IdCardIcon, MapPinIcon, PhoneIcon } from 'lucide-react';
 import { useAction } from 'next-safe-action/hooks';
-import Image from 'next/image';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { use } from 'react';

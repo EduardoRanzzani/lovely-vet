@@ -30,8 +30,8 @@ const AdminFormClient = () => {
 			<h1 className='text-2xl font-bold'>Mudar cadastro</h1>
 			<p>Alterar o id de usuário para acessar itens de dev/prod</p>
 
-			<div className='flex flex-col xl:flex-row gap-4 w-full'>
-				<Button className='flex-1' onClick={changeToProd}>
+			<div className='flex flex-col lg:flex-row gap-4 w-full'>
+				<Button className='w-full lg:w-60' onClick={changeToProd}>
 					{changeUserIdAction.isPending ? (
 						<>
 							<Loader2Icon className='animate-spin' />
@@ -45,7 +45,7 @@ const AdminFormClient = () => {
 					)}
 				</Button>
 
-				<Button className='flex-1' onClick={changeToDev}>
+				<Button className='w-full lg:w-60' onClick={changeToDev}>
 					{changeUserIdAction.isPending ? (
 						<>
 							<Loader2Icon className='animate-spin' />
